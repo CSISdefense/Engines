@@ -1,0 +1,505 @@
+"","fy","project_name","amount"
+"1",1998,"ACFT Demo Engines",5.964e+12
+"2",1999,"ACFT Demo Engines",6.291e+12
+"3",2000,"ACFT Demo Engines",6.757e+12
+"4",2001,"ACFT Demo Engines",6.637e+12
+"5",2002,"ACFT Demo Engines",9.993e+12
+"6",2003,"ACFT Demo Engines",6.364e+12
+"7",2004,"ACFT Demo Engines",6.652e+12
+"8",2005,"ACFT Demo Engines",6.873e+12
+"9",2006,"ACFT Demo Engines",7.356e+12
+"10",2007,"ACFT Demo Engines",8.051e+12
+"11",2008,"ACFT Demo Engines",1.0593e+13
+"12",2009,"ACFT Demo Engines",1.1281e+13
+"13",2010,"ACFT Demo Engines",1.7264e+13
+"14",2011,"ACFT Demo Engines",1.057e+13
+"15",2012,"ACFT Demo Engines",8.149e+12
+"16",2013,"ACFT Demo Engines",8.869e+12
+"17",2014,"ACFT Demo Engines",8.03e+12
+"18",2015,"ACFT Demo Engines",7.975e+12
+"19",2016,"ACFT Demo Engines",7.891e+12
+"20",2017,"ACFT Demo Engines",4.947e+12
+"21",2018,"ACFT Demo Engines",6.097e+12
+"22",1998,"Advanced Aerospace Propulsion",1.2757e+13
+"23",1999,"Advanced Aerospace Propulsion",1.3766e+13
+"24",2000,"Advanced Aerospace Propulsion",1.9577e+13
+"25",2001,"Advanced Aerospace Propulsion",2.0937e+13
+"26",2002,"Advanced Aerospace Propulsion",2.206e+13
+"27",2003,"Advanced Aerospace Propulsion",2.2554e+13
+"28",2004,"Advanced Aerospace Propulsion",1.5418e+13
+"29",2005,"Advanced Aerospace Propulsion",1.6524e+13
+"30",2006,"Advanced Aerospace Propulsion",2.1276e+13
+"31",2007,"Advanced Aerospace Propulsion",2.0499e+13
+"32",2008,"Advanced Aerospace Propulsion",2.0145e+13
+"33",2009,"Advanced Aerospace Propulsion",0
+"34",2010,"Advanced Aerospace Propulsion",3.1164e+13
+"35",2011,"Advanced Aerospace Propulsion",3.3329e+13
+"36",2012,"Advanced Aerospace Propulsion",2.8416e+13
+"37",2013,"Advanced Aerospace Propulsion",0
+"38",2014,"Advanced Aerospace Propulsion",0
+"39",2015,"Advanced Aerospace Propulsion",0
+"40",2016,"Advanced Aerospace Propulsion",2.2599e+13
+"41",2017,"Advanced Aerospace Propulsion",2.5013e+13
+"42",2018,"Advanced Aerospace Propulsion",2.8797e+13
+"43",1998,"Advanced Propulsion Research",2.282e+12
+"44",1999,"Advanced Propulsion Research",2.042e+12
+"45",2000,"Advanced Propulsion Research",2.423e+12
+"46",2001,"Advanced Propulsion Research",2.472e+12
+"47",2002,"Advanced Propulsion Research",2.462e+12
+"48",2003,"Advanced Propulsion Research",2.439e+12
+"49",2004,"Advanced Propulsion Research",1.881e+12
+"50",2005,"Advanced Propulsion Research",2.04e+12
+"51",2006,"Advanced Propulsion Research",1.996e+12
+"52",2007,"Advanced Propulsion Research",1.929e+12
+"53",2008,"Advanced Propulsion Research",2.185e+12
+"54",2009,"Advanced Propulsion Research",3.299e+12
+"55",2010,"Advanced Propulsion Research",3.303e+12
+"56",2011,"Advanced Propulsion Research",3.348e+12
+"57",2012,"Advanced Propulsion Research",3.94e+12
+"58",2013,"Advanced Propulsion Research",3.886e+12
+"59",2014,"Advanced Propulsion Research",4.2e+12
+"60",2015,"Advanced Propulsion Research",4.054e+12
+"61",2016,"Advanced Propulsion Research",4.097e+12
+"62",2017,"Advanced Propulsion Research",4.22e+12
+"63",2018,"Advanced Propulsion Research",3.46e+12
+"64",1998,"Advanced Propulsion Technology",1.683e+12
+"65",1999,"Advanced Propulsion Technology",2.003e+12
+"66",2000,"Advanced Propulsion Technology",0
+"67",2001,"Advanced Propulsion Technology",0
+"68",2002,"Advanced Propulsion Technology",1.8435e+13
+"69",2003,"Advanced Propulsion Technology",1.4701e+13
+"70",2004,"Advanced Propulsion Technology",1.6681e+13
+"71",2005,"Advanced Propulsion Technology",1.214e+13
+"72",2006,"Advanced Propulsion Technology",1.9272e+13
+"73",2007,"Advanced Propulsion Technology",2.9077e+13
+"74",2008,"Advanced Propulsion Technology",2.1133e+13
+"75",2009,"Advanced Propulsion Technology",1.7276e+13
+"76",2010,"Advanced Propulsion Technology",1.7061e+13
+"77",2011,"Advanced Propulsion Technology",2.2074e+13
+"78",2012,"Advanced Propulsion Technology",2.0009e+13
+"79",2013,"Advanced Propulsion Technology",2.1275e+13
+"80",2014,"Advanced Propulsion Technology",2.181e+13
+"81",2015,"Advanced Propulsion Technology",1.725e+13
+"82",2016,"Advanced Propulsion Technology",1.9074e+13
+"83",2017,"Advanced Propulsion Technology",2.7095e+13
+"84",2018,"Advanced Propulsion Technology",2.8612e+13
+"85",1998,"Advanced Turbine Engine Gas Generator",2.6821e+13
+"86",1999,"Advanced Turbine Engine Gas Generator",2.8508e+13
+"87",2000,"Advanced Turbine Engine Gas Generator",3.1841e+13
+"88",2001,"Advanced Turbine Engine Gas Generator",3.5617e+13
+"89",2002,"Advanced Turbine Engine Gas Generator",3.381e+13
+"90",2003,"Advanced Turbine Engine Gas Generator",3.1688e+13
+"91",2004,"Advanced Turbine Engine Gas Generator",2.7192e+13
+"92",2005,"Advanced Turbine Engine Gas Generator",2.1834e+13
+"93",2006,"Advanced Turbine Engine Gas Generator",2.3427e+13
+"94",2007,"Advanced Turbine Engine Gas Generator",2.6662e+13
+"95",2008,"Advanced Turbine Engine Gas Generator",3.2994e+13
+"96",2009,"Advanced Turbine Engine Gas Generator",4.8405e+13
+"97",2010,"Advanced Turbine Engine Gas Generator",5.6168e+13
+"98",2011,"Advanced Turbine Engine Gas Generator",3.3646e+13
+"99",2012,"Advanced Turbine Engine Gas Generator",3.1125e+13
+"100",2013,"Advanced Turbine Engine Gas Generator",3.1039e+13
+"101",2014,"Advanced Turbine Engine Gas Generator",3.165e+13
+"102",2015,"Advanced Turbine Engine Gas Generator",8.286e+12
+"103",2016,"Advanced Turbine Engine Gas Generator",2.0389e+13
+"104",2017,"Advanced Turbine Engine Gas Generator",1.2238e+13
+"105",2018,"Advanced Turbine Engine Gas Generator",1.2765e+13
+"106",1998,"Aerospace Fuels",1.444e+12
+"107",1999,"Aerospace Fuels",1.904e+12
+"108",2000,"Aerospace Fuels",2.134e+12
+"109",2001,"Aerospace Fuels",3.417e+12
+"110",2002,"Aerospace Fuels",1.1456e+13
+"111",2003,"Aerospace Fuels",1.1498e+13
+"112",2004,"Aerospace Fuels",3.352e+12
+"113",2005,"Aerospace Fuels",3.45e+11
+"114",2006,"Aerospace Fuels",5.187e+12
+"115",2007,"Aerospace Fuels",1.7979e+13
+"116",2008,"Aerospace Fuels",8.469e+12
+"117",2009,"Aerospace Fuels",1.4998e+13
+"118",2010,"Aerospace Fuels",2.7254e+13
+"119",2011,"Aerospace Fuels",9.091e+12
+"120",2012,"Aerospace Fuels",6.589e+12
+"121",2013,"Aerospace Fuels",3.195e+12
+"122",2014,"Aerospace Fuels",2.38e+12
+"123",2015,"Aerospace Fuels",2.144e+12
+"124",2016,"Aerospace Fuels",2.194e+12
+"125",2017,"Aerospace Fuels",2.262e+12
+"126",2018,"Aerospace Fuels",2.302e+12
+"127",1998,"Aircraft Engine Component Improvement Program (F135)",0
+"128",1999,"Aircraft Engine Component Improvement Program (F135)",0
+"129",2000,"Aircraft Engine Component Improvement Program (F135)",0
+"130",2001,"Aircraft Engine Component Improvement Program (F135)",0
+"131",2002,"Aircraft Engine Component Improvement Program (F135)",0
+"132",2003,"Aircraft Engine Component Improvement Program (F135)",0
+"133",2004,"Aircraft Engine Component Improvement Program (F135)",0
+"134",2005,"Aircraft Engine Component Improvement Program (F135)",0
+"135",2006,"Aircraft Engine Component Improvement Program (F135)",0
+"136",2007,"Aircraft Engine Component Improvement Program (F135)",0
+"137",2008,"Aircraft Engine Component Improvement Program (F135)",0
+"138",2009,"Aircraft Engine Component Improvement Program (F135)",0
+"139",2010,"Aircraft Engine Component Improvement Program (F135)",0
+"140",2011,"Aircraft Engine Component Improvement Program (F135)",0
+"141",2012,"Aircraft Engine Component Improvement Program (F135)",0
+"142",2013,"Aircraft Engine Component Improvement Program (F135)",0
+"143",2014,"Aircraft Engine Component Improvement Program (F135)",0
+"144",2015,"Aircraft Engine Component Improvement Program (F135)",0
+"145",2016,"Aircraft Engine Component Improvement Program (F135)",3.0329e+13
+"146",2017,"Aircraft Engine Component Improvement Program (F135)",3.1566e+13
+"147",2018,"Aircraft Engine Component Improvement Program (F135)",3.2274e+13
+"148",1998,"Aircraft Engine Component Improvement Program (USA)",2.756e+12
+"149",1999,"Aircraft Engine Component Improvement Program (USA)",6.543e+12
+"150",2000,"Aircraft Engine Component Improvement Program (USA)",3.757e+12
+"151",2001,"Aircraft Engine Component Improvement Program (USA)",5.658e+12
+"152",2002,"Aircraft Engine Component Improvement Program (USA)",1.4443e+13
+"153",2003,"Aircraft Engine Component Improvement Program (USA)",6.759e+12
+"154",2004,"Aircraft Engine Component Improvement Program (USA)",5.285e+12
+"155",2005,"Aircraft Engine Component Improvement Program (USA)",7.117e+12
+"156",2006,"Aircraft Engine Component Improvement Program (USA)",1.982e+12
+"157",2007,"Aircraft Engine Component Improvement Program (USA)",8.36e+11
+"158",2008,"Aircraft Engine Component Improvement Program (USA)",4.61e+11
+"159",2009,"Aircraft Engine Component Improvement Program (USA)",3.26e+11
+"160",2010,"Aircraft Engine Component Improvement Program (USA)",7.67e+11
+"161",2011,"Aircraft Engine Component Improvement Program (USA)",6.88e+11
+"162",2012,"Aircraft Engine Component Improvement Program (USA)",8e+11
+"163",2013,"Aircraft Engine Component Improvement Program (USA)",8.04e+11
+"164",2014,"Aircraft Engine Component Improvement Program (USA)",3.1e+11
+"165",2015,"Aircraft Engine Component Improvement Program (USA)",3.72e+11
+"166",2016,"Aircraft Engine Component Improvement Program (USA)",3.49e+11
+"167",2017,"Aircraft Engine Component Improvement Program (USA)",2.59e+11
+"168",2018,"Aircraft Engine Component Improvement Program (USA)",1.45e+11
+"169",1998,"Aircraft Engine Component Improvement Program (USAF)",9.3487e+13
+"170",1999,"Aircraft Engine Component Improvement Program (USAF)",9.3338e+13
+"171",2000,"Aircraft Engine Component Improvement Program (USAF)",1.51546e+14
+"172",2001,"Aircraft Engine Component Improvement Program (USAF)",1.54308e+14
+"173",2002,"Aircraft Engine Component Improvement Program (USAF)",1.63498e+14
+"174",2003,"Aircraft Engine Component Improvement Program (USAF)",1.74205e+14
+"175",2004,"Aircraft Engine Component Improvement Program (USAF)",1.69947e+14
+"176",2005,"Aircraft Engine Component Improvement Program (USAF)",1.41803e+14
+"177",2006,"Aircraft Engine Component Improvement Program (USAF)",1.46527e+14
+"178",2007,"Aircraft Engine Component Improvement Program (USAF)",1.52969e+14
+"179",2008,"Aircraft Engine Component Improvement Program (USAF)",1.5856e+14
+"180",2009,"Aircraft Engine Component Improvement Program (USAF)",1.46359e+14
+"181",2010,"Aircraft Engine Component Improvement Program (USAF)",1.472e+14
+"182",2011,"Aircraft Engine Component Improvement Program (USAF)",1.1529e+14
+"183",2012,"Aircraft Engine Component Improvement Program (USAF)",1.36516e+14
+"184",2013,"Aircraft Engine Component Improvement Program (USAF)",1.13829e+14
+"185",2014,"Aircraft Engine Component Improvement Program (USAF)",7.007e+13
+"186",2015,"Aircraft Engine Component Improvement Program (USAF)",7.8674e+13
+"187",2016,"Aircraft Engine Component Improvement Program (USAF)",7.3763e+13
+"188",2017,"Aircraft Engine Component Improvement Program (USAF)",7.8293e+13
+"189",2018,"Aircraft Engine Component Improvement Program (USAF)",7.6969e+13
+"190",1998,"Aircraft Engine Component Improvement Program (USN)",3.5338e+13
+"191",1999,"Aircraft Engine Component Improvement Program (USN)",4.2704e+13
+"192",2000,"Aircraft Engine Component Improvement Program (USN)",3.599e+13
+"193",2001,"Aircraft Engine Component Improvement Program (USN)",3.6963e+13
+"194",2002,"Aircraft Engine Component Improvement Program (USN)",3.4292e+13
+"195",2003,"Aircraft Engine Component Improvement Program (USN)",2.8385e+13
+"196",2004,"Aircraft Engine Component Improvement Program (USN)",4.7523e+13
+"197",2005,"Aircraft Engine Component Improvement Program (USN)",5.0431e+13
+"198",2006,"Aircraft Engine Component Improvement Program (USN)",6.5823e+13
+"199",2007,"Aircraft Engine Component Improvement Program (USN)",5.737e+13
+"200",2008,"Aircraft Engine Component Improvement Program (USN)",5.6277e+13
+"201",2009,"Aircraft Engine Component Improvement Program (USN)",5.7878e+13
+"202",2010,"Aircraft Engine Component Improvement Program (USN)",6.3769e+13
+"203",2011,"Aircraft Engine Component Improvement Program (USN)",5.0161e+13
+"204",2012,"Aircraft Engine Component Improvement Program (USN)",6.0673e+13
+"205",2013,"Aircraft Engine Component Improvement Program (USN)",5.1589e+13
+"206",2014,"Aircraft Engine Component Improvement Program (USN)",5.904e+13
+"207",2015,"Aircraft Engine Component Improvement Program (USN)",5.9212e+13
+"208",2016,"Aircraft Engine Component Improvement Program (USN)",7.3811e+13
+"209",2017,"Aircraft Engine Component Improvement Program (USN)",9.3543e+13
+"210",2018,"Aircraft Engine Component Improvement Program (USN)",9.4001e+13
+"211",1998,"Aircraft Propulsion Subsystems Int",2.2253e+13
+"212",1999,"Aircraft Propulsion Subsystems Int",2.515e+13
+"213",2000,"Aircraft Propulsion Subsystems Int",1.8912e+13
+"214",2001,"Aircraft Propulsion Subsystems Int",3.3267e+13
+"215",2002,"Aircraft Propulsion Subsystems Int",3.4672e+13
+"216",2003,"Aircraft Propulsion Subsystems Int",3.3809e+13
+"217",2004,"Aircraft Propulsion Subsystems Int",2.6887e+13
+"218",2005,"Aircraft Propulsion Subsystems Int",2.1026e+13
+"219",2006,"Aircraft Propulsion Subsystems Int",3.1996e+13
+"220",2007,"Aircraft Propulsion Subsystems Int",2.7413e+13
+"221",2008,"Aircraft Propulsion Subsystems Int",2.587e+13
+"222",2009,"Aircraft Propulsion Subsystems Int",4.4678e+13
+"223",2010,"Aircraft Propulsion Subsystems Int",3.8383e+13
+"224",2011,"Aircraft Propulsion Subsystems Int",4.0066e+13
+"225",2012,"Aircraft Propulsion Subsystems Int",1.724e+13
+"226",2013,"Aircraft Propulsion Subsystems Int",6.9342e+13
+"227",2014,"Aircraft Propulsion Subsystems Int",6.788e+13
+"228",2015,"Aircraft Propulsion Subsystems Int",5.1389e+13
+"229",2016,"Aircraft Propulsion Subsystems Int",7.4654e+13
+"230",2017,"Aircraft Propulsion Subsystems Int",1.9757e+13
+"231",2018,"Aircraft Propulsion Subsystems Int",1.7902e+13
+"232",1998,"AV-8B",1.845e+12
+"233",1999,"AV-8B",1.884e+12
+"234",2000,"AV-8B",7.08e+11
+"235",2001,"AV-8B",6.187e+12
+"236",2002,"AV-8B",2.338e+13
+"237",2003,"AV-8B",1.4733e+13
+"238",2004,"AV-8B",1.034e+13
+"239",2005,"AV-8B",1.9335e+13
+"240",2006,"AV-8B",1.9517e+13
+"241",2007,"AV-8B",2.0902e+13
+"242",2008,"AV-8B",2.2128e+13
+"243",2009,"AV-8B",2.9677e+13
+"244",2010,"AV-8B",2.0659e+13
+"245",2011,"AV-8B",2.2063e+13
+"246",2012,"AV-8B",2.281e+13
+"247",2013,"AV-8B",1.6128e+13
+"248",2014,"AV-8B",3.029e+13
+"249",2015,"AV-8B",2.4558e+13
+"250",2016,"AV-8B",2.6939e+13
+"251",2017,"AV-8B",3.4902e+13
+"252",2018,"AV-8B",4.878e+13
+"253",1998,"Combustion and Mechanical Systems",1.0629e+13
+"254",1999,"Combustion and Mechanical Systems",1.1246e+13
+"255",2000,"Combustion and Mechanical Systems",1.1247e+13
+"256",2001,"Combustion and Mechanical Systems",8.501e+12
+"257",2002,"Combustion and Mechanical Systems",1.238e+13
+"258",2003,"Combustion and Mechanical Systems",1.7621e+13
+"259",2004,"Combustion and Mechanical Systems",1.754e+13
+"260",2005,"Combustion and Mechanical Systems",1.5577e+13
+"261",2006,"Combustion and Mechanical Systems",2.0723e+13
+"262",2007,"Combustion and Mechanical Systems",2.4022e+13
+"263",2008,"Combustion and Mechanical Systems",2.9957e+13
+"264",2009,"Combustion and Mechanical Systems",2.7086e+13
+"265",2010,"Combustion and Mechanical Systems",2.5915e+13
+"266",2011,"Combustion and Mechanical Systems",2.4214e+13
+"267",2012,"Combustion and Mechanical Systems",2.5847e+13
+"268",2013,"Combustion and Mechanical Systems",1.9234e+13
+"269",2014,"Combustion and Mechanical Systems",1.815e+13
+"270",2015,"Combustion and Mechanical Systems",1.6559e+13
+"271",2016,"Combustion and Mechanical Systems",1.6167e+13
+"272",2017,"Combustion and Mechanical Systems",1.5076e+13
+"273",2018,"Combustion and Mechanical Systems",1.5449e+13
+"274",1998,"F135",0
+"275",1999,"F135",0
+"276",2000,"F135",0
+"277",2001,"F135",0
+"278",2002,"F135",7.63242e+14
+"279",2003,"F135",8.33127e+14
+"280",2004,"F135",8.68969e+14
+"281",2005,"F135",9.56382e+14
+"282",2006,"F135",7.41955e+14
+"283",2007,"F135",7.54246e+14
+"284",2008,"F135",6.54258e+14
+"285",2009,"F135",5.07209e+14
+"286",2010,"F135",4.58329e+14
+"287",2011,"F135",3.75628e+14
+"288",2012,"F135",2.77559e+14
+"289",2013,"F135",3.40219e+14
+"290",2014,"F135",1.48826e+14
+"291",2015,"F135",2.0022e+14
+"292",2016,"F135",1.23198e+14
+"293",2017,"F135",1.2e+14
+"294",2018,"F135",0
+"295",1998,"F136",0
+"296",1999,"F136",0
+"297",2000,"F136",0
+"298",2001,"F136",0
+"299",2002,"F136",2.6921e+13
+"300",2003,"F136",2.20817e+14
+"301",2004,"F136",1.41578e+14
+"302",2005,"F136",2.12232e+14
+"303",2006,"F136",3.4432e+14
+"304",2007,"F136",3.4129e+14
+"305",2008,"F136",4.63609e+14
+"306",2009,"F136",4.2539e+14
+"307",2010,"F136",4.15918e+14
+"308",2011,"F136",6.9288e+13
+"309",2012,"F136",5e+12
+"310",2013,"F136",0
+"311",2014,"F136",0
+"312",2015,"F136",0
+"313",2016,"F136",0
+"314",2017,"F136",0
+"315",2018,"F136",0
+"316",1998,"Improved Turbine Engine Program",0
+"317",1999,"Improved Turbine Engine Program",0
+"318",2000,"Improved Turbine Engine Program",0
+"319",2001,"Improved Turbine Engine Program",0
+"320",2002,"Improved Turbine Engine Program",0
+"321",2003,"Improved Turbine Engine Program",0
+"322",2004,"Improved Turbine Engine Program",0
+"323",2005,"Improved Turbine Engine Program",0
+"324",2006,"Improved Turbine Engine Program",0
+"325",2007,"Improved Turbine Engine Program",0
+"326",2008,"Improved Turbine Engine Program",0
+"327",2009,"Improved Turbine Engine Program",0
+"328",2010,"Improved Turbine Engine Program",0
+"329",2011,"Improved Turbine Engine Program",0
+"330",2012,"Improved Turbine Engine Program",0
+"331",2013,"Improved Turbine Engine Program",0
+"332",2014,"Improved Turbine Engine Program",0
+"333",2015,"Improved Turbine Engine Program",4.9328e+13
+"334",2016,"Improved Turbine Engine Program",4.9137e+13
+"335",2017,"Improved Turbine Engine Program",1.26105e+14
+"336",2018,"Improved Turbine Engine Program",2.04304e+14
+"337",1998,"Materials for Structures, Propulsion, and Subsystems",3.9766e+13
+"338",1999,"Materials for Structures, Propulsion, and Subsystems",4.1812e+13
+"339",2000,"Materials for Structures, Propulsion, and Subsystems",5.0451e+13
+"340",2001,"Materials for Structures, Propulsion, and Subsystems",6.2036e+13
+"341",2002,"Materials for Structures, Propulsion, and Subsystems",6.049e+13
+"342",2003,"Materials for Structures, Propulsion, and Subsystems",6.5429e+13
+"343",2004,"Materials for Structures, Propulsion, and Subsystems",6.2966e+13
+"344",2005,"Materials for Structures, Propulsion, and Subsystems",7.1274e+13
+"345",2006,"Materials for Structures, Propulsion, and Subsystems",7.3687e+13
+"346",2007,"Materials for Structures, Propulsion, and Subsystems",7.0723e+13
+"347",2008,"Materials for Structures, Propulsion, and Subsystems",6.5942e+13
+"348",2009,"Materials for Structures, Propulsion, and Subsystems",7.9314e+13
+"349",2010,"Materials for Structures, Propulsion, and Subsystems",1.09378e+14
+"350",2011,"Materials for Structures, Propulsion, and Subsystems",8.5962e+13
+"351",2012,"Materials for Structures, Propulsion, and Subsystems",8.8824e+13
+"352",2013,"Materials for Structures, Propulsion, and Subsystems",6.0945e+13
+"353",2014,"Materials for Structures, Propulsion, and Subsystems",5.349e+13
+"354",2015,"Materials for Structures, Propulsion, and Subsystems",3.5119e+13
+"355",2016,"Materials for Structures, Propulsion, and Subsystems",5.4699e+13
+"356",2017,"Materials for Structures, Propulsion, and Subsystems",4.6444e+13
+"357",2018,"Materials for Structures, Propulsion, and Subsystems",4.5059e+13
+"358",1998,"Turbine Engine Technology",3.1682e+13
+"359",1999,"Turbine Engine Technology",3.4782e+13
+"360",2000,"Turbine Engine Technology",3.8979e+13
+"361",2001,"Turbine Engine Technology",4.0168e+13
+"362",2002,"Turbine Engine Technology",4.6144e+13
+"363",2003,"Turbine Engine Technology",3.6092e+13
+"364",2004,"Turbine Engine Technology",3.1341e+13
+"365",2005,"Turbine Engine Technology",3.3769e+13
+"366",2006,"Turbine Engine Technology",3.3107e+13
+"367",2007,"Turbine Engine Technology",4.8345e+13
+"368",2008,"Turbine Engine Technology",6.0816e+13
+"369",2009,"Turbine Engine Technology",8.5675e+13
+"370",2010,"Turbine Engine Technology",6.0738e+13
+"371",2011,"Turbine Engine Technology",6.4278e+13
+"372",2012,"Turbine Engine Technology",7.0515e+13
+"373",2013,"Turbine Engine Technology",9.1999e+13
+"374",2014,"Turbine Engine Technology",7.574e+13
+"375",2015,"Turbine Engine Technology",5.5773e+13
+"376",2016,"Turbine Engine Technology",6.2716e+13
+"377",2017,"Turbine Engine Technology",5.2519e+13
+"378",2018,"Turbine Engine Technology",5.5304e+13
+"379",1998,"Veh Prop & Struct Tech",2.675e+12
+"380",1999,"Veh Prop & Struct Tech",3.061e+12
+"381",2000,"Veh Prop & Struct Tech",3.246e+12
+"382",2001,"Veh Prop & Struct Tech",3.528e+12
+"383",2002,"Veh Prop & Struct Tech",3.482e+12
+"384",2003,"Veh Prop & Struct Tech",3.63e+12
+"385",2004,"Veh Prop & Struct Tech",3.646e+12
+"386",2005,"Veh Prop & Struct Tech",3.904e+12
+"387",2006,"Veh Prop & Struct Tech",3.999e+12
+"388",2007,"Veh Prop & Struct Tech",4.261e+12
+"389",2008,"Veh Prop & Struct Tech",4.149e+12
+"390",2009,"Veh Prop & Struct Tech",4.238e+12
+"391",2010,"Veh Prop & Struct Tech",4.221e+12
+"392",2011,"Veh Prop & Struct Tech",5.305e+12
+"393",2012,"Veh Prop & Struct Tech",5.484e+12
+"394",2013,"Veh Prop & Struct Tech",5.201e+12
+"395",2014,"Veh Prop & Struct Tech",6.68e+12
+"396",2015,"Veh Prop & Struct Tech",7.834e+12
+"397",2016,"Veh Prop & Struct Tech",8.292e+12
+"398",2017,"Veh Prop & Struct Tech",9.755e+12
+"399",2018,"Veh Prop & Struct Tech",1.0456e+13
+"400",1997,"army",4915915000
+"401",1998,"army",5023313000
+"402",1999,"army",5030770000
+"403",2000,"army",5313987000
+"404",2001,"army",6263162000
+"405",2002,"army",7018252000
+"406",2003,"army",7594576000
+"407",2004,"army",10202221000
+"408",2005,"army",10576058000
+"409",2006,"army",11682886000
+"410",2007,"army",11354176000
+"411",2008,"army",12553720000
+"412",2009,"army",12078895000
+"413",2010,"army",11710796000
+"414",2011,"army",9760396000
+"415",2012,"army",8705075000
+"416",2013,"army",8010810000
+"417",2014,"army",7124298000
+"418",2015,"army",6744134000
+"419",2016,"army",7861744000
+"420",2017,"army",8852507000
+"421",1997,"navy",7884361000
+"422",1998,"navy",7887810000
+"423",1999,"navy",8942170000
+"424",2000,"navy",9064511000
+"425",2001,"navy",9596201000
+"426",2002,"navy",11379389000
+"427",2003,"navy",13699864000
+"428",2004,"navy",14773169000
+"429",2005,"navy",17076795000
+"430",2006,"navy",18970169000
+"431",2007,"navy",19724109000
+"432",2008,"navy",18486652000
+"433",2009,"navy",19733741000
+"434",2010,"navy",19948370000
+"435",2011,"navy",17865538000
+"436",2012,"navy",17723271000
+"437",2013,"navy",15553477000
+"438",2014,"navy",14946053000
+"439",2015,"navy",16067423000
+"440",2016,"navy",18333041000
+"441",2017,"navy",17851955000
+"442",1997,"air_force",14089834000
+"443",1998,"air_force",14278446000
+"444",1999,"air_force",13731514000
+"445",2000,"air_force",14527373000
+"446",2001,"air_force",14313436000
+"447",2002,"air_force",14479222000
+"448",2003,"air_force",18934575000
+"449",2004,"air_force",20232781000
+"450",2005,"air_force",20477909000
+"451",2006,"air_force",22190943000
+"452",2007,"air_force",24491745000
+"453",2008,"air_force",26346815000
+"454",2009,"air_force",26691777000
+"455",2010,"air_force",27917273000
+"456",2011,"air_force",27421360000
+"457",2012,"air_force",26630843000
+"458",2013,"air_force",23163315000
+"459",2014,"air_force",23823510000
+"460",2015,"air_force",23619928000
+"461",2016,"air_force",25243981000
+"462",2017,"air_force",28381681000
+"463",1997,"dod_total",36502710000
+"464",1998,"dod_total",37183983000
+"465",1999,"dod_total",38103652000
+"466",2000,"dod_total",38752461000
+"467",2001,"dod_total",41748375000
+"468",2002,"dod_total",48623499000
+"469",2003,"dod_total",58307309000
+"470",2004,"dod_total",64366635000
+"471",2005,"dod_total",69296298000
+"472",2006,"dod_total",72691484000
+"473",2007,"dod_total",77589409000
+"474",2008,"dod_total",79447874000
+"475",2009,"dod_total",80350793000
+"476",2010,"dod_total",80654870000
+"477",2011,"dod_total",76134726000
+"478",2012,"dod_total",72969559000
+"479",2013,"dod_total",64328270000
+"480",2014,"dod_total",63457801000
+"481",2015,"dod_total",64088037000
+"482",2016,"dod_total",70633054000
+"483",2017,"dod_total",74817436000
+"484",1997,"us_total",1.51e+11
+"485",1998,"us_total",1.52e+11
+"486",1999,"us_total",1.56e+11
+"487",2000,"us_total",1.57e+11
+"488",2001,"us_total",1.63e+11
+"489",2002,"us_total",1.78e+11
+"490",2003,"us_total",1.96e+11
+"491",2004,"us_total",2e+11
+"492",2005,"us_total",1.95e+11
+"493",2006,"us_total",1.9e+11
+"494",2007,"us_total",1.88e+11
+"495",2008,"us_total",1.83e+11
+"496",2009,"us_total",1.81e+11
+"497",2010,"us_total",1.82e+11
+"498",2011,"us_total",1.69e+11
+"499",2012,"us_total",1.61e+11
+"500",2013,"us_total",1.44e+11
+"501",2014,"us_total",1.44e+11
+"502",2015,"us_total",1.42e+11
+"503",2016,"us_total",1.48e+11
+"504",2017,"us_total",NA

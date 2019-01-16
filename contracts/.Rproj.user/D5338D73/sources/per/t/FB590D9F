@@ -1,0 +1,23 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1508253265288.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "112630257",
+    "id" : "FB590D9F",
+    "lastKnownWriteTime" : 1509628728,
+    "last_content_update" : 1513707791918,
+    "path" : "K:/Analytics/Interns/Zhian/Contracting/App_Contracting_final/server.R",
+    "project_path" : "server.R",
+    "properties" : {
+        "cursorPosition" : "123,52",
+        "scrollLine" : "104",
+        "tempName" : "Untitled1"
+    },
+    "relative_order" : 4,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

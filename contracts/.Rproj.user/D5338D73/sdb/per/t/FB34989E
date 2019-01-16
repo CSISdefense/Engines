@@ -1,0 +1,21 @@
+{
+    "collab_server" : "",
+    "contents" : "library(dplyr)\nlibrary(forcats)\nlibrary(readr)\nlibrary(csis360)\n\n#read data\nFullData <- read.csv(\"FPDS_data.csv\")\n\n# rename MilitaryHealth to have a space\n#levels(FullData$Customer)[5] <- \"Military Health\"\nFullData$Customer[FullData$Customer == \"MilitaryHealth\"] <- \"Other DoD\" \n\n# make Big Five the first category (so it displays at the top of the legend)\nFullData$VendorSize <- relevel(FullData$VendorSize, \"Big Five\")\n\n# drop observations with NULL customer\nFullData <- filter(FullData, Category != \"NULL\")\n\nclass(FullData$Category)\nlapply(FullData,class)\n\n####\n#Area\n\nAreaData2 <- FullData %>%\n  group_by(\n    FY,\n    VendorSize,\n    Customer,\n    Portfolio,\n    Category, \n    Contract.Type, \n    Classification) %>%\n  summarize(Amount = sum(Amount))\n\nAreaData2$Customer[AreaData2$Customer == \"MilitaryHealth\"] <- \"Other DoD\" \n\n# make Big Five the first category (so it displays at the top of the legend)\nAreaData2$VendorSize <- relevel(AreaData2$VendorSize, \"Big Five\")\n\n# drop observations with NULL customer\nAreaData2 <- filter(AreaData2, Category != \"NULL\")\n\nwrite.csv(AreaData2,\"areadata.csv\")\n\n\ncolnames(AreaData2)[3] <- \"Agencies\"\nlabels_and_colors<-prepare_labels_and_colors(AreaData2)\n\n\n\n\nFullData <- read.csv(\"FPDS_data.csv\")\n\n# rename MilitaryHealth to have a space\n#FullData$Customer[FullData$Customer == \"MilitaryHealth\"] <- \"Other DoD\" \n\n# make Big Five the first category (so it displays at the top of the legend)\nFullData$VendorSize <- relevel(FullData$VendorSize, \"Big Five\")\n\n# drop observations with NULL category\n#FullData <- filter(FullData, Category != \"NULL\")\n\nnames(FullData)\n# rename some column names\nnames(FullData)[9] <- \"Contract Type\"\nnames(FullData)[10] <- \"Vendor Size\"\nnames(FullData)[6] <- \"Platform Portfolio\"\nnames(FullData)[8] <- \"Competition\"\n\nshown <- FullData\nshown2 <- FullData\n\n# aggregate amount by (Fiscal Year x Category)\nshown2 <- shown2 %>%\n  group_by(FY, Category) %>%\n  summarise(Amount = sum(Amount) / 1e9)\nprint(head(shown2))\n# create 'Percent' variable as the percent of each FY's obligations that\n# went to that Customer\nshown2 <- shown2 %>%\n  group_by(FY) %>%\n  mutate(Percent = Amount / sum(Amount)) \n\n# discard any row without Customer data\nshown2 <- shown2 %>%\n  filter(!is.na(Category))\n\n# reorder by most recent year\nshown$Category <- fct_reorder(\n  shown$Category,\n  (shown$Percent * (shown$FY == 2016)) ,\n  mean,\n  na.rm = TRUE,\n  .desc = TRUE)  \n\n\n# reorder by most recent year\nshown2[2] <- fct_reorder(\n  shown2[2],\n  (shown$Percent * (shown$FY == 2016)) ,\n  mean,\n  na.rm = TRUE,\n  .desc = TRUE)  \n\nclass(shown2[2])\nclass(shown2$Category)\n",
+    "created" : 1508852456543.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "878802471",
+    "id" : "FB34989E",
+    "lastKnownWriteTime" : 1508940002,
+    "last_content_update" : 1508940003065,
+    "path" : "K:/R-Shiny/Interns/Zhian/Contracting/App_Contracting/draft.R",
+    "project_path" : "draft.R",
+    "properties" : {
+        "tempName" : "Untitled1"
+    },
+    "relative_order" : 1,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}
