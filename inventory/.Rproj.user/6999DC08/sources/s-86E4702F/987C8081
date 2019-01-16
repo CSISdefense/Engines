@@ -1,0 +1,22 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1547066577340.000,
+    "dirty" : true,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "987C8081",
+    "lastKnownWriteTime" : 1547072445,
+    "last_content_update" : 1547072632395,
+    "path" : "K:/analytics/greg review/engines/inventory/data_processing.R",
+    "project_path" : "data_processing.R",
+    "properties" : {
+        "cursorPosition" : "44,7",
+        "scrollLine" : "23"
+    },
+    "relative_order" : 1,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

@@ -15,15 +15,15 @@ library(extrafontdb)
 
 # theme --------------------------------------------------------------------------
 
-source("chart_theme.R")
+source("theme/chart_theme.R")
 
 # read data ----------------------------------------------------------------------
 
-intro_year <- read_csv("intro_year.csv")
-usaf_inventory <- read_csv("usaf_inventory.csv")
-engine_specs <- read_csv("engine_specs.csv")
-generation <- read_csv("generation.csv")
-relevance <- read_csv("relevance.csv")
+intro_year <- read_csv("data/intro_year.csv")
+usaf_inventory <- read_csv("data/usaf_inventory.csv")
+engine_specs <- read_csv("data/engine_specs.csv")
+generation <- read_csv("data/generation.csv")
+relevance <- read_csv("data/relevance.csv")
 
 intro_year <- intro_year %>%
   .[-1,] %>%
@@ -32,13 +32,30 @@ intro_year <- intro_year %>%
 
 usaf_inventory[is.na(usaf_inventory)] <- 0
 
+
+
+# Preserve unique column names and then remove "_1" from duplicates in aircraft.
 usaf_inventory <- gather(usaf_inventory, aircraft, amount,-year)
+usaf_inventory$column<-usaf_inventory$aircraft
+usaf_inventory$aircraft<-sub("_1$","",usaf_inventory$aircraft)
+
+usaf_inventory$aircraft<-factor(usaf_inventory$aircraft)
+engine_specs$aircraft<-factor(engine_specs$aircraft)
+if(any(duplicated(engine_specs$aircraft))) 
+  stop (paste("Duplicate aircraft in engine_spaces:",
+              duplicated(unique(duplicated(engine_specs$aircraft)))))
+intro_year$aircraft<-factor(intro_year$aircraft)
+if(any(duplicated(intro_year$aircraft))) stop ("Duplicate aircraft in intro_year")
 
 engine <- usaf_inventory %>%
   inner_join(engine_specs, by = "aircraft") %>%
   left_join(intro_year, by = "aircraft")
 
-write.csv(engine, "engine.csv")
+
+View(engine[engine$aircraft %in% duplicates,])
+write.csv(usaf_inventory[usaf_inventory$aircraft %in% duplicates,], "data/accidentally_dropped_columns.csv")
+
+write.csv(engine, "data/engine.csv")
 
 # summarize data -----------------------------------------------------------------
 
@@ -168,9 +185,6 @@ by_type <- by_type %>%
     )
 )
 
-# ggsave("charts/USAF inventory amount by engine type.svg", p_type,
-#        device = "svg", width = 8, height = 6, units = "in")
-
 # plot number of engines ---------------------------------------------------------
 
 engine <- engine %>%
@@ -281,10 +295,6 @@ introduction <- engine %>%
     xlab("Year of Introduction")
 )
 
-# ggsave("charts/dotplot intro year, aircraft type.svg", p_introduction,
-#        device = "svg", width = 8, height = 6, units = "in")
-
-
 # introduction rate dotplot ------------------------------------------------------
 
 (
@@ -374,7 +384,6 @@ generation <- engine %>%
   filter(type == "FighterAttack") %>% 
   group_by(aircraft, intro_year, relevance, generation) %>%
   summarise(peak_inventory = mean(peak_inventory, na.rm = TRUE)) %>%
-  # filter(generation != "Other") %>%
   filter(relevance != "Old") %>% 
   mutate(generation = factor(
     generation,
@@ -421,7 +430,7 @@ generation <- engine %>%
                        values=c(1,19)) + 
     chart_theme +
     ggtitle(
-      "Figther Attack inventory by generation"
+      "Fighter Attack inventory by generation"
     ) +
     xlab("Year of Introduction") +
     ylab("Peak Inventory")
@@ -440,7 +449,6 @@ ggsave(
 
 inventory <- engine %>%
   filter(relevance != "Old") %>%
-  # filter(engine_type != "NA") %>%
   group_by(aircraft, intro_year, relevance, generation, type, engine_type) %>%
   summarise(peak_inventory = mean(peak_inventory, na.rm = TRUE))
 
@@ -449,9 +457,7 @@ inventory <- engine %>%
     geom_point(mapping = aes(
       x = intro_year, y = peak_inventory, color = relevance
     )) +
-    # geom_vline(mapping = aes(xintercept = intro_year), color = "#554449") +
     facet_wrap(~ type, nrow = 1) +
-    # theme_fivethirtyeight()
     xlab("year of introduction") +
     ylab("peak inventory") +
     ggtitle("Peak inventory by aircraft type") +
@@ -500,15 +506,11 @@ inventory_engine_type <- engine %>%
     chart_theme
 )
 
-# ggsave("charts/inventory engine type area color.svg", p_engine_type,
-#        device = "svg", width = 8, height = 6, units = "in")
-
 # generation chart ---------------------------------------------------------------
 
 generation <- engine %>%
   group_by(year, generation) %>%
   summarise(amount = sum(amount, na.rm = TRUE)) 
-  # filter(generation != "Other")
 
 (
   p_generation <- ggplot() +
@@ -524,9 +526,6 @@ generation <- engine %>%
     )) +
     chart_theme
 )
-
-# ggsave("charts/year and amout by generation area color.svg", p_generation,
-#        device = "svg", width = 8, height = 6, units = "in")
 
 # --------------------------------------------------------------------------------
 # plot number of engines by engine type ------------------------------------------
@@ -549,15 +548,6 @@ p <- engine %>%
     chart_theme
 )
 
-ggsave(
-  "charts/year and engine amount by engine type.svg",
-  p,
-  device = "svg",
-  width = 8,
-  height = 6,
-  units = "in"
-)
-
 # --------------------------------------------------------------------------------
 
 (
@@ -565,7 +555,6 @@ ggsave(
     filter(type == "FighterAttack") %>% 
     group_by(year, generation) %>%
     summarise(amount = sum(engine_amount, na.rm = TRUE)) %>%
-    # filter(generation != "Other") %>%
     mutate(generation = factor(
       generation,
       levels = c("Other", 
@@ -769,7 +758,7 @@ ggsave(
 )
 
 ggsave(
-  "charts/thrustweightratio.svg",
+  "charts/thrust_weight_ratio.svg",
   p_thrust_weight_aircraft,
   device = "svg",
   width = 8,
@@ -889,7 +878,7 @@ ggsave(
 )
 
 ggsave(
-  "charts/thrustweightratio_engine.svg",
+  "charts/thrust_weight_ratio_engine.svg",
   p_thrust_weight_engine,
   device = "svg",
   width = 8,
@@ -897,3 +886,4 @@ ggsave(
   units = "in"
 )
 
+# ================================================================================

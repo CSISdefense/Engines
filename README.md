@@ -106,11 +106,7 @@ The 2016 data used in this report were downloaded in January 2017. The 2017 data
 
 **Military aircraft engines** 
 The dataset of Aircraft Engine contract transactions was selected by multiple criteria. First, only contracts managed by the Department of Defense and falling in CSIS's Aircraft Platform Portfolio were included in the dataset. The platform portfolio classification looks to whether a transaction supports a specific aircraft platform (based on DoD Acquisition Program), is administered by platform-dedicated agency (i.e. the Missile Defense Agency), is part of a broader category of aircraft programs (based on the Claimant Program Code), or uses a product or service code specific to aircraft. The second step in creating the dataset was limiting specifically to those contracts relevant to engines according to either Claimant Program Code (A1B: Aircraft Engines or Spares) or one of the multiple product or service codes relating to all types of engines (see [contracts\EngineProductOrServiceCodes.csv](contracts\EngineProductOrServiceCodes.csv)).
-
-Second, this dataset of de
-
-- 
-
+ 
 **Notable contract variables** 
 
 `fy`: the fiscal year for the contract obligation
@@ -211,5 +207,8 @@ Aircraft Engine Component Improvement Program (CIP) develops, tests, and qualifi
 *`Improved Turbine Engine Program`*
 ITEP develops, tests, qualifies, and integrates the next generation turboshaft engine on the Black Hawk and Apache aircraft. The Improved Turbine Engine (ITE) replaces the existing T700 engine design originated in the 1970's and meets the operational requirement of 6,000 feet pressure altitude and 95 degrees (6K/95). The ITE will fit inside the existing engine bays of the Black Hawk and Apache Helicopters and provides a significant power enhancement of up to fifty percent (total of 3,000 class shaft horsepower) with increased fuel efficiency. Additional benefits include improved design life, enhanced reliability, lower maintenance cost and restored capability lost due to aircraft weight growth, without increasing the logistics footprint. The program consists of systems engineering and program management, detailed design engineering, design assurance, hardware manufacturing and testing, component and module level development and testing, system level testing and qualification, as well as integration into the airframe.
 
+*`F135`*
+F135 Propulsion System SDD execution of the F135 Propulsion System (Pratt & Whitney). 
 
-
+*`F136`*
+F136 Propulsion System SDD execution of the F136 Propulsion System (General Electric). 
