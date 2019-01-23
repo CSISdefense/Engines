@@ -74,8 +74,8 @@ engine_specs_no_dupes <- engine_specs %>% group_by(aircraft, takeoff_weight, spe
   summarise(
     engine_type=ifelse(!any(is.na(engine_type)) & max(engine_type)==min(engine_type),max(engine_type),NA_character_ ),
       engine_number=ifelse(!any(is.na(engine_number)) & max(engine_number)==min(engine_number),max(engine_number),NA_integer_),
-    type_count=length(unique(type)),
-    record_count=length(aircraft))
+    type_list=paste(unique(type),collapse=", "),
+    engine_variant_count=length(aircraft))
 engine_specs_no_dupes$engine_type <- factor(engine_specs_no_dupes$engine_type)
 engine_specs_no_dupes<-engine_specs_no_dupes[,c(1,14:17,2:13)]
 
