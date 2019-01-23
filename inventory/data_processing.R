@@ -12,7 +12,6 @@ library(tidyverse)
 library(ggthemes)
 library(extrafont)
 library(extrafontdb)
-library(csis360)
 
 # theme --------------------------------------------------------------------------
 
@@ -59,11 +58,11 @@ engine_specs_no_dupes <- engine_specs %>% group_by(aircraft, engine_type,  engin
 engine_specs_no_dupes<-engine_specs_no_dupes[order(engine_specs_no_dupes$aircraft),]
 
 if(any(duplicated(engine_specs$aircraft))) 
-  stop (paste("Duplicate aircraft in engine_spaces:",
-          unique(engine_specs$aircraft[duplicated(engine_specs$aircraft)])))
+  print(unique(engine_specs$aircraft[duplicated(engine_specs$aircraft)]))
+  
 
+#Output those aircraft with inconsistent details
 duplicate_aircraft<-unique(engine_specs_no_dupes$aircraft[duplicated(engine_specs_no_dupes$aircraft)])
-
 write.csv(engine_specs_no_dupes[engine_specs_no_dupes$aircraft %in% duplicate_aircraft,],
           "inventory/data/variable_engine_aircraft.csv")
 
@@ -79,32 +78,33 @@ engine_specs_no_dupes <- engine_specs %>% group_by(aircraft, takeoff_weight, spe
     record_count=length(aircraft))
 engine_specs_no_dupes$engine_type <- factor(engine_specs_no_dupes$engine_type)
 engine_specs_no_dupes<-engine_specs_no_dupes[,c(1,14:17,2:13)]
+
+
+if(any(duplicated(engine_specs_no_dupes$aircraft))) 
+  print(unique(engine_specs_no_dupes$aircraft[duplicated(engine_specs_no_dupes$aircraft)]))
+stop ("Attempt to remove duplicates failed.")
+
 write.csv(engine_specs_no_dupes,
           "inventory/data/engine_specs_no_dupes.csv")
 
-
+#Separtely create a many 2 many file that lists aircraft types, some aircraft having multiple types.
 aircraft_type_m2m<-unique(engine_specs[,c("aircraft","type")])
 write.csv(engine_specs_no_dupes,
           "inventory/data/aircraft_type_m2m.csv")
 
-if(any(duplicated(engine_specs_no_dupes$aircraft))){
-  print(unique(engine_specs_no_dupes$aircraft[duplicated(engine_specs_no_dupes$aircraft)]))
-  warn ("Duplicate aircraft in engine_spaces:")
-}
 
 intro_year$aircraft<-factor(intro_year$aircraft)
 if(any(duplicated(intro_year$aircraft))) stop ("Duplicate aircraft in intro_year")
 
 engine <- usaf_inventory %>%
-  inner_join(engine_specs, by = "aircraft") %>%
+  inner_join(engine_specs_no_dupes, by = "aircraft") %>%
   left_join(intro_year, by = "aircraft")
-
-
-View(engine[engine$aircraft %in% duplicates,])
-write.csv(usaf_inventory[usaf_inventory$aircraft %in% duplicates,], "inventory/data/accidentally_dropped_columns.csv")
+if (nrow(engine)!=nrow(usaf_inventory)) stop("Duplicates produced")
 
 write.csv(engine, "inventory/data/engine.csv")
 
+
+# Greg got this far in the morning.
 # summarize data -----------------------------------------------------------------
 
 engine$amount <- as.integer(as.character(engine$amount))
