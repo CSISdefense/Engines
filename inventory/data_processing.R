@@ -12,18 +12,19 @@ library(tidyverse)
 library(ggthemes)
 library(extrafont)
 library(extrafontdb)
+library(csis360)
 
 # theme --------------------------------------------------------------------------
 
-source("theme/chart_theme.R")
+source("inventory/theme/chart_theme.R")
 
 # read data ----------------------------------------------------------------------
 
-intro_year <- read_csv("data/intro_year.csv")
-usaf_inventory <- read_csv("data/usaf_inventory.csv")
-engine_specs <- read_csv("data/engine_specs.csv")
-generation <- read_csv("data/generation.csv")
-relevance <- read_csv("data/relevance.csv")
+intro_year <- read_csv("inventory/data/intro_year.csv")
+usaf_inventory <- read_csv("inventory/data/usaf_inventory.csv")
+engine_specs <- read_csv("inventory/data/engine_specs.csv")
+generation <- read_csv("inventory/data/generation.csv")
+relevance <- read_csv("inventory/data/relevance.csv")
 
 intro_year <- intro_year %>%
   .[-1,] %>%
@@ -39,11 +40,58 @@ usaf_inventory <- gather(usaf_inventory, aircraft, amount,-year)
 usaf_inventory$column<-usaf_inventory$aircraft
 usaf_inventory$aircraft<-sub("_1$","",usaf_inventory$aircraft)
 
+#Stop preserving and summarize by aircraft type
+usaf_inventory$amount<-as.numeric(usaf_inventory$amount)
+usaf_inventory <- usaf_inventory %>% group_by(year, aircraft) %>%
+  summarise(amount=sum(amount,na.rm = TRUE))
+
+
 usaf_inventory$aircraft<-factor(usaf_inventory$aircraft)
 engine_specs$aircraft<-factor(engine_specs$aircraft)
+#1st version, to get the details.
+engine_specs_no_dupes <- engine_specs %>% group_by(aircraft, engine_type,  engine_number, takeoff_weight, speed, 
+                                                   range, ceiling, climb_rate,  thrust_weight_aircraft, engine,  engine_company, 
+                                                   thrust,  pressure_ratio, engine_weight, thrust_weight_engine ) %>%
+  summarise(
+    type_count=length(unique(type)),
+            record_count=length(aircraft))
+
+engine_specs_no_dupes<-engine_specs_no_dupes[order(engine_specs_no_dupes$aircraft),]
+
 if(any(duplicated(engine_specs$aircraft))) 
   stop (paste("Duplicate aircraft in engine_spaces:",
-              duplicated(unique(duplicated(engine_specs$aircraft)))))
+          unique(engine_specs$aircraft[duplicated(engine_specs$aircraft)])))
+
+duplicate_aircraft<-unique(engine_specs_no_dupes$aircraft[duplicated(engine_specs_no_dupes$aircraft)])
+
+write.csv(engine_specs_no_dupes[engine_specs_no_dupes$aircraft %in% duplicate_aircraft,],
+          "inventory/data/variable_engine_aircraft.csv")
+
+#Second version. Note, not removing NAs, so any aircraft with one NA in a column will have NA in its single line.
+#Alternate version is to remove NAs to allow max/min to trump.
+engine_specs_no_dupes <- engine_specs %>% group_by(aircraft, takeoff_weight, speed, 
+                                                   range, ceiling, climb_rate,  thrust_weight_aircraft, engine,  engine_company, 
+                                                   thrust,  pressure_ratio, engine_weight, thrust_weight_engine ) %>%
+  summarise(
+    engine_type=ifelse(!any(is.na(engine_type)) & max(engine_type)==min(engine_type),max(engine_type),NA_character_ ),
+      engine_number=ifelse(!any(is.na(engine_number)) & max(engine_number)==min(engine_number),max(engine_number),NA_integer_),
+    type_count=length(unique(type)),
+    record_count=length(aircraft))
+engine_specs_no_dupes$engine_type <- factor(engine_specs_no_dupes$engine_type)
+engine_specs_no_dupes<-engine_specs_no_dupes[,c(1,14:17,2:13)]
+write.csv(engine_specs_no_dupes,
+          "inventory/data/engine_specs_no_dupes.csv")
+
+
+aircraft_type_m2m<-unique(engine_specs[,c("aircraft","type")])
+write.csv(engine_specs_no_dupes,
+          "inventory/data/aircraft_type_m2m.csv")
+
+if(any(duplicated(engine_specs_no_dupes$aircraft))){
+  print(unique(engine_specs_no_dupes$aircraft[duplicated(engine_specs_no_dupes$aircraft)]))
+  warn ("Duplicate aircraft in engine_spaces:")
+}
+
 intro_year$aircraft<-factor(intro_year$aircraft)
 if(any(duplicated(intro_year$aircraft))) stop ("Duplicate aircraft in intro_year")
 
@@ -53,9 +101,9 @@ engine <- usaf_inventory %>%
 
 
 View(engine[engine$aircraft %in% duplicates,])
-write.csv(usaf_inventory[usaf_inventory$aircraft %in% duplicates,], "data/accidentally_dropped_columns.csv")
+write.csv(usaf_inventory[usaf_inventory$aircraft %in% duplicates,], "inventory/data/accidentally_dropped_columns.csv")
 
-write.csv(engine, "data/engine.csv")
+write.csv(engine, "inventory/data/engine.csv")
 
 # summarize data -----------------------------------------------------------------
 
@@ -96,7 +144,7 @@ by_total <- by_total %>%
 )
 
 ggsave(
-  "charts/average_age.svg",
+  "inventory/charts/average_age.svg",
   p_total_age,
   device = "svg",
   width = 8,
@@ -140,7 +188,7 @@ p2 <- engine %>%
 )
 
 ggsave(
-  "charts/average_age_type.svg",
+  "inventory/charts/average_age_type.svg",
   p_total_age_type,
   device = "svg",
   width = 10,
@@ -222,7 +270,7 @@ p_engine <- engine %>%
 )
 
 ggsave(
-  "charts/engine_amount.svg",
+  "inventory/charts/engine_amount.svg",
   p,
   device = "svg",
   width = 8,
@@ -254,7 +302,7 @@ p <- engine %>%
 )
 
 ggsave(
-  "charts/engine_amount_type.svg",
+  "inventory/charts/engine_amount_type.svg",
   p,
   device = "svg",
   width = 10,
@@ -327,7 +375,7 @@ introduction <- engine %>%
 )
 
 ggsave(
-  "charts/intro_year.svg",
+  "inventory/charts/intro_year.svg",
   p_introduction,
   device = "svg",
   width = 8,
@@ -367,7 +415,7 @@ ggsave(
 )
 
 ggsave(
-  "charts/intro_year_type.svg",
+  "inventory/charts/intro_year_type.svg",
   p_introduction,
   device = "svg",
   width = 10,
@@ -437,7 +485,7 @@ generation <- engine %>%
 )
 
 ggsave(
-  "charts/peak_generation.svg",
+  "inventory/charts/peak_generation.svg",
   p_peak_inventory_generation,
   device = "svg",
   width = 8,
@@ -473,7 +521,7 @@ inventory <- engine %>%
 )
 
 ggsave(
-  "charts/peak_inventory_type.svg",
+  "inventory/charts/peak_inventory_type.svg",
   p_peak_inventory,
   device = "svg",
   width = 12,
@@ -598,7 +646,7 @@ p <- engine %>%
 )
 
 ggsave(
-  "charts/inventory_generation.svg",
+  "inventory/charts/inventory_generation.svg",
   p,
   device = "svg",
   width = 8,
@@ -635,7 +683,7 @@ p <- engine %>%
 )
 
 ggsave(
-  "charts/takeoff_weight.svg",
+  "inventory/charts/takeoff_weight.svg",
   p_takeoff_weight,
   device = "svg",
   width = 8,
@@ -658,7 +706,7 @@ ggsave(
     ggtitle("Average speed for USAF fighter/attack aircraft")
 )
 ggsave(
-  "charts/speed.svg",
+  "inventory/charts/speed.svg",
   p_speed,
   device = "svg",
   width = 8,
@@ -682,7 +730,7 @@ ggsave(
 )
 
 ggsave(
-  "charts/range.svg",
+  "inventory/charts/range.svg",
   p_range,
   device = "svg",
   width = 8,
@@ -706,7 +754,7 @@ ggsave(
 )
 
 ggsave(
-  "charts/ceiling.svg",
+  "inventory/charts/ceiling.svg",
   p_ceiling,
   device = "svg",
   width = 8,
@@ -730,7 +778,7 @@ ggsave(
 )
 
 ggsave(
-  "charts/climb.svg",
+  "inventory/charts/climb.svg",
   p_climb_rate,
   device = "svg",
   width = 8,
@@ -758,7 +806,7 @@ ggsave(
 )
 
 ggsave(
-  "charts/thrust_weight_ratio.svg",
+  "inventory/charts/thrust_weight_ratio.svg",
   p_thrust_weight_aircraft,
   device = "svg",
   width = 8,
@@ -792,7 +840,7 @@ p <- engine %>%
 )
 
 ggsave(
-  "charts/thrust.svg",
+  "inventory/charts/thrust.svg",
   p_thrust,
   device = "svg",
   width = 8,
@@ -820,7 +868,7 @@ ggsave(
 )
 
 ggsave(
-  "charts/pressure.svg",
+  "inventory/charts/pressure.svg",
   p_pressure_ratio,
   device = "svg",
   width = 8,
@@ -848,7 +896,7 @@ ggsave(
 )
 
 ggsave(
-  "charts/engine_weight.svg",
+  "inventory/charts/engine_weight.svg",
   p_engine_weight,
   device = "svg",
   width = 8,
@@ -878,7 +926,7 @@ ggsave(
 )
 
 ggsave(
-  "charts/thrust_weight_ratio_engine.svg",
+  "inventory/charts/thrust_weight_ratio_engine.svg",
   p_thrust_weight_engine,
   device = "svg",
   width = 8,
