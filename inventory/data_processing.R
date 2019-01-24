@@ -112,6 +112,8 @@ if(sum(engine$amount[engine$aircraft=="HC-130"])==0)
 levels(engine$engine_type)
 engine$engine_type<-factor(engine$engine_type,c("Radial","Ramjet","Mixed","Turbofan","Turbojet","Turboprop","Turboshaft"))
 engine$engine_type[engine$aircraft=="B-36" & is.na(engine$engine_type)]<-"Mixed"
+engine$engine_type[engine$aircraft=="C-123" & is.na(engine$engine_type)]<-"Mixed"
+engine$engine_type[engine$aircraft=="KC-97" & is.na(engine$engine_type)]<-"Mixed"
 engine$amount[engine$aircraft=="B-36" & is.na(engine$amount)]<-10
 
 #***** Age
