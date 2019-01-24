@@ -195,17 +195,17 @@ ggsave(
 
 # total age by type --------------------------------------------------------------
 
-# p <- engine %>%
+# p <- engine_type %>%
 #   group_by(year) %>%
 #   summarise(total_amount = sum(amount, na.rm = TRUE))
-#
-# p <- engine %>%
+# 
+# p <- engine_type %>%
 #   inner_join(p, by = "year")
-#
-# p2 <- engine %>%
+# 
+# p2 <- engine_type %>%
 #   group_by(year, type) %>%
 #   summarise(type_amount = sum(amount, na.rm = TRUE))
-#
+# 
 # (
 #   p_avg_age_type <- p %>%
 #     left_join(p2, by = c("year", "type")) %>%
@@ -261,11 +261,12 @@ ggsave(
 
 # plot USAF inventory # by engine type -------------------------------------------
 
-by_type <- engine %>%
+by_engine_type <- engine %>%
   group_by(year, engine_type)
 
-by_type <- by_type %>%
+by_engine_type <- by_engine_type %>%
   filter(engine_type %in% c("Radial",
+                            # "Mixed",
                             "Turbofan",
                             "Turbojet",
                             "Turboprop",
@@ -273,7 +274,7 @@ by_type <- by_type %>%
   summarise(amount = sum(amount, na.rm = TRUE))
 
 (
-  p_type <- ggplot(data = by_type) +
+  p_type <- ggplot(data = by_engine_type) +
     geom_area(aes(
       y = amount, x = year, fill = engine_type
     ), stat = "identity") +
@@ -288,13 +289,22 @@ by_type <- by_type %>%
     scale_fill_manual(
       values = c(
         "Radial" = "#4D7FA3",
+        # "Mixed" = "#AAAAAA", #Pick a color!
         "Turbofan" = "#C74745",
         "Turbojet" = "#0E9E87",
         "Turboprop" = "#566377",
         "Turboshaft" = "#F2BC57"
       )
-    )
+    )+labs(caption="Note: Excludes ramjet and mixed engines as well as aircraft with inconsistent classification.")
 )
+
+ggsave(file="year and engine amount by engine type",
+       p_type,
+       device = "svg",
+       width = 8,
+       height = 6,
+       units = "in"
+       )
 
 # plot number of engines ---------------------------------------------------------
 
