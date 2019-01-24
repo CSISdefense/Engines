@@ -12,7 +12,7 @@ library(tidyverse)
 library(ggthemes)
 library(extrafont)
 library(extrafontdb)
-
+library(svglite)
 # theme --------------------------------------------------------------------------
 
 source("inventory/theme/chart_theme.R")
@@ -75,7 +75,7 @@ engine_specs_no_dupes <- engine_specs %>% group_by(aircraft, takeoff_weight, spe
     engine_type=ifelse(!any(is.na(engine_type)) & max(engine_type)==min(engine_type),max(engine_type),NA_character_ ),
       engine_number=ifelse(!any(is.na(engine_number)) & max(engine_number)==min(engine_number),max(engine_number),NA_integer_),
     type_list=paste(unique(type),collapse=", "),
-    engine_variant_count=length(aircraft))
+    engine_spec_record_count=length(aircraft))
 engine_specs_no_dupes$engine_type <- factor(engine_specs_no_dupes$engine_type)
 engine_specs_no_dupes<-engine_specs_no_dupes[,c(1,14:17,2:13)]
 
@@ -93,46 +93,87 @@ write.csv(engine_specs_no_dupes,
           "inventory/data/aircraft_type_m2m.csv")
 
 
+
+#*****Intro Year* and engne specs*****************
 intro_year$aircraft<-factor(intro_year$aircraft)
 if(any(duplicated(intro_year$aircraft))) stop ("Duplicate aircraft in intro_year")
 
 engine <- usaf_inventory %>%
-  inner_join(engine_specs_no_dupes, by = "aircraft") %>%
+  left_join(engine_specs_no_dupes, by = "aircraft") %>%
   left_join(intro_year, by = "aircraft")
 if (nrow(engine)!=nrow(usaf_inventory)) stop("Duplicates produced")
 
-write.csv(engine, "inventory/data/engine.csv")
-
-
-# Greg got this far in the morning.
-# summarize data -----------------------------------------------------------------
-
+#*****Manual cleanup
 engine$amount <- as.integer(as.character(engine$amount))
+
+
+if(sum(engine$amount[engine$aircraft=="HC-130"])==0)
+  engine<-subset(engine,aircraft!="HC-130")
+levels(engine$engine_type)
+engine$engine_type<-factor(engine$engine_type,c("Radial","Ramjet","Mixed","Turbofan","Turbojet","Turboprop","Turboshaft"))
+engine$engine_type[engine$aircraft=="B-36" & is.na(engine$engine_type)]<-"Mixed"
+engine$amount[engine$aircraft=="B-36" & is.na(engine$amount)]<-10
+
+#***** Age
+
+
 engine$intro_year <- as.integer(as.character(engine$intro_year))
+engine$year <- as.integer(as.character(engine$year))
+engine <- engine %>% group_by(aircraft) %>%
+  mutate(min_year = min(ifelse(amount>0,year,NA),na.rm=TRUE))
+write.csv(engine[engine$year<engine$first_year & engine$amount>0,],file="inventory\\data\\appear_before_intro_year.csv")
+
+#Examining first years
+
+engine$intro_year[engine$intro_year>engine$min_year]<-engine$min_year[engine$intro_year>engine$min_year]
+
+if(sum(engine$amount[engine$year<engine$intro_year],na.rm = TRUE)>0) stop("Don't drop initial 0s yet")
+engine<-subset(engine, amount > 0 | year>=intro_year)
 
 engine <- engine %>%
   mutate(age = year - intro_year)
 
+if(min(engine$age,na.rm = TRUE)<0) stop("Negative ages!")
+
+write.csv(engine, "inventory/data/engine.csv")
+
+
+engine_type <- engine %>%
+  left_join(aircraft_type_m2m, by = "aircraft")
+
+
+# summarize data -----------------------------------------------------------------
+
+aircraft_total <- engine %>% group_by(aircraft) %>% summarise(total = sum(amount, na.rm = TRUE))
+aircraft_total[aircraft_total$total==0,]
+#Age of aircraft, regardless of type, since first introduction
+
+#Total aircraft and total age per year
 by_total <- engine %>%
   group_by(year) %>%
-  summarise(total = sum(amount, na.rm = TRUE))
+  summarise(total = sum(amount, na.rm = TRUE),
+            total_age = sum(amount * age, na.rm = TRUE),
+            avg_age = sum(amount * age, na.rm = TRUE) / sum(amount, na.rm = TRUE)
+            )
 
-engine <- engine %>%
-  left_join(by_total, by = "year") %>%
-  mutate(total_age = amount * age / total)
-
-by_total <- engine %>%
-  group_by(year)
-by_total <- by_total %>%
-  summarise(total_age = sum(total_age, na.rm = TRUE))
+# This shouldn't change the data, but it simplifies and removes a chance to introduce error.
+#
+# engine <- engine %>%
+#   left_join(by_total, by = "year") %>%
+#   mutate(total_age = amount * age / total)
+# 
+# by_total <- engine %>%
+#   group_by(year)
+# by_total <- by_total %>%
+#   summarise(total_age = sum(total_age, na.rm = TRUE))
 
 # charting =======================================================================
 # total age-----------------------------------------------------------------------
 
 (
-  p_total_age <- ggplot(data = by_total) +
+  p_avg_age <- ggplot(data = by_total) +
     geom_area(
-      aes(y = total_age, x = year),
+      aes(y = avg_age, x = year),
       stat = "identity",
       fill = "#333333",
       alpha = .90
@@ -145,7 +186,7 @@ by_total <- by_total %>%
 
 ggsave(
   "inventory/charts/average_age.svg",
-  p_total_age,
+  p_avg_age,
   device = "svg",
   width = 8,
   height = 6,
@@ -154,23 +195,44 @@ ggsave(
 
 # total age by type --------------------------------------------------------------
 
-p <- engine %>%
-  group_by(year) %>%
-  summarise(total_amount = sum(amount, na.rm = TRUE))
-
-p <- engine %>%
-  inner_join(p, by = "year")
-
-p2 <- engine %>%
-  group_by(year, type) %>%
-  summarise(type_amount = sum(amount, na.rm = TRUE))
+# p <- engine %>%
+#   group_by(year) %>%
+#   summarise(total_amount = sum(amount, na.rm = TRUE))
+#
+# p <- engine %>%
+#   inner_join(p, by = "year")
+#
+# p2 <- engine %>%
+#   group_by(year, type) %>%
+#   summarise(type_amount = sum(amount, na.rm = TRUE))
+#
+# (
+#   p_avg_age_type <- p %>%
+#     left_join(p2, by = c("year", "type")) %>%
+#     mutate(age_weight = age * amount / type_amount) %>%
+#     group_by(year, type) %>%
+#     summarise(average_age = sum(age_weight, na.rm = TRUE)) %>%
+#     ggplot() +
+#     geom_area(aes(y = average_age, x = year), stat = "identity") +
+#     scale_x_continuous(
+#       breaks = seq(1940, 2010, by = 20),
+#       labels = function(x) {
+#         substring(as.character(x), 3, 4)
+#       }
+#     ) +
+#     facet_wrap(~ type, nrow = 1) +
+#     # ylab("age") +
+#     ylab(NULL) +
+#     xlab(NULL) +
+#     # ggtitle("Average platform age of the USAF inventory by type") +
+#     chart_theme
+# )
 
 (
-  p_total_age_type <- p %>%
-    left_join(p2, by = c("year", "type")) %>%
-    mutate(age_weight = age * amount / type_amount) %>%
+  p_avg_age_type <- engine_type  %>%
     group_by(year, type) %>%
-    summarise(average_age = sum(age_weight, na.rm = TRUE)) %>%
+    summarise(average_age = sum(age * amount,na.rm=TRUE) / 
+                sum(amount,na.rm=TRUE)) %>%
     ggplot() +
     geom_area(aes(y = average_age, x = year), stat = "identity") +
     scale_x_continuous(
@@ -187,9 +249,10 @@ p2 <- engine %>%
     chart_theme
 )
 
+
 ggsave(
   "inventory/charts/average_age_type.svg",
-  p_total_age_type,
+  p_avg_age_type,
   device = "svg",
   width = 10,
   height = 3,
