@@ -135,6 +135,8 @@ engine <- engine %>%
 
 if(min(engine$age,na.rm = TRUE)<0) stop("Negative ages!")
 
+
+
 write.csv(engine, "inventory/data/engine.csv")
 
 
@@ -298,21 +300,16 @@ by_engine_type <- by_engine_type %>%
     )+labs(caption="Note: Excludes ramjet and mixed engines as well as aircraft with inconsistent classification.")
 )
 
-ggsave(file="year and engine amount by engine type",
-       p_type,
-       device = "svg",
-       width = 8,
-       height = 6,
-       units = "in"
-       )
-
 # plot number of engines ---------------------------------------------------------
-
-engine <- engine %>%
-  mutate(engine_amount = amount * engine_number)
 
 p_engine <- engine %>%
   group_by(year, engine_type) %>%
+  filter(engine_type %in% c("Radial",
+                            # "Mixed",
+                            "Turbofan",
+                            "Turbojet",
+                            "Turboprop",
+                            "Turboshaft")) %>%
   summarise(engine_amount = sum(engine_amount, na.rm = TRUE))
 
 (
@@ -339,8 +336,9 @@ p_engine <- engine %>%
         "Turboshaft" = "#F2BC57"
       )
     ) +
-    ylab("amount")
-)
+    ylab("amount")+labs(caption="Note: Excludes ramjet and mixed engines as well as aircraft with inconsistent classification.")
+)    
+
 
 ggsave(
   "inventory/charts/engine_amount.svg",
@@ -353,7 +351,7 @@ ggsave(
 
 # plot number of engines by aircraft type ----------------------------------------
 
-p <- engine %>%
+p <- engine_type %>%
   group_by(year, type) %>%
   filter(type != "Helicopter") %>%
   filter(type != "Trainer") %>%
