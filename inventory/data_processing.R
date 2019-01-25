@@ -142,6 +142,10 @@ engine <- engine %>%
 
 if(min(engine$age,na.rm = TRUE)<0) stop("Negative ages!")
 
+if(any(duplicated(generation$aircraft))) stop("Duplicate aircraft in generation")
+engine <- engine %>%
+  left_join(generation, by = "aircraft")
+
 
 
 write.csv(engine, "inventory/data/engine.csv")
@@ -363,11 +367,11 @@ p <- engine_type %>%
   group_by(year, type) %>%
   filter(type != "Helicopter") %>%
   filter(type != "Trainer") %>%
-  summarise(amount = sum(engine_amount, na.rm = TRUE))
+  summarise(engine_amount = sum(engine_amount, na.rm = TRUE))
 
 (
   p <- ggplot(data = p) +
-    geom_area(aes(y = amount, x = year), stat = "identity") +
+    geom_area(aes(y = engine_amount, x = year), stat = "identity") +
     facet_wrap( ~ type, nrow = 1) +
     chart_theme +
     ylab(NULL) +
@@ -514,11 +518,8 @@ ggsave(
 
 # peak inventory for FighterAttack by generation ---------------------------------
 
-engine <- engine %>%
-  left_join(generation, by = "aircraft")
-
 generation <- engine %>%
-  filter(type == "FighterAttack") %>% 
+  filter(grepl("FighterAttack",type_list)) %>% 
   group_by(aircraft, intro_year, relevance, generation) %>%
   summarise(peak_inventory = mean(peak_inventory, na.rm = TRUE)) %>%
   filter(relevance != "Old") %>% 
@@ -669,29 +670,28 @@ generation <- engine %>%
 
 p <- engine %>%
   group_by(year, engine_type) %>%
-  summarise(amount = sum(engine_amount, na.rm = TRUE)) %>%
-  filter(engine_type != "NA")
+  summarise(engine_amount = sum(engine_amount, na.rm = TRUE)) %>%
+  filter(!is.na(engine_type)) #Can't check  != "NA", it doesn't work that way. NA is a special absence of value, not a character string.
 
 (
   p <- ggplot(data = p) +
     geom_area(aes(
-      y = amount, x = year, fill = engine_type
+      y = engine_amount, x = year, fill = engine_type
     ), position = "stack") +
     guides(fill = guide_legend(
       keywidth = 1,
       keyheight = 1,
       nrow = 5
     )) +
-    chart_theme
+    chart_theme+ylab("engine count")
 )
 
 # --------------------------------------------------------------------------------
-
 (
   p <- engine %>%
-    filter(type == "FighterAttack") %>% 
+    filter(grepl("FighterAttack",type_list)) %>% #Grepl is over kill, but allows for  multiple type to include fighterattack
     group_by(year, generation) %>%
-    summarise(amount = sum(engine_amount, na.rm = TRUE)) %>%
+    summarise(amount = sum(amount, na.rm = TRUE)) %>% #This had been engine amount, should just be amount or label properly
     mutate(generation = factor(
       generation,
       levels = c("Other", 
@@ -746,19 +746,25 @@ ggsave(
 # plot average aircraft specs for USAF fighter/attack aircraft ===================
 # takeoff weight -----------------------------------------------------------------
 
-p <- engine %>%
-  filter(type == "FighterAttack") %>%
-  group_by(year) %>%
-  summarise(total_amount = sum(amount, na.rm = TRUE))
-
-p <- engine %>%
-  inner_join(p, by = "year")
-
+# p <- engine %>%
+#   filter(grepl("FighterAttack",type_list)) %>%
+#   group_by(year) %>%
+#   summarise(total_amount = sum(amount, na.rm = TRUE))
+# 
+# p <- engine %>%
+#   inner_join(p, by = "year")
+# 
+# 
+# 
 (
-  p_takeoff_weight <- p %>%
-    mutate(age_weight = takeoff_weight * amount / total_amount) %>%
-    group_by(year) %>%
-    summarise(takeoff_weight = sum(age_weight, na.rm = TRUE)) %>%
+  # p_takeoff_weight <- p %>%
+  #   mutate(age_weight = takeoff_weight * amount / total_amount) %>%
+  #   group_by(year) %>%
+  #   summarise(takeoff_weight = sum(age_weight, na.rm = TRUE)) %>%
+  
+  p_takeoff_weight <- engine %>% group_by(year) %>%
+    filter(grepl("FighterAttack",type_list)) %>%
+    summarise(takeoff_weight = sum(takeoff_weight * amount) / sum(amount)) %>%
     ggplot() +
     geom_area(
       aes(y = takeoff_weight, x = year),
@@ -907,7 +913,7 @@ ggsave(
 # thrust -------------------------------------------------------------------------
 
 p <- engine %>%
-  filter(type == "FighterAttack") %>%
+  filter(grepl("FighterAttack",type_list)) %>%
   filter(engine_type == "Turbojet" | engine_type == "Turbofan") %>%
   group_by(year) %>%
   summarise(total_amount = sum(engine_amount, na.rm = TRUE))
