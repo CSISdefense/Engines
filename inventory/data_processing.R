@@ -745,6 +745,7 @@ ggsave(
 
 # plot average aircraft specs for USAF fighter/attack aircraft ===================
 # takeoff weight -----------------------------------------------------------------
+any(is.na(engine$takeoff_weight)& grepl("FighterAttack",engine$type_list))
 
 # p <- engine %>%
 #   filter(grepl("FighterAttack",type_list)) %>%
@@ -788,7 +789,7 @@ ggsave(
 
 # speed --------------------------------------------------------------------------
 
-any(is.na(engine$speed))
+any(is.na(engine$speed)& grepl("FighterAttack",engine$type_list))
 unique(engine$aircraft[is.na(engine$speed) & grepl("FighterAttack",engine$type_list)])
 
 
@@ -814,7 +815,7 @@ ggsave(
 )
 
 # range --------------------------------------------------------------------------
-any(is.na(engine$range))
+any(is.na(engine$range)& grepl("FighterAttack",engine$type_list))
 unique(engine$aircraft[is.na(engine$range) & grepl("FighterAttack",engine$type_list)])
 
   
@@ -844,12 +845,16 @@ ggsave(
 )
 
 # ceiling ------------------------------------------------------------------------
+any(is.na(engine$ceiling) & grepl("FighterAttack",engine$type_list))
 
 (
-  p_ceiling <- p %>%
-    mutate(age_weight = ceiling * amount / total_amount) %>%
-    group_by(year) %>%
-    summarise(ceiling = sum(age_weight, na.rm = TRUE)) %>%
+  # p_ceiling <- p %>%
+  #   mutate(age_weight = ceiling * amount / total_amount) %>%
+  #   group_by(year) %>%
+  #   summarise(ceiling = sum(age_weight, na.rm = TRUE)) %>%
+  p_ceiling <- engine %>% group_by(year) %>%
+    filter(grepl("FighterAttack",type_list)) %>%
+    summarise(ceiling = sum(ceiling * amount) / sum(amount)) %>%
     ggplot() +
     geom_area(aes(y = ceiling, x = year), stat = "identity", alpha = .90) +
     chart_theme +
@@ -868,12 +873,16 @@ ggsave(
 )
 
 # climb rate ---------------------------------------------------------------------
+any(is.na(engine$climb_rate & grepl("FighterAttack",engine$type_list)))
 
 (
-  p_climb_rate <- p %>%
-    mutate(age_weight = climb_rate * amount / total_amount) %>%
-    group_by(year) %>%
-    summarise(climb_rate = sum(age_weight, na.rm = TRUE)) %>%
+  # p_climb_rate <- p %>%
+  #   mutate(age_weight = climb_rate * amount / total_amount) %>%
+  #   group_by(year) %>%
+  #   summarise(climb_rate = sum(age_weight, na.rm = TRUE)) %>%
+  p_climb_rate <- engine %>% group_by(year) %>%
+    filter(grepl("FighterAttack",type_list)) %>%
+    summarise(climb_rate = sum(climb_rate * amount) / sum(amount)) %>%
     ggplot() +
     geom_area(aes(y = climb_rate, x = year), stat = "identity", alpha = .90) +
     chart_theme +
@@ -892,12 +901,18 @@ ggsave(
 )
 
 # trust to weight ----------------------------------------------------------------
+any(is.na(engine$thrust_weight_aircraft & grepl("FighterAttack",engine$type_list)))
+unique(engine$aircraft[is.na(engine$thrust_weight_aircraft) & grepl("FighterAttack",engine$type_list)])
 
 (
-  p_thrust_weight_aircraft <- p %>%
-    mutate(age_weight = thrust_weight_aircraft * amount / total_amount) %>%
-    group_by(year) %>%
-    summarise(thrust_weight_aircraft = sum(age_weight, na.rm = TRUE)) %>%
+  # p_thrust_weight_aircraft <- p %>%
+  #   mutate(age_weight = thrust_weight_aircraft * amount / total_amount) %>%
+  #   group_by(year) %>%
+  #   summarise(thrust_weight_aircraft = sum(age_weight, na.rm = TRUE)) %>%
+  p_thrust_weight_aircraft <- engine %>% group_by(year) %>%
+    filter(grepl("FighterAttack",type_list)) %>%
+    mutate(p_thrust_weight = thrust_weight_aircraft * amount / sum(amount)) %>%
+    summarise(thrust_weight_aircraft = sum(p_thrust_weight, na.rm = TRUE)) %>%
     ggplot() +
     geom_area(
       aes(y = thrust_weight_aircraft, x = year),
@@ -907,7 +922,8 @@ ggsave(
     chart_theme +
     ylab("thrust to weight ratio") +
     scale_x_continuous(breaks = seq(1950, 2018, by = 10)) +
-    ggtitle("Average thrust to weight ratio for USAF fighter/attack aircraft")
+    ggtitle("Average thrust to weight ratio for USAF fighter/attack aircraft")+
+    labs(caption="Excludes multiple aircrafts for which reliable thrust-to-weight estimates were not available.")
 )
 
 ggsave(
