@@ -911,8 +911,8 @@ unique(engine$aircraft[is.na(engine$thrust_weight_aircraft) & grepl("FighterAtta
   #   summarise(thrust_weight_aircraft = sum(age_weight, na.rm = TRUE)) %>%
   p_thrust_weight_aircraft <- engine %>% group_by(year) %>%
     filter(grepl("FighterAttack",type_list)) %>%
-    mutate(p_thrust_weight = thrust_weight_aircraft * amount / sum(amount)) %>%
-    summarise(thrust_weight_aircraft = sum(p_thrust_weight, na.rm = TRUE)) %>%
+    mutate(p_thrust_weight_aircraft = thrust_weight_aircraft * amount / sum(amount)) %>%
+    summarise(thrust_weight_aircraft = sum(p_thrust_weight_aircraft, na.rm = TRUE)) %>%
     ggplot() +
     geom_area(
       aes(y = thrust_weight_aircraft, x = year),
@@ -937,27 +937,37 @@ ggsave(
 
 # plot average engine specs for USAF fighter/attack jet engines ==================
 # thrust -------------------------------------------------------------------------
-
-p <- engine %>%
-  filter(grepl("FighterAttack",type_list)) %>%
-  filter(engine_type == "Turbojet" | engine_type == "Turbofan") %>%
-  group_by(year) %>%
-  summarise(total_amount = sum(engine_amount, na.rm = TRUE))
-
-p <- engine %>%
-  inner_join(p, by = "year")
-
+any(is.na(engine$thrust & grepl("FighterAttack",engine$type_list)))
+unique(engine$aircraft[is.na(engine$thrust) & grepl("FighterAttack",engine$type_list)])
+unique(engine$aircraft[is.na(engine$thrust) & grepl("FighterAttack",engine$type_list)& 
+                         engine$engine_type %in% c("Turbojet" , "Turbofan")])
+# p <- engine %>%
+#   filter(grepl("FighterAttack",type_list)) %>%
+#   filter(engine_type == "Turbojet" | engine_type == "Turbofan") %>%
+#   group_by(year) %>%
+#   summarise(total_amount = sum(engine_amount, na.rm = TRUE))
+# 
+# p <- engine %>%
+#   inner_join(p, by = "year")
+# 
 (
-  p_thrust <- p %>%
-    mutate(age_weight = thrust * engine_amount / total_amount) %>%
-    group_by(year) %>%
-    summarise(average_age = sum(age_weight, na.rm = TRUE)) %>%
+#   p_thrust <- p %>%
+#     mutate(age_weight = thrust * engine_amount / total_amount) %>%
+#     group_by(year) %>%
+#     summarise(average_age = sum(age_weight, na.rm = TRUE)) %>%
+  
+  p_thrust <- engine %>% group_by(year) %>%
+    filter(grepl("FighterAttack",type_list)) %>%
+    filter(engine_type == "Turbojet" | engine_type == "Turbofan") %>%
+    mutate(p_thrust = thrust * engine_amount / sum(engine_amount)) %>%
+    summarise(thrust = sum(p_thrust, na.rm = TRUE)) %>%
     ggplot() +
-    geom_area(aes(y = average_age, x = year), stat = "identity", alpha = .90) +
+    geom_area(aes(y = thrust, x = year), stat = "identity", alpha = .90) +
     chart_theme +
     ylab("thrust (lbs)") +
     scale_x_continuous(breaks = seq(1950, 2018, by = 10)) +
-    ggtitle("Average thrust for USAF fighter/attack jet engines")
+    ggtitle("Average thrust for USAF fighter/attack jet engines")+
+    labs(caption="Excludes aircraft for which reliable engine thrust estimates were not available (F-82).")
 )
 
 ggsave(
@@ -970,12 +980,22 @@ ggsave(
 )
 
 # pressure ratio -----------------------------------------------------------------
+any(is.na(engine$pressure_ratio & grepl("FighterAttack",engine$type_list)))
+unique(engine$aircraft[is.na(engine$pressure_ratio) & grepl("FighterAttack",engine$type_list)])
+unique(engine$aircraft[is.na(engine$pressure_ratio) & grepl("FighterAttack",engine$type_list)& 
+                         engine$engine_type %in% c("Turbojet" , "Turbofan")])
+
 
 (
-  p_pressure_ratio <- p %>%
-    mutate(age_weight = pressure_ratio * engine_amount / total_amount) %>%
-    group_by(year) %>%
-    summarise(pressure_ratio = sum(age_weight, na.rm = TRUE)) %>%
+  # p_pressure_ratio <- p %>%
+  #   mutate(age_weight = pressure_ratio * engine_amount / total_amount) %>%
+  #   group_by(year) %>%
+  #   summarise(pressure_ratio = sum(age_weight, na.rm = TRUE)) %>%
+  p_pressure_ratio <- engine %>% group_by(year) %>%
+    filter(grepl("FighterAttack",type_list)) %>%
+    filter(engine_type == "Turbojet" | engine_type == "Turbofan") %>%
+    mutate(p_pressure_ratio = pressure_ratio * engine_amount / sum(engine_amount)) %>%
+    summarise(pressure_ratio = sum(p_pressure_ratio, na.rm = TRUE)) %>%
     ggplot() +
     geom_area(
       aes(y = pressure_ratio, x = year),
@@ -985,7 +1005,8 @@ ggsave(
     chart_theme +
     ylab("pressure ratio") +
     scale_x_continuous(breaks = seq(1950, 2018, by = 10)) +
-    ggtitle("Average pressure ratio for USAF fighter/attack jet engines")
+    ggtitle("Average pressure ratio for USAF fighter/attack jet engines")+
+    labs(caption="Excludes aircraft for which reliable engine thrust estimates were not available (F-82).")
 )
 
 ggsave(
@@ -998,12 +1019,23 @@ ggsave(
 )
 
 # engine weight ------------------------------------------------------------------
+any(is.na(engine$engine_weight & grepl("FighterAttack",engine$type_list)))
+unique(engine$aircraft[is.na(engine$engine_weight) & grepl("FighterAttack",engine$type_list)])
+unique(engine$aircraft[is.na(engine$engine_weight) & grepl("FighterAttack",engine$type_list)& 
+                         engine$engine_type %in% c("Turbojet" , "Turbofan")])
+
+
 
 (
-  p_engine_weight <- p %>%
-    mutate(age_weight = engine_weight * engine_amount / total_amount) %>%
-    group_by(year) %>%
-    summarise(engine_weight = sum(age_weight, na.rm = TRUE)) %>%
+  # p_engine_weight <- p %>%
+  #   mutate(age_weight = engine_weight * engine_amount / total_amount) %>%
+  #   group_by(year) %>%
+  #   summarise(engine_weight = sum(age_weight, na.rm = TRUE)) %>%
+  p_engine_weight <- engine %>% group_by(year) %>%
+    filter(grepl("FighterAttack",type_list)) %>%
+    filter(engine_type == "Turbojet" | engine_type == "Turbofan") %>%
+    mutate(p_engine_weight = engine_weight * engine_amount / sum(engine_amount)) %>%
+    summarise(engine_weight = sum(p_engine_weight, na.rm = TRUE)) %>%
     ggplot() +
     geom_area(
       aes(y = engine_weight, x = year),
@@ -1013,7 +1045,8 @@ ggsave(
     chart_theme +
     ylab("engine weight (lbs)") +
     scale_x_continuous(breaks = seq(1950, 2018, by = 10)) +
-    ggtitle("Average engine weight for USAF fighter/attack jet engines")
+    ggtitle("Average engine weight for USAF fighter/attack jet engines")+
+    labs(caption="Excludes aircraft for which reliable engine thrust estimates were not available (F-82).")
 )
 
 ggsave(
@@ -1026,6 +1059,10 @@ ggsave(
 )
 
 # thrust to weight ---------------------------------------------------------------
+any(is.na(engine$thrust_weight_engine & grepl("FighterAttack",engine$type_list)))
+unique(engine$aircraft[is.na(engine$thrust_weight_engine) & grepl("FighterAttack",engine$type_list)])
+unique(engine$aircraft[is.na(engine$thrust_weight_engine) & grepl("FighterAttack",engine$type_list)& 
+                         engine$engine_type %in% c("Turbojet" , "Turbofan")])
 
 (
   p_thrust_weight_engine <- p %>%
@@ -1043,7 +1080,8 @@ ggsave(
     scale_x_continuous(breaks = seq(1950, 2018, by = 10)) +
     ggtitle(
       "Average thrust to weight ratio for USAF fighter/attack jet engines"
-    )
+    )+
+    labs(caption="Excludes aircraft for which reliable engine thrust estimates were not available (F-82).")
 )
 
 ggsave(
