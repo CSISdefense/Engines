@@ -80,9 +80,10 @@ engine_specs_no_dupes$engine_type <- factor(engine_specs_no_dupes$engine_type)
 engine_specs_no_dupes<-engine_specs_no_dupes[,c(1,14:17,2:13)]
 
 
-if(any(duplicated(engine_specs_no_dupes$aircraft))) 
+if(any(duplicated(engine_specs_no_dupes$aircraft))){
   print(unique(engine_specs_no_dupes$aircraft[duplicated(engine_specs_no_dupes$aircraft)]))
-stop ("Attempt to remove duplicates failed.")
+  stop ("Attempt to remove duplicates failed.")
+}
 
 write.csv(engine_specs_no_dupes,
           "inventory/data/engine_specs_no_dupes.csv")
@@ -111,10 +112,13 @@ if(sum(engine$amount[engine$aircraft=="HC-130"])==0)
   engine<-subset(engine,aircraft!="HC-130")
 levels(engine$engine_type)
 engine$engine_type<-factor(engine$engine_type,c("Radial","Ramjet","Mixed","Turbofan","Turbojet","Turboprop","Turboshaft"))
+
+#The B-36 had 10 engines, 6 radial, 4 turbojet
 engine$engine_type[engine$aircraft=="B-36" & is.na(engine$engine_type)]<-"Mixed"
+engine$amount[engine$aircraft=="B-36" & is.na(engine$amount)]<-10
+#The C-123 and KC-97 transitioned from radial to turbojet engines
 engine$engine_type[engine$aircraft=="C-123" & is.na(engine$engine_type)]<-"Mixed"
 engine$engine_type[engine$aircraft=="KC-97" & is.na(engine$engine_type)]<-"Mixed"
-engine$amount[engine$aircraft=="B-36" & is.na(engine$amount)]<-10
 
 #***** Age
 
@@ -133,7 +137,8 @@ if(sum(engine$amount[engine$year<engine$intro_year],na.rm = TRUE)>0) stop("Don't
 engine<-subset(engine, amount > 0 | year>=intro_year)
 
 engine <- engine %>%
-  mutate(age = year - intro_year)
+  mutate(age = year - intro_year,
+         engine_amount = engine_number * amount)
 
 if(min(engine$age,na.rm = TRUE)<0) stop("Negative ages!")
 
@@ -270,7 +275,7 @@ by_engine_type <- engine %>%
 
 by_engine_type <- by_engine_type %>%
   filter(engine_type %in% c("Radial",
-                            # "Mixed",
+                            "Mixed",
                             "Turbofan",
                             "Turbojet",
                             "Turboprop",
@@ -293,13 +298,13 @@ by_engine_type <- by_engine_type %>%
     scale_fill_manual(
       values = c(
         "Radial" = "#4D7FA3",
-        # "Mixed" = "#AAAAAA", #Pick a color!
+        "Mixed" = "#AAAAAA", #Pick a color!
         "Turbofan" = "#C74745",
         "Turbojet" = "#0E9E87",
         "Turboprop" = "#566377",
         "Turboshaft" = "#F2BC57"
       )
-    )+labs(caption="Note: Excludes ramjet and mixed engines as well as aircraft with inconsistent classification.")
+    )
 )
 
 # plot number of engines ---------------------------------------------------------
@@ -307,7 +312,7 @@ by_engine_type <- by_engine_type %>%
 p_engine <- engine %>%
   group_by(year, engine_type) %>%
   filter(engine_type %in% c("Radial",
-                            # "Mixed",
+                            "Mixed",
                             "Turbofan",
                             "Turbojet",
                             "Turboprop",
@@ -332,13 +337,14 @@ p_engine <- engine %>%
     scale_fill_manual(
       values = c(
         "Radial" = "#4D7FA3",
+        "Mixed" = "#AAAAAA", #Pick a color!
         "Turbofan" = "#C74745",
         "Turbojet" = "#0E9E87",
         "Turboprop" = "#566377",
         "Turboshaft" = "#F2BC57"
       )
     ) +
-    ylab("amount")+labs(caption="Note: Excludes ramjet and mixed engines as well as aircraft with inconsistent classification.")
+    ylab("amount")+labs(caption="Note: Excludes aircraft with variable engine counts (KC-97 and NT-29).")
 )    
 
 
@@ -371,7 +377,7 @@ p <- engine_type %>%
       labels = function(x) {
         substring(as.character(x), 3, 4)
       }
-    )
+    )+labs(caption="Note: Excludes aircraft with variable engine counts (KC-97 and NT-29).")
 )
 
 ggsave(
@@ -385,17 +391,20 @@ ggsave(
 
 # introduction rate for USAF aircraft --------------------------------------------
 
+
+#Changed this to use type list to avoid double counting.
 introduction <- engine %>%
-  group_by(aircraft, type) %>%
-  summarize(intro_year = mean(intro_year, na.rm = TRUE)) %>%
+  group_by(aircraft, type_list) %>%
+  summarize(intro_year = min(intro_year, na.rm = TRUE)) %>% #Min vs. Mean doesn't matter, but oddly enough I feel more comfortable with min in this situation.
   filter(intro_year >= 1950)
+
 
 (
   p_introduction <-
-    ggplot(introduction, aes(x = intro_year, fill = factor(type))) +
+    ggplot(introduction, aes(x = intro_year, fill = factor(type_list))) +
     geom_dotplot(
       stackgroups = TRUE,
-      binwidth = 1.2,
+      binwidth = 2,#I changed this because 1.2 binwdith with discrete data makes interpretation harder/
       binpositions = "all",
       stackdir = "center"
     ) +
@@ -403,7 +412,7 @@ introduction <- engine %>%
     # axis.text.y = element_blank() +
     chart_theme +
     scale_x_continuous(
-      breaks = seq(1940, 2010, by = 5),
+      breaks = seq(1950, 2010, by = 4),
       labels = function(x) {
         substring(as.character(x), 3, 4)
       }
@@ -413,7 +422,7 @@ introduction <- engine %>%
       panel.grid.major.y = element_blank(),
       panel.grid.minor.y = element_blank()
     ) +
-    xlab("Year of Introduction")
+    xlab("Year of Introduction (2 Year Blocks)")
 )
 
 # introduction rate dotplot ------------------------------------------------------
@@ -422,7 +431,8 @@ introduction <- engine %>%
   p_introduction <- ggplot(introduction, aes(x = intro_year)) +
     geom_dotplot(
       stackgroups = TRUE,
-      binwidth = .75,
+      binwidth = 1,#.75,
+      # dotsize=.75,
       binpositions = "all",
       stackdir = "center",
       fill = "#333333",
@@ -458,11 +468,17 @@ ggsave(
 
 # introduction rate for USAF aircraft by type ------------------------------------
 
+introduction_type <- engine_type %>%
+  group_by(aircraft, type) %>%
+  summarize(intro_year = min(intro_year, na.rm = TRUE)) %>% #Min vs. Mean doesn't matter, but oddly enough I feel more comfortable with min in this situation.
+  filter(intro_year >= 1950)
+
+
 (
-  p_introduction <- ggplot(introduction, aes(x = intro_year)) +
+  p_introduction <- ggplot(introduction_type, aes(x = intro_year)) +
     geom_dotplot(
       stackgroups = TRUE,
-      binwidth = 2.5,
+      binwidth = 3, #This evenly divides, but I don't know how it actually works, des it split the X2 and X7 years in half?
       binpositions = "all",
       stackdir = "center",
       fill = "#333333",
@@ -473,7 +489,7 @@ ggsave(
     # axis.text.y = element_blank() +
     chart_theme +
     scale_x_continuous(
-      breaks = seq(1940, 2010, by = 20),
+      breaks = seq(1950, 2010, by = 15),
       labels = function(x) {
         substring(as.character(x), 3, 4)
       }
