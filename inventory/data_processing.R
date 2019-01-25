@@ -788,17 +788,21 @@ ggsave(
 
 # speed --------------------------------------------------------------------------
 
+any(is.na(engine$speed))
+unique(engine$aircraft[is.na(engine$speed) & grepl("FighterAttack",engine$type_list)])
+
+
 (
-  p_speed <- p %>%
-    mutate(age_weight = speed * amount / total_amount) %>%
-    group_by(year) %>%
-    summarise(speed = sum(age_weight, na.rm = TRUE)) %>%
+  p_speed <- engine %>% group_by(year) %>%
+    filter(grepl("FighterAttack",type_list)) %>%
+    mutate(p_speed = speed * amount / sum(amount)) %>%
+    summarise(speed = sum(p_speed, na.rm = TRUE)) %>%
     ggplot() +
     geom_area(aes(y = speed, x = year), stat = "identity", alpha = .90) +
     chart_theme +
     ylab("speed (mph)") +
     scale_x_continuous(breaks = seq(1950, 2018, by = 10)) +
-    ggtitle("Average speed for USAF fighter/attack aircraft")
+    ggtitle("Average speed for USAF fighter/attack aircraft")+labs(caption="Excludes aircrafts for which reliable speed estimates were not available (F-51)")
 )
 ggsave(
   "inventory/charts/speed.svg",
@@ -810,12 +814,18 @@ ggsave(
 )
 
 # range --------------------------------------------------------------------------
+any(is.na(engine$range))
+unique(engine$aircraft[is.na(engine$range) & grepl("FighterAttack",engine$type_list)])
 
+  
 (
-  p_range <- p %>%
-    mutate(age_weight = range * amount / total_amount) %>%
-    group_by(year) %>%
-    summarise(range = sum(age_weight, na.rm = TRUE)) %>%
+  # p_range <- p %>%
+  #   mutate(age_weight = range * amount / total_amount) %>%
+  #   group_by(year) %>%
+  #   summarise(range = sum(age_weight, na.rm = TRUE)) %>%
+    p_range <- engine %>% group_by(year) %>%
+    filter(grepl("FighterAttack",type_list)) %>%
+    summarise(range = sum(range * amount) / sum(amount)) %>%
     ggplot() +
     geom_area(aes(y = range, x = year), stat = "identity", alpha = .90) +
     chart_theme +
