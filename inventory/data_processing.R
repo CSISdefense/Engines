@@ -543,6 +543,10 @@ generation <- engine %>%
 generation$label<-generation$aircraft
 generation$label[generation$max_inventory<1000 & generation$intro_year <1997]<-NA
 
+generation$label<-generation$aircraft
+generation$label[generation$max_inventory<1000 & generation$intro_year <1997]<-NA
+
+
 (
   p_peak_inventory_generation <- ggplot(data = generation) +
     geom_point(
@@ -601,10 +605,14 @@ ggsave(
 
 # --------------------------------------------------------------------------------
 
-inventory <- engine %>%
+inventory <- engine_type %>%
   filter(relevance != "Old") %>%
   group_by(aircraft, intro_year, relevance, generation, type, engine_type) %>%
   summarise(max_inventory = max(amount, na.rm = TRUE))
+summary(factor(inventory$relevance))
+inventory$label<-gsub("-","",inventory$aircraft)
+inventory$label[inventory$max_inventory<1250 & inventory$relevance=="Normal"]<-NA
+
 
 (
   p_peak_inventory <- ggplot(data = inventory) +
@@ -623,7 +631,13 @@ inventory <- engine %>%
       labels = function(x) {
         substring(as.character(x), 3, 4)
       }
-    )
+    ) +
+    geom_text(aes(x = intro_year,
+                  y = max_inventory,
+                  label=label
+    ),
+    size=3,
+    position = position_nudge(x=-4,y = 125))
 )
 
 ggsave(
