@@ -517,12 +517,19 @@ ggsave(
 )
 
 # peak inventory for FighterAttack by generation ---------------------------------
+summary(factor(engine$relevance))
+
+quality_check<-engine %>% group_by(aircraft) %>%
+  summarise(peak_inventory=mean(peak_inventory, na.rm = TRUE),
+            max_inventory=max(amount,na.rm = TRUE))
+quality_check %>% filter(peak_inventory!=max_inventory)
+
 
 generation <- engine %>%
   filter(grepl("FighterAttack",type_list)) %>% 
-  group_by(aircraft, intro_year, relevance, generation) %>%
-  summarise(peak_inventory = mean(peak_inventory, na.rm = TRUE)) %>%
   filter(relevance != "Old") %>% 
+  group_by(aircraft, intro_year, relevance, generation) %>%
+  summarise(max_inventory = max(amount, na.rm = TRUE)) %>%
   mutate(generation = factor(
     generation,
     levels = c("Other", 
@@ -532,12 +539,16 @@ generation <- engine %>%
                "Fourth",
                "Fifth")))
 
+
+generation$label<-generation$aircraft
+generation$label[generation$max_inventory<1000 & generation$intro_year <1997]<-NA
+
 (
   p_peak_inventory_generation <- ggplot(data = generation) +
     geom_point(
       mapping = aes(
         x = intro_year,
-        y = peak_inventory,
+        y = max_inventory,
         color = generation,
         shape = relevance
       ),
@@ -567,6 +578,11 @@ generation <- engine %>%
     scale_shape_manual(labels=c("In Production","Complete"),
                        values=c(1,19)) + 
     chart_theme +
+    geom_text(aes(x = intro_year,
+                  y = max_inventory,
+                  label=label
+                  ),
+              position = position_nudge(x=-1,y = 125))+
     ggtitle(
       "Fighter Attack inventory by generation"
     ) +
@@ -588,12 +604,12 @@ ggsave(
 inventory <- engine %>%
   filter(relevance != "Old") %>%
   group_by(aircraft, intro_year, relevance, generation, type, engine_type) %>%
-  summarise(peak_inventory = mean(peak_inventory, na.rm = TRUE))
+  summarise(max_inventory = max(amount, na.rm = TRUE))
 
 (
   p_peak_inventory <- ggplot(data = inventory) +
     geom_point(mapping = aes(
-      x = intro_year, y = peak_inventory, color = relevance
+      x = intro_year, y = max_inventory, color = relevance
     )) +
     facet_wrap(~ type, nrow = 1) +
     xlab("year of introduction") +
@@ -1065,10 +1081,15 @@ unique(engine$aircraft[is.na(engine$thrust_weight_engine) & grepl("FighterAttack
                          engine$engine_type %in% c("Turbojet" , "Turbofan")])
 
 (
-  p_thrust_weight_engine <- p %>%
-    mutate(age_weight = thrust_weight_engine * engine_amount / total_amount) %>%
-    group_by(year) %>%
-    summarise(thrust_weight_engine = sum(age_weight, na.rm = TRUE)) %>%
+  # p_thrust_weight_engine <- p %>%
+  #   mutate(age_weight = thrust_weight_engine * engine_amount / total_amount) %>%
+  #   group_by(year) %>%
+  #   summarise(thrust_weight_engine = sum(age_weight, na.rm = TRUE)) %>%
+  p_thrust_weight_engine <- engine %>% group_by(year) %>%
+    filter(grepl("FighterAttack",type_list)) %>%
+    filter(engine_type == "Turbojet" | engine_type == "Turbofan") %>%
+    mutate(p_thrust_weight_engine = thrust_weight_engine * engine_amount / sum(engine_amount)) %>%
+    summarise(thrust_weight_engine = sum(p_thrust_weight_engine, na.rm = TRUE)) %>%
     ggplot() +
     geom_area(
       aes(y = thrust_weight_engine, x = year),
