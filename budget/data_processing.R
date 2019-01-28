@@ -19,33 +19,33 @@ library(extrafont)
 # --------------------------------------------------------------------------------
 # add theme
 
-source("theme/chart_theme.R")
-source("theme/money_labels.R")
+source("budget/theme/chart_theme.R")
+source("budget/theme/money_labels.R")
 
 # --------------------------------------------------------------------------------
 # read data (each President's budget has a separate data table)
 
-d19 <- read.csv("data/19.csv")
-d18 <- read.csv("data/18.csv")
-d17 <- read.csv("data/17.csv")
-d16 <- read.csv("data/16.csv")
-d15 <- read.csv("data/15.csv")
-d14 <- read.csv("data/14.csv")
-d13 <- read.csv("data/13.csv")
-d12 <- read.csv("data/12.csv")
-d11 <- read.csv("data/11.csv")
-d10 <- read.csv("data/10.csv")
-d09 <- read.csv("data/09.csv")
-d08 <- read.csv("data/08.csv")
-d07 <- read.csv("data/07.csv")
-d06 <- read.csv("data/06.csv")
-d05 <- read.csv("data/05.csv")
-d04 <- read.csv("data/04.csv")
-d03 <- read.csv("data/03.csv")
-d02 <- read.csv("data/02.csv")
-d01 <- read.csv("data/01.csv")
-d00 <- read.csv("data/00.csv")
-d99 <- read.csv("data/99.csv")
+d19 <- read.csv("budget/data/19.csv")
+d18 <- read.csv("budget/data/18.csv")
+d17 <- read.csv("budget/data/17.csv")
+d16 <- read.csv("budget/data/16.csv")
+d15 <- read.csv("budget/data/15.csv")
+d14 <- read.csv("budget/data/14.csv")
+d13 <- read.csv("budget/data/13.csv")
+d12 <- read.csv("budget/data/12.csv")
+d11 <- read.csv("budget/data/11.csv")
+d10 <- read.csv("budget/data/10.csv")
+d09 <- read.csv("budget/data/09.csv")
+d08 <- read.csv("budget/data/08.csv")
+d07 <- read.csv("budget/data/07.csv")
+d06 <- read.csv("budget/data/06.csv")
+d05 <- read.csv("budget/data/05.csv")
+d04 <- read.csv("budget/data/04.csv")
+d03 <- read.csv("budget/data/03.csv")
+d02 <- read.csv("budget/data/02.csv")
+d01 <- read.csv("budget/data/01.csv")
+d00 <- read.csv("budget/data/00.csv")
+d99 <- read.csv("budget/data/99.csv")
 
 names(d19)[1] <- "FYDP.Year"
 names(d18)[1] <- "FYDP.Year"
@@ -55,7 +55,7 @@ names(d15)[1] <- "FYDP.Year"
 names(d14)[1] <- "FYDP.Year"
 names(d13)[1] <- "FYDP.Year"
 
-stages <- read.csv("data/stages_join.csv")
+stages <- read.csv("budget/data/stages_join.csv")
 
 # --------------------------------------------------------------------------------
 # make the data long
@@ -135,14 +135,19 @@ engine_budget <- rbind(
 # add F135 
 #   (note: separate because F135 funding is embeded into the broader F-35 line)
 
-service_ratio <- read_csv("data/service_ratio.csv")
+service_ratio <- read_csv("budget/data/service_ratio.csv")
+service_ratio$checksum<-service_ratio$navy_ratio+service_ratio$air_force_ratio
 
-f135 <- read_csv("data/f135_spending.csv")
+f135 <- read_csv("budget/data/f135_spending.csv")
+f135_amount<-sum(f135$Amount)
 
+if(any(duplicated(service_ratio$FY))) stop("Duplicate Fiscal Years in service ratio")
 f135 <- f135 %>%
-  left_join(service_ratio)
+  left_join(service_ratio,by="FY")
 
 f135$FY <- str_c("X", f135$FY)
+
+sum(f135$Amount)
 
 f135_navy <- f135 %>%
   mutate(Amount = Amount * navy_ratio) %>%
@@ -182,6 +187,13 @@ f135_air_force$Program.Number <-
   str_c(f135_air_force$Program.Number, "F")
 
 f135 <- rbind(f135_navy, f135_air_force)
+if(sum(f135$Amount,na.rm=TRUE)!= f135_amount) stop("F135 Checksum failure")
+
+f135_original <- read_csv("budget/data/f135_spending.csv")
+f135_original$FY <- str_c("X", f135_original$FY)
+f135_annual<- f135_original %>% group_by(FY) %>% summarize(Original_Amount=sum(Amount,na.rm = TRUE)) %>% left_join(
+  f135 %>% group_by(FY) %>%  summarize(Split_Amount=sum(Amount,na.rm = TRUE)))
+f135_annual %>% filter(Original_Amount!=Split_Amount)
 
 # --------------------------------------------------------------------------------
 # add F136 
@@ -189,8 +201,10 @@ f135 <- rbind(f135_navy, f135_air_force)
 
 service_ratio <- read_csv("service_ratio.csv")
 
-f136 <- read_csv("data/f136_spending.csv")
 
+f136 <- read_csv("budget/data/f136_spending.csv")
+f136_amount<-sum(f136$Amount)
+if(any(duplicated(service_ratio$FY))) stop("Duplicate Fiscal Years in service ratio")
 f136 <- f136 %>%
   left_join(service_ratio)
 
@@ -235,13 +249,25 @@ f136_air_force$Program.Number <-
 
 f136 <- rbind(f136_navy, f136_air_force)
 
+if(sum(f136$Amount,na.rm=TRUE)!= f136_amount) stop("F136 Checksum failure")
+
+
 # --------------------------------------------------------------------------------
 # combine engine_budget with F135 and F136
 
 f135_f136 <- rbind(f135, f136)
 
-engine_budget <- engine_budget %>%
-  rbind(f135_f136)
+sum(f135_f136$Amount,na.rm=TRUE)
+summary(f135_f136)
+?substring
+
+
+if(nrow(engine_budget %>% filter(Program.Name %in% c("F135","F136") |
+                                 substring(Program.Number,1,6) %in% substring(unique(f135_f136$Program.Number),1,6)|
+                                 Project.Number %in% unique(f135_f136$Project.Number)))>0) stop("Adding redundant data!")
+else 
+  engine_budget <- engine_budget %>%
+    rbind(f135_f136)
 
 # --------------------------------------------------------------------------------
 # deflate data
@@ -278,7 +304,15 @@ deflator <-
   )
 
 fy <- c(1999:2023)
+
 deflate_year <- as.data.frame(cbind(fy, deflator))
+engine_budget_alternate<- engine_budget %>%
+  separate(FY, into = c("X", "FY"), sep = 1) 
+engine_budget_alternate<-csis360::deflate(data=engine_budget_alternate,
+                 money_var= "Amount",
+                 fy_var="FY",
+                 deflator_var="OMB.2019"
+                 )
 
 # --------------------------------------------------------------------------------
 # clean and summarize data
@@ -301,11 +335,11 @@ engine_budget <- engine_budget %>%
   ) %>%
   mutate(fy = as.numeric(fy)) %>%
   dplyr::left_join(deflate_year, by = "fy") %>%
-  mutate(amount_18 = amount / deflator) %>%
+  mutate(amount_19 = amount / deflator) %>%
   dplyr::mutate(fydp_year = as.factor(fydp_year)) %>%
   dplyr::mutate(fydp = "FYDP") %>%
   unite(fydp_year, fydp_year, fydp, sep = " ") %>%
-  select(fydp_year:project_name, fy, amount, amount_18) %>%
+  select(fydp_year:project_name, fy, amount, amount_19) %>%
   dplyr::mutate(
     project_name = recode(
       project_name,
@@ -336,6 +370,8 @@ engine_budget <- engine_budget %>%
       'Aerospace Fuel Technology' = 'Combustion and Mechanical Systems'"
     )
     )
+if(sum(engine_budget$amount,na.rm=TRUE) != sum(engine_budget_alternate$Amount.Then.Year,na.rm=TRUE) |
+   sum(engine_budget$amount_19,na.rm=TRUE) != sum(engine_budget_alternate$Amount.OMB.2019,na.rm=TRUE)) stop("Checksum failure")
 
 # --------------------------------------------------------------------------------
 # join stages 
@@ -344,7 +380,7 @@ engine_budget <- engine_budget %>%
 
 
 stages <- stages %>%
-  dplyr::rename(stage = "ï..Stage") %>%
+  dplyr::rename(stage = "?..Stage") %>%
   dplyr::rename(project_name = "Project.Name") %>%
   dplyr::mutate(
     stage = recode(
@@ -958,7 +994,7 @@ ggsave(
 # --------------------------------------------------------------------------------
 # read topline data 
 
-read_topline <- read_csv("data/topline.csv")
+read_topline <- read_csv("budget/data/topline.csv")
 
 topline <- read_topline %>%
   select(fy, army, navy, air_force, dod_total, us_total) %>%
