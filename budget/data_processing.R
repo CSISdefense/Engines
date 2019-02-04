@@ -644,7 +644,7 @@ ggsave(
 # --------------------------------------------------------------------------------
 # engine spending by Service and stage
 
-engine_budget_future <- engine_budget %>%
+engine_budget_stage_service_future <- engine_budget %>%
   mutate(fy = as.numeric(fy)) %>%
   mutate(
     stage = recode(
@@ -664,17 +664,18 @@ engine_budget_future <- engine_budget %>%
   filter(stage != "NA") %>%
   group_by(fydp_year, fy, organization, stage) %>%
   filter(amount != 0) %>%
-  dplyr::summarize(amount = sum(amount, na.rm = TRUE))
+  dplyr::summarize(amount = sum(amount, na.rm = TRUE),
+                   amount_19 = sum(amount_19, na.rm = TRUE))
 
-engine_budget_future_wide <-
-  spread(engine_budget_future, key = "fy", value = "amount")
+engine_budget_stage_service_future_wide <-
+  spread(engine_budget_stage_service_future, key = "fy", value = "amount")
 
 (
-  plot_ebf <- ggplot(engine_budget_future) +
+  plot_ebf <- ggplot(engine_budget_stage_service_future) +
     geom_line(
       aes(
         x = fy,
-        y = amount,
+        y = amount_19,
         group = fydp_year,
         alpha = fydp_year
       ),
@@ -771,7 +772,7 @@ engine_actual_1 <- engine_actual %>%
 
 (
   facet <-
-    ggplot() + geom_area(aes(y = amount, x = fy),
+    ggplot() + geom_area(aes(y = amount_19, x = fy),
                          data = engine_actual_1,
                          stat = "identity") +
     geom_rect(
@@ -965,7 +966,7 @@ total <- total %>%
     
     ggplot() +
     
-    geom_area(aes(y = amount, x = fy),
+    geom_area(aes(y = amount_19, x = fy),
                          # data = engine_actual_2,
                          stat = "identity") +
     facet_grid(organization ~ stage) +
