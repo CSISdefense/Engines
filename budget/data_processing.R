@@ -15,7 +15,7 @@ library(Cairo)
 library(ggthemes)
 library(car)
 library(extrafont)
-
+library(csis360)
 # --------------------------------------------------------------------------------
 # add theme
 
@@ -47,13 +47,23 @@ d01 <- read.csv("budget/data/01.csv")
 d00 <- read.csv("budget/data/00.csv")
 d99 <- read.csv("budget/data/99.csv")
 
-names(d19)[1] <- "FYDP.Year"
-names(d18)[1] <- "FYDP.Year"
-names(d17)[1] <- "FYDP.Year"
-names(d16)[1] <- "FYDP.Year"
-names(d15)[1] <- "FYDP.Year"
-names(d14)[1] <- "FYDP.Year"
-names(d13)[1] <- "FYDP.Year"
+
+#Renaming the columns is really about removing byte order  marks (bom)
+d13<-remove_bom(d13)
+d14<-remove_bom(d14)
+d15<-remove_bom(d15)
+d16<-remove_bom(d16)
+d17<-remove_bom(d17)
+d18<-remove_bom(d18)
+d19<-remove_bom(d19)
+
+# names(d19)[1] <- "FYDP.Year"
+# names(d18)[1] <- "FYDP.Year"
+# names(d17)[1] <- "FYDP.Year"
+# names(d16)[1] <- "FYDP.Year"
+# names(d15)[1] <- "FYDP.Year"
+# names(d14)[1] <- "FYDP.Year"
+# names(d13)[1] <- "FYDP.Year"
 
 stages <- read.csv("budget/data/stages_join.csv")
 
@@ -187,7 +197,7 @@ f135_air_force$Program.Number <-
   str_c(f135_air_force$Program.Number, "F")
 
 f135 <- rbind(f135_navy, f135_air_force)
-if(sum(f135$Amount,na.rm=TRUE)!= f135_amount) stop("F135 Checksum failure")
+if(sum(f135$Amount,na.rm=TRUE)!= f135_amount) warning("F135 Checksum failure")
 
 f135_original <- read_csv("budget/data/f135_spending.csv")
 f135_original$FY <- str_c("X", f135_original$FY)
@@ -199,7 +209,7 @@ f135_annual %>% filter(Original_Amount!=Split_Amount)
 # add F136 
 #   (note: separate because F135 funding is embeded into the broader F-35 line)
 
-service_ratio <- read_csv("service_ratio.csv")
+service_ratio <- read_csv("budget/data/service_ratio.csv")
 
 
 f136 <- read_csv("budget/data/f136_spending.csv")
@@ -264,11 +274,12 @@ summary(f135_f136)
 
 if(nrow(engine_budget %>% filter(Program.Name %in% c("F135","F136") |
                                  substring(Program.Number,1,6) %in% substring(unique(f135_f136$Program.Number),1,6)|
-                                 Project.Number %in% unique(f135_f136$Project.Number)))>0) stop("Adding redundant data!")
-else 
+                                 Project.Number %in% unique(f135_f136$Project.Number)))>0){
+  stop("Adding redundant data!")
+} else {
   engine_budget <- engine_budget %>%
     rbind(f135_f136)
-
+}
 # --------------------------------------------------------------------------------
 # deflate data
 #   (note: used Table 10.1 - GDP and deflators used in OMB historical tables:
@@ -377,11 +388,11 @@ if(sum(engine_budget$amount,na.rm=TRUE) != sum(engine_budget_alternate$Amount.Th
 # join stages 
 #   (note: these are the stages of R&D, i.e. basic, applied research)
 
-
+stages<-csis360::remove_bom(stages)
 
 stages <- stages %>%
-  dplyr::rename(stage = "?..Stage") %>%
-  dplyr::rename(project_name = "Project.Name") %>%
+  dplyr::rename(stage = "Stage") %>% #remove-bom covers this
+  dplyr::rename(project_name = "Project.Name") %>% 
   dplyr::mutate(
     stage = recode(
       stage,
@@ -394,6 +405,7 @@ stages <- stages %>%
     )
     )
 
+if(any(duplicated(stages$project_name))) stop("Duplicate Project Name")
 engine_budget <- engine_budget %>%
   left_join(stages, by = "project_name") %>%
   mutate(amount = amount * 1000000)
@@ -403,6 +415,9 @@ engine_budget <- engine_budget %>%
 engine_budget_wide <-
   spread(engine_budget, key = "fy", value = "amount") # to view discrepancies
 
+engine_budget %>% group_by(project_name) %>% dplyr::summarise(amount=sum(amount,na.rm=TRUE))
+
+#I'm not sure why you're filtering these.
 engine_budget <- engine_budget %>%
   filter(
     project_name %in% c(
@@ -474,7 +489,7 @@ engine_budget_future_wide <-
 )
 
 ggsave(
-  "charts/amount_total.svg",
+  "budget/charts/amount_total.svg",
   plot_ebf,
   device = "svg",
   width = 8,
@@ -521,7 +536,7 @@ engine_budget_future_wide <-
 )
 
 ggsave(
-  "charts/amount_service.svg",
+  "budget/charts/amount_service.svg",
   plot_ebf,
   device = "svg",
   width = 12,
@@ -607,7 +622,7 @@ engine_budget_future_wide <-
 )
 
 ggsave(
-  "charts/amount_stage.svg",
+  "budget/charts/amount_stage.svg",
   plot_ebf,
   device = "svg",
   width = 10,
@@ -672,7 +687,7 @@ engine_budget_future_wide <-
 )
 
 # ggsave(
-#   "charts/amount_service_stage.svg",
+#   "budget/charts/amount_service_stage.svg",
 #   plot_ebf,
 #   device = "svg",
 #   width = 14,
@@ -787,7 +802,7 @@ engine_actual_1 <- engine_actual %>%
 )
 
 ggsave(
-  "charts/actual_amount_project.svg",
+  "budget/charts/actual_amount_project.svg",
   facet,
   device = "svg",
   width = 20,
@@ -981,7 +996,7 @@ total <- total %>%
 )
 
 ggsave(
-  "charts/actual_amount_service_stage.svg",
+  "budget/charts/actual_amount_service_stage.svg",
   super_facet,
   device = "svg",
   width = 20,
@@ -1200,7 +1215,7 @@ eng.all$fy <- as.factor(eng.all$fy)
 )
 
 # ggsave(
-#   "charts/engine_DoD_US_comparison.svg",
+#   "budget/charts/engine_DoD_US_comparison.svg",
 #   eng_US_DOD.comp,
 #   device = "svg",
 #   width = 10,
