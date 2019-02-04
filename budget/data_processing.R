@@ -980,6 +980,25 @@ total <- total %>%
 
 summary( total$stage)
 
+
+empty<-expand.grid(
+  stage = c("6.1",
+            "6.2",
+            "6.3",
+            "6.4",
+            "6.5",
+            "6.7",
+            "Total"),
+  organization = c("Army",
+                   "Navy",
+                   "Air Force",
+                   "Total"),
+  fy=seq(from=2017,to=2023))
+
+empty$amount<-0
+empty$amount_19<-0
+
+
 (
   super_facet <- total %>%
     
@@ -990,15 +1009,16 @@ summary( total$stage)
                          stat = "identity") +
     facet_grid(organization ~ stage) +
     geom_rect(
-      aes(
+      # aes(
         xmin = 2017,
         xmax = Inf,
         ymin = 0,
-        ymax = Inf
-      ),
-      alpha = .02,
-      fill = "grey"#,
-      # data = engine_actual#engine_actual_2
+        ymax = Inf,
+        alpha = 0.05,
+        fill = "grey",
+      # ),
+      
+      data = empty#engine_actual#engine_actual_2
     ) +
     chart_theme +
     theme(strip.text.x = element_text(size = 8)) +
