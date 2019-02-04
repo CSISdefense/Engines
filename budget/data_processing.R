@@ -467,7 +467,8 @@ engine_budget_future <- engine_budget %>%
   mutate(fy = as.numeric(fy)) %>%
   group_by(fydp_year, fy) %>%
   filter(amount != 0) %>%
-  dplyr::summarize(amount = sum(amount, na.rm = TRUE))
+  dplyr::summarize(amount = sum(amount, na.rm = TRUE),
+                   amount_19 = sum(amount_19, na.rm = TRUE))
 
 #Quick examination of variance in number of years tracked by each budget
 engine_budget_future_wide <-
@@ -483,7 +484,7 @@ engine_budget_future %>% group_by(fydp_year) %>%
   plot_ebf <- ggplot(engine_budget_future) +
     geom_line(aes(
       x = fy,
-      y = amount,
+      y = amount_19,
       group = fydp_year,
       alpha = fydp_year
     ), color = "#554449", size = 1) +
@@ -491,8 +492,8 @@ engine_budget_future %>% group_by(fydp_year) %>%
     chart_theme +
     scale_y_continuous(labels = money_labels) +
 
-    xlab("fiscal year") + 
-    ylab("constant fy19 dollars") 
+    xlab("Fiscal Year") + 
+    ylab("Constant 2019 $ Millions") 
 )
 
 ggsave(
@@ -507,21 +508,22 @@ ggsave(
 # --------------------------------------------------------------------------------
 # engine spending by service
 
-engine_budget_future <- engine_budget %>%
+engine_budget_organization_future <- engine_budget %>%
   mutate(fy = as.numeric(fy)) %>%
   group_by(fydp_year, fy, organization) %>%
   filter(amount != 0) %>%
-  dplyr::summarize(amount = sum(amount, na.rm = TRUE))
+  dplyr::summarize(amount = sum(amount, na.rm = TRUE),
+                   amount_19 = sum(amount_19, na.rm = TRUE))
 
-engine_budget_future_wide <-
-  spread(engine_budget_future, key = "fy", value = "amount")
+engine_budget_organization_future_wide <-
+  spread(engine_budget_organization_future, key = "fy", value = "amount")
 
 (
-  plot_ebf <- ggplot(engine_budget_future) +
+  plot_ebf <- ggplot(engine_budget_organization_future) +
     geom_line(
       aes(
         x = fy,
-        y = amount,
+        y = amount_19,
         group = fydp_year,
         alpha = fydp_year
       ),
@@ -538,8 +540,8 @@ engine_budget_future_wide <-
     ) +
     ggtitle("DoD RDT&E aircraft engine spending projections by service") +
     chart_theme +
-    xlab("fiscal year") + 
-    ylab("constant fy19 dollars") 
+    xlab("Fiscal Year") + 
+    ylab("Constant 2019 $ Millions") 
 )
 
 ggsave(
@@ -554,21 +556,22 @@ ggsave(
 # --------------------------------------------------------------------------------
 # engine spending by project name
 
-engine_budget_future <- engine_budget %>%
+engine_budget_project_future <- engine_budget %>%
   mutate(fy = as.numeric(fy)) %>%
   group_by(fydp_year, fy, project_name) %>%
   filter(amount != 0) %>%
-  dplyr::summarize(amount = sum(amount, na.rm = TRUE))
+  dplyr::summarize(amount = sum(amount, na.rm = TRUE),
+                   amount_19 = sum(amount_19, na.rm = TRUE))
 
-engine_budget_future_wide <-
-  spread(engine_budget_future, key = "fy", value = "amount")
+engine_budget_project_future_wide <-
+  spread(engine_budget_project_future, key = "fy", value = "amount")
 
 (
-  plot_ebf <- ggplot(engine_budget_future) +
+  plot_ebf <- ggplot(engine_budget_project_future) +
     geom_line(
       aes(
         x = fy,
-        y = amount,
+        y = amount_19,
         group = fydp_year,
         alpha = fydp_year
       ),
@@ -585,8 +588,8 @@ engine_budget_future_wide <-
     ) +
     ggtitle("DoD RDT&E aircraft engine spending projections by project") +
     chart_theme +
-    xlab("fiscal year") + 
-    ylab("constant fy19 dollars") 
+    xlab("Fiscal Year") + 
+    ylab("Constant 2019 $ Millions") 
 )
 
 # --------------------------------------------------------------------------------
@@ -624,8 +627,8 @@ engine_budget_future_wide <-
     ) +
     ggtitle("DoD RDT&E aircraft engine spending projections by stage") +
     chart_theme +
-    xlab("fiscal year") + 
-    ylab("constant fy19 dollars")  
+    xlab("Fiscal Year") + 
+    ylab("Constant 2019 $ Millions")  
 )
 
 ggsave(
@@ -689,8 +692,8 @@ engine_budget_future_wide <-
     chart_theme +
     theme(strip.text.x = element_text(size = 10)) +
     theme(strip.text.y = element_text(size = 10)) +
-    xlab("fiscal year") +
-    ylab("constant fy19 dollars") 
+    xlab("Fiscal Year") +
+    ylab("Constant 2019 $ Millions") 
 )
 
 # ggsave(
@@ -793,8 +796,8 @@ engine_actual_1 <- engine_actual %>%
       }
     ) +
     ggtitle("DoD RDT&E aircraft engine spending by project") +
-    xlab("fiscal year") +
-    ylab("constant fy19 dollars") + 
+    xlab("Fiscal Year") +
+    ylab("Constant 2019 $ Millions") + 
     geom_vline(
       xintercept = 2017,
       color = "#554449",
@@ -987,8 +990,8 @@ total <- total %>%
       }
     ) +
     ggtitle("DoD RDT&E aircraft engine spending by service and stage") +
-    xlab("fiscal year") +
-    ylab("constant fy19 dollars") + 
+    xlab("Fiscal Year") +
+    ylab("Constant 2019 $ Millions") + 
     geom_vline(
       xintercept = 2017,
       color = "#554449",

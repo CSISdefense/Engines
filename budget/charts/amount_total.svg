@@ -79,8 +79,8 @@
 <g clip-path='url(#cpMHw1NzZ8NDMyfDA=)'><text x='243.07' y='397.95' style='font-size: 10.00px; fill: #554449; font-family: Open Sans;' textLength='22.87px' lengthAdjust='spacingAndGlyphs'>2010</text></g>
 <g clip-path='url(#cpMHw1NzZ8NDMyfDA=)'><text x='313.72' y='397.95' style='font-size: 10.00px; fill: #554449; font-family: Open Sans;' textLength='22.87px' lengthAdjust='spacingAndGlyphs'>2015</text></g>
 <g clip-path='url(#cpMHw1NzZ8NDMyfDA=)'><text x='384.37' y='397.95' style='font-size: 10.00px; fill: #554449; font-family: Open Sans;' textLength='22.87px' lengthAdjust='spacingAndGlyphs'>2020</text></g>
-<g clip-path='url(#cpMHw1NzZ8NDMyfDA=)'><text x='231.03' y='423.99' style='font-size: 12.00px; font-weight: bold; fill: #554449; font-family: Open Sans;' textLength='61.08px' lengthAdjust='spacingAndGlyphs'>fiscal year</text></g>
-<g clip-path='url(#cpMHw1NzZ8NDMyfDA=)'><text transform='translate(14.04,287.76) rotate(-90)' style='font-size: 12.00px; font-weight: bold; fill: #554449; font-family: Open Sans;' textLength='125.42px' lengthAdjust='spacingAndGlyphs'>constant fy19 dollars</text></g>
+<g clip-path='url(#cpMHw1NzZ8NDMyfDA=)'><text x='229.73' y='423.99' style='font-size: 12.00px; font-weight: bold; fill: #554449; font-family: Open Sans;' textLength='63.69px' lengthAdjust='spacingAndGlyphs'>Fiscal Year</text></g>
+<g clip-path='url(#cpMHw1NzZ8NDMyfDA=)'><text transform='translate(14.04,297.71) rotate(-90)' style='font-size: 12.00px; font-weight: bold; fill: #554449; font-family: Open Sans;' textLength='145.32px' lengthAdjust='spacingAndGlyphs'>Constant 2019 $ Millions</text></g>
 <rect x='466.82' y='46.77' width='103.70' height='356.56' style='stroke-width: 1.07; stroke: none; fill: #FCFCFC;' clip-path='url(#cpMHw1NzZ8NDMyfDA=)' />
 <rect x='472.30' y='52.25' width='43.20' height='17.28' style='stroke-width: 1.07; stroke: #FCFCFC; fill: #FCFCFC;' clip-path='url(#cpMHw1NzZ8NDMyfDA=)' />
 <line x1='476.62' y1='60.89' x2='511.18' y2='60.89' style='stroke-width: 2.13; stroke: #554449; stroke-opacity: 0.10; stroke-linecap: butt;' clip-path='url(#cpMHw1NzZ8NDMyfDA=)' />
@@ -142,5 +142,5 @@
 <g clip-path='url(#cpMHw1NzZ8NDMyfDA=)'><text x='515.50' y='358.22' style='font-size: 10.00px; fill: #554449; font-family: Open Sans;' textLength='49.54px' lengthAdjust='spacingAndGlyphs'>2017 FYDP</text></g>
 <g clip-path='url(#cpMHw1NzZ8NDMyfDA=)'><text x='515.50' y='375.50' style='font-size: 10.00px; fill: #554449; font-family: Open Sans;' textLength='49.54px' lengthAdjust='spacingAndGlyphs'>2018 FYDP</text></g>
 <g clip-path='url(#cpMHw1NzZ8NDMyfDA=)'><text x='515.50' y='392.78' style='font-size: 10.00px; fill: #554449; font-family: Open Sans;' textLength='49.54px' lengthAdjust='spacingAndGlyphs'>2019 FYDP</text></g>
-<g clip-path='url(#cpMHw1NzZ8NDMyfDA=)'><text x='69.75' y='36.83' style='font-size: 16.00px; font-weight: bold; fill: #554449; font-family: Open Sans;' textLength='383.65px' lengthAdjust='spacingAndGlyphs'>DoD RDT&amp;E aircraft engine spending projections</text></g>
+<g clip-path='url(#cpMHw1NzZ8NDMyfDA=)'><text x='68.91' y='36.83' style='font-size: 16.00px; font-weight: bold; fill: #554449; font-family: Open Sans;' textLength='385.31px' lengthAdjust='spacingAndGlyphs'>DoD RDT&amp;E Aircraft Engine Spending Projections</text></g>
 </svg>
