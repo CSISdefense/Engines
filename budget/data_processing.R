@@ -381,8 +381,8 @@ engine_budget <- engine_budget %>%
       'Aerospace Fuel Technology' = 'Combustion and Mechanical Systems'"
     )
     )
-if(sum(engine_budget$amount,na.rm=TRUE) != sum(engine_budget_alternate$Amount.Then.Year,na.rm=TRUE) |
-   sum(engine_budget$amount_19,na.rm=TRUE) != sum(engine_budget_alternate$Amount.OMB.2019,na.rm=TRUE)) stop("Checksum failure")
+if(sum(engine_budget$amount,na.rm=TRUE) - sum(engine_budget_alternate$Amount.Then.Year,na.rm=TRUE) > 0.001 |
+   sum(engine_budget$amount_19,na.rm=TRUE) - sum(engine_budget_alternate$Amount.OMB.2019,na.rm=TRUE)> 0.001) stop("Deflation checksum failure")
 
 # --------------------------------------------------------------------------------
 # join stages 
@@ -473,7 +473,7 @@ engine_budget_future <- engine_budget %>%
 #Quick examination of variance in number of years tracked by each budget
 engine_budget_future_wide <-
   spread(engine_budget_future, key = "fy", value = "amount")
-View(engine_budget_future)
+# View(engine_budget_future)
 engine_budget_future %>% group_by(fydp_year) %>%
   dplyr::summarise(fy_count=length(fy),
                    min_fy=min(fy),
@@ -756,7 +756,8 @@ engine_actual <- engine_budget %>%
   ) %>% 
   filter(amount != 0) %>%
   group_by(fy, organization, stage, project_name) %>%
-  dplyr::summarise(amount = sum(amount, na.rm = FALSE))
+  dplyr::summarize(amount = sum(amount, na.rm = TRUE),
+                   amount_19 = sum(amount_19, na.rm = TRUE))
 
 engine_actual_wide <-
   spread(engine_actual, key = "fy", value = "amount")
@@ -768,7 +769,8 @@ engine_actual$fy <- as.numeric(engine_actual$fy)
 engine_actual_1 <- engine_actual %>%
   filter(amount != 0) %>%
   group_by(fy, project_name) %>%
-  dplyr::summarise(amount = sum(amount, na.rm = FALSE))
+  dplyr::summarize(amount = sum(amount, na.rm = TRUE),
+                   amount_19 = sum(amount_19, na.rm = TRUE))
 
 (
   facet <-
@@ -797,7 +799,7 @@ engine_actual_1 <- engine_actual %>%
         substring(as.character(x), 3, 4)
       }
     ) +
-    ggtitle("DoD RDT&E Aircraft Engine spending by project") +
+    ggtitle("DoD RDT&E Aircraft Engine Spending By Project") +
     xlab("Fiscal Year") +
     ylab("Constant 2019 $ Millions") + 
     geom_vline(
@@ -826,13 +828,15 @@ ggsave(
 
 total <- engine_actual %>%
   group_by(fy) %>%
-  dplyr::summarise(amount = sum(amount, na.rm = FALSE)) %>% 
+  dplyr::summarize(amount = sum(amount, na.rm = TRUE),
+                   amount_19 = sum(amount_19, na.rm = TRUE)) %>% 
   mutate(organization = "Total") %>% 
   as.data.frame(.)
 
 total_organization <- engine_actual %>%
   group_by(fy, organization) %>%
-  dplyr::summarise(amount = sum(amount, na.rm = FALSE)) %>% 
+  dplyr::summarize(amount = sum(amount, na.rm = TRUE),
+                   amount_19 = sum(amount_19, na.rm = TRUE)) %>% 
   as.data.frame(.)
 
 total <- total %>%
@@ -842,14 +846,16 @@ total <- total %>%
 rd6.1 <-  engine_actual %>%
   filter(stage == "6.1") %>% 
   group_by(fy) %>%
-  dplyr::summarise(amount = sum(amount, na.rm = FALSE)) %>% 
+  dplyr::summarize(amount = sum(amount, na.rm = TRUE),
+                   amount_19 = sum(amount_19, na.rm = TRUE)) %>% 
   mutate(organization = "Total") %>% 
   as.data.frame(.)
 
 rd6.1_organization <-  engine_actual %>%
   filter(stage == "6.1") %>% 
   group_by(fy, organization) %>%
-  dplyr::summarise(amount = sum(amount, na.rm = FALSE)) %>% 
+  dplyr::summarize(amount = sum(amount, na.rm = TRUE),
+                   amount_19 = sum(amount_19, na.rm = TRUE)) %>% 
   as.data.frame(.)
 
 rd6.1 <- rd6.1 %>%
@@ -859,14 +865,16 @@ rd6.1 <- rd6.1 %>%
 rd6.2 <-  engine_actual %>%
   filter(stage == "6.2") %>% 
   group_by(fy) %>%
-  dplyr::summarise(amount = sum(amount, na.rm = FALSE)) %>% 
+  dplyr::summarize(amount = sum(amount, na.rm = TRUE),
+                   amount_19 = sum(amount_19, na.rm = TRUE)) %>% 
   mutate(organization = "Total") %>% 
   as.data.frame(.)  
 
 rd6.2_organization <-  engine_actual %>%
   filter(stage == "6.2") %>% 
   group_by(fy, organization) %>%
-  dplyr::summarise(amount = sum(amount, na.rm = FALSE)) %>% 
+  dplyr::summarize(amount = sum(amount, na.rm = TRUE),
+                   amount_19 = sum(amount_19, na.rm = TRUE)) %>% 
   as.data.frame(.)
 
 rd6.2 <- rd6.2 %>%
@@ -876,14 +884,16 @@ rd6.2 <- rd6.2 %>%
 rd6.3 <-  engine_actual %>%
   filter(stage == "6.3") %>% 
   group_by(fy) %>%
-  dplyr::summarise(amount = sum(amount, na.rm = FALSE)) %>% 
+  dplyr::summarize(amount = sum(amount, na.rm = TRUE),
+                   amount_19 = sum(amount_19, na.rm = TRUE)) %>% 
   mutate(organization = "Total") %>% 
   as.data.frame(.)  
 
 rd6.3_organization <-  engine_actual %>%
   filter(stage == "6.3") %>% 
   group_by(fy, organization) %>%
-  dplyr::summarise(amount = sum(amount, na.rm = FALSE)) %>% 
+  dplyr::summarize(amount = sum(amount, na.rm = TRUE),
+                   amount_19 = sum(amount_19, na.rm = TRUE)) %>% 
   as.data.frame(.)
 
 rd6.3 <- rd6.3 %>%
@@ -893,14 +903,16 @@ rd6.3 <- rd6.3 %>%
 rd6.4 <-  engine_actual %>%
   filter(stage == "6.4") %>% 
   group_by(fy) %>%
-  dplyr::summarise(amount = sum(amount, na.rm = FALSE)) %>% 
+  dplyr::summarize(amount = sum(amount, na.rm = TRUE),
+                   amount_19 = sum(amount_19, na.rm = TRUE)) %>% 
   mutate(organization = "Total") %>% 
   as.data.frame(.)  
 
 rd6.4_organization <-  engine_actual %>%
   filter(stage == "6.4") %>% 
   group_by(fy, organization) %>%
-  dplyr::summarise(amount = sum(amount, na.rm = FALSE)) %>% 
+  dplyr::summarize(amount = sum(amount, na.rm = TRUE),
+                   amount_19 = sum(amount_19, na.rm = TRUE)) %>% 
   as.data.frame(.)
 
 rd6.4 <- rd6.4 %>%
@@ -910,14 +922,16 @@ rd6.4 <- rd6.4 %>%
 rd6.5 <-  engine_actual %>%
   filter(stage == "6.5") %>% 
   group_by(fy) %>%
-  dplyr::summarise(amount = sum(amount, na.rm = FALSE)) %>% 
+  dplyr::summarize(amount = sum(amount, na.rm = TRUE),
+                   amount_19 = sum(amount_19, na.rm = TRUE)) %>% 
   mutate(organization = "Total") %>% 
   as.data.frame(.)  
 
 rd6.5_organization <-  engine_actual %>%
   filter(stage == "6.5") %>% 
   group_by(fy, organization) %>%
-  dplyr::summarise(amount = sum(amount, na.rm = FALSE)) %>% 
+  dplyr::summarize(amount = sum(amount, na.rm = TRUE),
+                   amount_19 = sum(amount_19, na.rm = TRUE)) %>% 
   as.data.frame(.)
 
 rd6.5 <- rd6.5 %>%
@@ -927,14 +941,16 @@ rd6.5 <- rd6.5 %>%
 rd6.7 <-  engine_actual %>%
   filter(stage == "6.7") %>% 
   group_by(fy) %>%
-  dplyr::summarise(amount = sum(amount, na.rm = FALSE)) %>% 
+  dplyr::summarize(amount = sum(amount, na.rm = TRUE),
+                   amount_19 = sum(amount_19, na.rm = TRUE)) %>% 
   mutate(organization = "Total") %>% 
   as.data.frame(.)  
 
 rd6.7_organization <-  engine_actual %>%
   filter(stage == "6.7") %>% 
   group_by(fy, organization) %>%
-  dplyr::summarise(amount = sum(amount, na.rm = FALSE)) %>% 
+  dplyr::summarize(amount = sum(amount, na.rm = TRUE),
+                   amount_19 = sum(amount_19, na.rm = TRUE)) %>% 
   as.data.frame(.)
 
 rd6.7 <- rd6.7 %>%
@@ -943,8 +959,9 @@ rd6.7 <- rd6.7 %>%
 
 engine_actual_organization <- engine_actual %>%
   group_by(fy, organization) %>%
-  dplyr::summarise(amount = sum(amount, na.rm = FALSE))
-
+  dplyr::summarize(amount = sum(amount, na.rm = TRUE),
+                   amount_19 = sum(amount_19, na.rm = TRUE)) 
+  
 total <- total %>%
   rbind(rd6.1, rd6.2, rd6.3, rd6.4, rd6.5, rd6.7) %>%
   mutate(
@@ -961,12 +978,14 @@ total <- total %>%
                                                    "Total"))
   )
 
+summary( total$stage)
+
 (
   super_facet <- total %>%
     
     ggplot() +
     
-    geom_area(aes(y = amount_19, x = fy),
+    geom_area(aes(y = amount, x = fy),
                          # data = engine_actual_2,
                          stat = "identity") +
     facet_grid(organization ~ stage) +
@@ -978,8 +997,8 @@ total <- total %>%
         ymax = Inf
       ),
       alpha = .02,
-      fill = "grey",
-      data = engine_actual_2
+      fill = "grey"#,
+      # data = engine_actual#engine_actual_2
     ) +
     chart_theme +
     theme(strip.text.x = element_text(size = 8)) +
@@ -991,7 +1010,7 @@ total <- total %>%
         substring(as.character(x), 3, 4)
       }
     ) +
-    ggtitle("DoD RDT&E Aircraft Engine spending by Service and stage") +
+    ggtitle("DoD RDT&E Aircraft Engine Spending by Service and Stage") +
     xlab("Fiscal Year") +
     ylab("Constant 2019 $ Millions") + 
     geom_vline(
