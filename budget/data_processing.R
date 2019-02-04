@@ -469,8 +469,15 @@ engine_budget_future <- engine_budget %>%
   filter(amount != 0) %>%
   dplyr::summarize(amount = sum(amount, na.rm = TRUE))
 
+#Quick examination of variance in number of years tracked by each budget
 engine_budget_future_wide <-
   spread(engine_budget_future, key = "fy", value = "amount")
+View(engine_budget_future)
+engine_budget_future %>% group_by(fydp_year) %>%
+  dplyr::summarise(fy_count=length(fy),
+                   min_fy=min(fy),
+                   max_fy=max(fy))
+
 
 (
   plot_ebf <- ggplot(engine_budget_future) +
