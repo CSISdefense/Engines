@@ -488,9 +488,9 @@ engine_budget_future %>% group_by(fydp_year) %>%
       group = fydp_year,
       alpha = fydp_year
     ), color = "#554449", size = 1) +
-    ggtitle("DoD RDT&E aircraft engine spending projections") +
+    ggtitle("DoD RDT&E Aircraft Engine Spending Projections") +
     chart_theme +
-    scale_y_continuous(labels = money_labels) +
+    scale_y_continuous(labels = scales::comma) +
 
     xlab("Fiscal Year") + 
     ylab("Constant 2019 $ Millions") 
@@ -506,7 +506,7 @@ ggsave(
 )
 
 # --------------------------------------------------------------------------------
-# engine spending by service
+# engine spending by Service
 
 engine_budget_organization_future <- engine_budget %>%
   mutate(fy = as.numeric(fy)) %>%
@@ -531,14 +531,14 @@ engine_budget_organization_future_wide <-
       size = 1
     ) +
     facet_wrap(~ organization) +
-    scale_y_continuous(labels = money_labels) +
+    scale_y_continuous(labels = scales::comma) +
     scale_x_continuous(
       breaks = seq(2000, 2025, by = 5),
       labels = function(x) {
         substring(as.character(x), 3, 4)
       }
     ) +
-    ggtitle("DoD RDT&E aircraft engine spending projections by service") +
+    ggtitle("DoD RDT&E Aircraft Engine Spending Projections by Service") +
     chart_theme +
     xlab("Fiscal Year") + 
     ylab("Constant 2019 $ Millions") 
@@ -579,38 +579,39 @@ engine_budget_project_future_wide <-
       size = 1
     ) +
     facet_wrap(~ project_name) +
-    scale_y_continuous(labels = money_labels) +
+    scale_y_continuous(labels = scales::comma) +
     scale_x_continuous(
       breaks = seq(2000, 2025, by = 5),
       labels = function(x) {
         substring(as.character(x), 3, 4)
       }
     ) +
-    ggtitle("DoD RDT&E aircraft engine spending projections by project") +
+    ggtitle("DoD RDT&E Aircraft Engine Spending Projections by project") +
     chart_theme +
     xlab("Fiscal Year") + 
     ylab("Constant 2019 $ Millions") 
 )
 
 # --------------------------------------------------------------------------------
-# engine spending by stage
+# engine spending by Stage
 
-engine_budget_future <- engine_budget %>%
+engine_budget_stage_future <- engine_budget %>%
   mutate(fy = as.numeric(fy)) %>%
   filter(stage != "NA") %>%
   group_by(fydp_year, fy, stage) %>%
   filter(amount != 0) %>%
-  dplyr::summarize(amount = sum(amount, na.rm = TRUE))
+  dplyr::summarize(amount = sum(amount, na.rm = TRUE),
+                   amount_19 = sum(amount_19, na.rm = TRUE))
 
-engine_budget_future_wide <-
-  spread(engine_budget_future, key = "fy", value = "amount")
+engine_budget_stage_future_wide <-
+  spread(engine_budget_stage_future, key = "fy", value = "amount")
 
 (
-  plot_ebf <- ggplot(engine_budget_future) +
+  plot_ebf <- ggplot(engine_budget_stage_future) +
     geom_line(
       aes(
         x = fy,
-        y = amount,
+        y = amount_19,
         group = fydp_year,
         alpha = fydp_year
       ),
@@ -618,14 +619,14 @@ engine_budget_future_wide <-
       size = 1
     ) +
     facet_wrap(~ stage) +
-    scale_y_continuous(labels = money_labels) +
+    scale_y_continuous(labels = scales::comma) +
     scale_x_continuous(
       breaks = seq(2000, 2025, by = 5),
       labels = function(x) {
         substring(as.character(x), 3, 4)
       }
     ) +
-    ggtitle("DoD RDT&E aircraft engine spending projections by stage") +
+    ggtitle("DoD RDT&E Aircraft Engine Spending Projections by Stage") +
     chart_theme +
     xlab("Fiscal Year") + 
     ylab("Constant 2019 $ Millions")  
@@ -641,7 +642,7 @@ ggsave(
 )
 
 # --------------------------------------------------------------------------------
-# engine spending by service and stage
+# engine spending by Service and stage
 
 engine_budget_future <- engine_budget %>%
   mutate(fy = as.numeric(fy)) %>%
@@ -681,14 +682,14 @@ engine_budget_future_wide <-
       size = 1
     ) +
     facet_grid(organization ~ stage) +
-    scale_y_continuous(labels = money_labels) +
+    scale_y_continuous(labels = scales::comma) +
     scale_x_continuous(
       breaks = seq(2000, 2025, by = 5),
       labels = function(x) {
         substring(as.character(x), 3, 4)
       }
     ) +
-    ggtitle("DoD RDT&E aircraft engine spending projections by stage and service") +
+    ggtitle("DoD RDT&E Aircraft Engine Spending Projections by Stage and Service") +
     chart_theme +
     theme(strip.text.x = element_text(size = 10)) +
     theme(strip.text.y = element_text(size = 10)) +
@@ -788,14 +789,14 @@ engine_actual_1 <- engine_actual %>%
     chart_theme +
     theme(strip.text.x = element_text(size = 8)) +
     theme(strip.text.y = element_text(size = 8)) +
-    scale_y_continuous(labels = money_labels) +
+    scale_y_continuous(labels = scales::comma) +
     scale_x_continuous(
       breaks = seq(2000, 2023, by = 2),
       labels = function(x) {
         substring(as.character(x), 3, 4)
       }
     ) +
-    ggtitle("DoD RDT&E aircraft engine spending by project") +
+    ggtitle("DoD RDT&E Aircraft Engine spending by project") +
     xlab("Fiscal Year") +
     ylab("Constant 2019 $ Millions") + 
     geom_vline(
@@ -982,14 +983,14 @@ total <- total %>%
     chart_theme +
     theme(strip.text.x = element_text(size = 8)) +
     theme(strip.text.y = element_text(size = 8)) +
-    scale_y_continuous(labels = money_labels) +
+    scale_y_continuous(labels = scales::comma) +
     scale_x_continuous(
       breaks = seq(2000, 2023, by = 2),
       labels = function(x) {
         substring(as.character(x), 3, 4)
       }
     ) +
-    ggtitle("DoD RDT&E aircraft engine spending by service and stage") +
+    ggtitle("DoD RDT&E Aircraft Engine spending by Service and stage") +
     xlab("Fiscal Year") +
     ylab("Constant 2019 $ Millions") + 
     geom_vline(
@@ -1214,7 +1215,7 @@ eng.all$fy <- as.factor(eng.all$fy)
     geom_hline(yintercept = 100, color = "#554449") +
     facet_wrap(~ project_name) +
     chart_theme +
-    scale_y_continuous(labels = money_labels) +
+    scale_y_continuous(labels = scales::comma) +
     scale_x_discrete(
       breaks = seq(2000, 2018, by = 2),
       labels = function(x) {
