@@ -1057,226 +1057,230 @@ ggsave(
   units = "in"
 )
 
-# ================================================================================
-# chart engine comparison 
-# --------------------------------------------------------------------------------
-# read topline data 
+## Greg stops reviewing here!
 
-read_topline <- read_delim("budget/data/topline.csv",delim="\t")
-
-topline <- read_topline %>%
-  select(fy, army, navy, air_force, dod_total, us_total) %>%
-  gather(army:us_total, key = "project_name", value = "amount")
-#mutate(amount_19 = amount / deflator)
-
-
-
-# --------------------------------------------------------------------------------
-# clean and combine data
-# --------------------------------------------------------------------------------
-
-# engine_actual <- filter(
-#   engine_budget,
-#   fydp_year == "2000 FYDP" & fy == "1998" |
-#     fydp_year == "2001 FYDP" & fy == "1999" |
-#     fydp_year == "2002 FYDP" & fy == "2000" |
-#     fydp_year == "2003 FYDP" & fy == "2001" |
-#     fydp_year == "2004 FYDP" & fy == "2002" |
-#     fydp_year == "2005 FYDP" & fy == "2003" |
-#     fydp_year == "2006 FYDP" & fy == "2004" |
-#     fydp_year == "2007 FYDP" & fy == "2005" |
-#     fydp_year == "2008 FYDP" & fy == "2006" |
-#     fydp_year == "2009 FYDP" & fy == "2007" |
-#     fydp_year == "2010 FYDP" & fy == "2008" |
-#     fydp_year == "2011 FYDP" & fy == "2009" |
-#     fydp_year == "2012 FYDP" & fy == "2010" |
-#     fydp_year == "2013 FYDP" & fy == "2011" |
-#     fydp_year == "2014 FYDP" & fy == "2012" |
-#     fydp_year == "2015 FYDP" & fy == "2013" |
-#     fydp_year == "2016 FYDP" & fy == "2014" |
-#     fydp_year == "2017 FYDP" & fy == "2015" |
-#     fydp_year == "2018 FYDP" & fy == "2016" |
-#     fydp_year == "2018 FYDP" & fy == "2017" |
-#     fydp_year == "2018 FYDP" & fy == "2018"
+# # ================================================================================
+# # chart engine comparison 
+# # --------------------------------------------------------------------------------
+# # read topline data 
+# 
+# read_topline <- read_delim("budget/data/topline.csv",delim="\t")
+# 
+# topline <- read_topline %>%
+#   select(fy, army, navy, air_force, dod_total, us_total) %>%
+#   gather(army:us_total, key = "project_name", value = "amount")
+# #mutate(amount_19 = amount / deflator)
+# 
+# 
+# 
+# # --------------------------------------------------------------------------------
+# # clean and combine data
+# # --------------------------------------------------------------------------------
+# 
+# # engine_actual <- filter(
+# #   engine_budget,
+# #   fydp_year == "2000 FYDP" & fy == "1998" |
+# #     fydp_year == "2001 FYDP" & fy == "1999" |
+# #     fydp_year == "2002 FYDP" & fy == "2000" |
+# #     fydp_year == "2003 FYDP" & fy == "2001" |
+# #     fydp_year == "2004 FYDP" & fy == "2002" |
+# #     fydp_year == "2005 FYDP" & fy == "2003" |
+# #     fydp_year == "2006 FYDP" & fy == "2004" |
+# #     fydp_year == "2007 FYDP" & fy == "2005" |
+# #     fydp_year == "2008 FYDP" & fy == "2006" |
+# #     fydp_year == "2009 FYDP" & fy == "2007" |
+# #     fydp_year == "2010 FYDP" & fy == "2008" |
+# #     fydp_year == "2011 FYDP" & fy == "2009" |
+# #     fydp_year == "2012 FYDP" & fy == "2010" |
+# #     fydp_year == "2013 FYDP" & fy == "2011" |
+# #     fydp_year == "2014 FYDP" & fy == "2012" |
+# #     fydp_year == "2015 FYDP" & fy == "2013" |
+# #     fydp_year == "2016 FYDP" & fy == "2014" |
+# #     fydp_year == "2017 FYDP" & fy == "2015" |
+# #     fydp_year == "2018 FYDP" & fy == "2016" |
+# #     fydp_year == "2018 FYDP" & fy == "2017" |
+# #     fydp_year == "2018 FYDP" & fy == "2018"
+# # )
+# 
+# 
+# 
+# engine_actual_project  <- engine_actual %>%
+#   group_by(project_name, fy) %>%
+#   summarise(amount = sum(amount, na.rm = TRUE)) %>%
+#   filter(amount != 0 & fy<2018) %>%
+#   dplyr::left_join(deflate_year, by = "fy") %>%
+#   mutate(amount_19 = amount / deflator) %>%
+#   select(-deflator)
+#   
+# #I don't see the point of this, spreading and then gathering just counteracts itself.
+# # engine_actual_wide <-
+# #   spread(engine_actual_project, key = "project_name", value = "amount")
+# # 
+# # engine_actual_wide[is.na(engine_actual_wide)] <- 0
+# # 
+# # colnames(engine_actual_wide)
+# # engine_actual_wide <-
+# #   gather(
+# #     engine_actual_wide,
+# #     "ACFT Demo Engines":"Veh Prop & Struct Tech",
+# #     key = "project_name",
+# #     value = "amount"
+#   # )
+# 
+# #I don't see the point of any of this either
+# # data_fy <- select(engine_actual_wide, fy)
+# # 
+# # engine_actual_wide <- select(engine_actual_wide,-fy)
+# # 
+# # engine_actual_wide <- cbind(data_fy, engine_actual_wide)
+# 
+# # engine_actual_wide$fy <- as.numeric(engine_actual_wide$fy)
+# 
+# 
+# 
+# engine_actual_project <- rbind(engine_actual_project, topline)
+# data_year <- engine_actual_project
+# data_year <- mutate(data_year, fy2 = fy + 1)
+# data_year <- select(data_year,-fy)
+# colnames(data_year)[colnames(data_year) == "fy2"] <- "fy"
+# 
+# engine_comparison <-
+#   left_join(engine_actual_project, data_year, by = c("project_name", "fy"))
+# engine_comparison <- filter(engine_comparison, fy != 1998 |
+#                               fy != 1997)
+# engine_comparison <-
+#   select(engine_comparison, fy, project_name, amount.x, amount.y)
+# engine_comparison_topline <- filter(
+#   engine_comparison,
+#   project_name == "us_total" |
+#     project_name == "dod_total" |
+#     project_name == "army" |
+#     project_name == "navy" |
+#     project_name == "air_force"
 # )
-
-
-
-engine_actual_project  <- engine_actual %>%
-  group_by(project_name, fy) %>%
-  summarise(amount = sum(amount, na.rm = TRUE),
-            amount_19 = sum(amount_19, na.rm = TRUE)) %>%
-  filter(amount != 0 & fy<2018) 
-
-
-engine_actual_wide <-
-  spread(engine_actual_project, key = "project_name", value = "amount")
-
-engine_actual_wide[is.na(engine_actual_wide)] <- 0
-
-engine_actual_wide <-
-  gather(
-    engine_actual_wide,
-    "ACFT Demo Engines":"Veh Prop & Struct Tech",
-    key = "project_name",
-    value = "amount"
-  )
-
-data_fy <- select(engine_actual_wide, fy)
-
-engine_actual_wide <- select(engine_actual_wide,-fy)
-
-engine_actual_wide <- cbind(data_fy, engine_actual_wide)
-
-engine_actual_wide$fy <- as.numeric(engine_actual_wide$fy)
-
-#Here's the error
-View(engine_actual_wide)
-View(topline)
-
-engine_actual_wide <- rbind(engine_actual_wide, topline)
-data_year <- engine_actual_wide
-data_year <- mutate(data_year, fy2 = fy + 1)
-data_year <- select(data_year,-fy)
-colnames(data_year)[colnames(data_year) == "fy2"] <- "fy"
-
-engine_comparison <-
-  left_join(engine_actual_wide, data_year, by = c("project_name", "fy"))
-engine_comparison <- filter(engine_comparison, fy != 1998 |
-                              fy != 1997)
-engine_comparison <-
-  select(engine_comparison, fy, project_name, amount.x, amount.y)
-engine_comparison_topline <- filter(
-  engine_comparison,
-  project_name == "us_total" |
-    project_name == "dod_total" |
-    project_name == "army" |
-    project_name == "navy" |
-    project_name == "air_force"
-)
-engine_comparison <- engine_comparison %>%
-  filter(project_name != "us_total") %>%
-  filter(project_name != "dod_total") %>%
-  filter(project_name != "army") %>%
-  filter(project_name != "navy") %>%
-  filter(project_name != "air_force")
-
-engine_comparison <- engine_comparison %>%
-  group_by(fy) %>%
-  summarise(
-    amount.x = sum(amount.x, na.rm = TRUE),
-    amount.y = sum(amount.y, na.rm = TRUE)
-  ) %>%
-  mutate(project_name = "Engines") %>%
-  select(fy, project_name, amount.x, amount.y) %>%
-  rbind(engine_comparison_topline)
-
-engine_comparison <-
-  mutate(engine_comparison, amount_change = amount.x - amount.y)
-engine_comparison <-
-  mutate(engine_comparison,
-         amount_percent_Change = (amount.x - amount.y) / amount.y * 100)
-colnames(engine_comparison)[colnames(engine_comparison) == "amount.x"] <-
-  "amount"
-
-engine_comparison <-
-  select(engine_comparison,
-         fy,
-         project_name,
-         amount,
-         amount_change,
-         amount_percent_Change)
-
-engine_comparison$fy <- as.character(engine_comparison$fy)
-engine_comparison$fy <- as.factor(engine_comparison$fy)
-
-engine_comparison2 <-
-  filter(engine_comparison, project_name == "Aerospace Fuels")
-
-engine_comparison <- engine_comparison %>%
-  filter()
-
-# --------------------------------------------------------------------------------
-# chart comparison 
-
-engines_DOD_US <- engine_comparison %>%
-  filter(project_name == "dod_total" |
-           project_name == "Engines" | project_name == "us_total")
-
-engines_DOD_US$fy = as.character(engines_DOD_US$fy)
-
-engines <- engines_DOD_US %>%
-  filter(project_name == "Engines")
-
-eng.baseyear <- engines$amount[engines$fy == 2000]
-
-DOD <- engines_DOD_US %>%
-  filter(project_name == "dod_total")
-
-dod.baseyear <- DOD$amount[DOD$fy == 2000]
-
-US <- engines_DOD_US %>%
-  filter(project_name == "us_total")
-
-US.baseyear <- US$amount[US$fy == 2000]
-
-base_year.eng <- engines %>%
-  filter(fy >= 2000) %>%
-  mutate(amount_change = amount - eng.baseyear) %>%
-  mutate(amount_percent_change = (amount_change) / eng.baseyear * 100) %>%
-  mutate(base = 100) %>%
-  mutate(amount = base + amount_percent_change)
-
-base_year.DOD <- DOD %>%
-  filter(fy >= 2000) %>%
-  mutate(amount_change = amount - dod.baseyear) %>%
-  mutate(amount_percent_change = (amount_change) / dod.baseyear * 100) %>%
-  mutate(base = 100) %>%
-  mutate(amount = base + amount_percent_change)
-
-base_year.US <- US %>%
-  filter(fy >= 2000) %>%
-  mutate(amount_change = amount - US.baseyear) %>%
-  mutate(amount_percent_change = (amount_change) / US.baseyear * 100) %>%
-  mutate(base = 100) %>%
-  mutate(amount = base + amount_percent_change)
-
-eng.all <- rbind(base_year.eng, base_year.DOD, base_year.US)
-
-eng.all$project_name[eng.all$project_name == "dod_total"] = "Total DOD"
-eng.all$project_name[eng.all$project_name == "us_total"] = "Total US"
-
-eng.all <- eng.all %>%
-  group_by(fy, project_name) %>%
-  dplyr::summarise(amount = sum(amount, na.rm = TRUE))
-
-eng.all$fy <- as.factor(eng.all$fy)
-
-(
-  eng_US_DOD.comp <- eng.all %>%
-    ggplot() +
-    geom_line(aes(
-      x = fy, y = amount, group = 1
-    ), size = 1) +
-    geom_hline(yintercept = 100, color = "#554449") +
-    facet_wrap(~ project_name) +
-    chart_theme +
-    scale_y_continuous(label = unit_format(unit = "M", scale = 1e-6)) +
-    scale_x_discrete(
-      breaks = seq(2000, 2018, by = 2),
-      labels = function(x) {
-        substring(as.character(x), 3, 4)
-      }
-    ) +
-    xlab("Fiscal Year")
-)
-
-# ggsave(
-#   "budget/charts/engine_DoD_US_comparison.svg",
-#   eng_US_DOD.comp,
-#   device = "svg",
-#   width = 10,
-#   height = 6,
-#   units = "in"
+# engine_comparison <- engine_comparison %>%
+#   filter(project_name != "us_total") %>%
+#   filter(project_name != "dod_total") %>%
+#   filter(project_name != "army") %>%
+#   filter(project_name != "navy") %>%
+#   filter(project_name != "air_force")
+# 
+# engine_comparison <- engine_comparison %>%
+#   group_by(fy) %>%
+#   summarise(
+#     amount.x = sum(amount.x, na.rm = TRUE),
+#     amount.y = sum(amount.y, na.rm = TRUE)
+#   ) %>%
+#   mutate(project_name = "Engines") %>%
+#   select(fy, project_name, amount.x, amount.y) %>%
+#   rbind(engine_comparison_topline)
+# 
+# engine_comparison <-
+#   mutate(engine_comparison, amount_change = amount.x - amount.y)
+# engine_comparison <-
+#   mutate(engine_comparison,
+#          amount_percent_Change = (amount.x - amount.y) / amount.y * 100)
+# colnames(engine_comparison)[colnames(engine_comparison) == "amount.x"] <-
+#   "amount"
+# 
+# engine_comparison <-
+#   select(engine_comparison,
+#          fy,
+#          project_name,
+#          amount,
+#          amount_change,
+#          amount_percent_Change)
+# 
+# engine_comparison$fy <- as.character(engine_comparison$fy)
+# engine_comparison$fy <- as.factor(engine_comparison$fy)
+# 
+# engine_comparison2 <-
+#   filter(engine_comparison, project_name == "Aerospace Fuels")
+# 
+# engine_comparison <- engine_comparison %>%
+#   filter()
+# 
+# # --------------------------------------------------------------------------------
+# # chart comparison 
+# 
+# engines_DOD_US <- engine_comparison %>%
+#   filter(project_name == "dod_total" |
+#            project_name == "Engines" | project_name == "us_total")
+# 
+# engines_DOD_US$fy = as.character(engines_DOD_US$fy)
+# 
+# engines <- engines_DOD_US %>%
+#   filter(project_name == "Engines")
+# 
+# eng.baseyear <- engines$amount[engines$fy == 2000]
+# 
+# DOD <- engines_DOD_US %>%
+#   filter(project_name == "dod_total")
+# 
+# dod.baseyear <- DOD$amount[DOD$fy == 2000]
+# 
+# US <- engines_DOD_US %>%
+#   filter(project_name == "us_total")
+# 
+# US.baseyear <- US$amount[US$fy == 2000]
+# 
+# base_year.eng <- engines %>%
+#   filter(fy >= 2000) %>%
+#   mutate(amount_change = amount - eng.baseyear) %>%
+#   mutate(amount_percent_change = (amount_change) / eng.baseyear * 100) %>%
+#   mutate(base = 100) %>%
+#   mutate(amount = base + amount_percent_change)
+# 
+# base_year.DOD <- DOD %>%
+#   filter(fy >= 2000) %>%
+#   mutate(amount_change = amount - dod.baseyear) %>%
+#   mutate(amount_percent_change = (amount_change) / dod.baseyear * 100) %>%
+#   mutate(base = 100) %>%
+#   mutate(amount = base + amount_percent_change)
+# 
+# base_year.US <- US %>%
+#   filter(fy >= 2000) %>%
+#   mutate(amount_change = amount - US.baseyear) %>%
+#   mutate(amount_percent_change = (amount_change) / US.baseyear * 100) %>%
+#   mutate(base = 100) %>%
+#   mutate(amount = base + amount_percent_change)
+# 
+# eng.all <- rbind(base_year.eng, base_year.DOD, base_year.US)
+# 
+# eng.all$project_name[eng.all$project_name == "dod_total"] = "Total DOD"
+# eng.all$project_name[eng.all$project_name == "us_total"] = "Total US"
+# 
+# eng.all <- eng.all %>%
+#   group_by(fy, project_name) %>%
+#   dplyr::summarise(amount = sum(amount, na.rm = TRUE))
+# 
+# eng.all$fy <- as.factor(eng.all$fy)
+# 
+# (
+#   eng_US_DOD.comp <- eng.all %>%
+#     ggplot() +
+#     geom_line(aes(
+#       x = fy, y = amount, group = 1
+#     ), size = 1) +
+#     geom_hline(yintercept = 100, color = "#554449") +
+#     facet_wrap(~ project_name) +
+#     chart_theme +
+#     scale_y_continuous(label = unit_format(unit = "M", scale = 1e-6)) +
+#     scale_x_discrete(
+#       breaks = seq(2000, 2018, by = 2),
+#       labels = function(x) {
+#         substring(as.character(x), 3, 4)
+#       }
+#     ) +
+#     xlab("Fiscal Year")
 # )
-
+# 
+# # ggsave(
+# #   "budget/charts/engine_DoD_US_comparison.svg",
+# #   eng_US_DOD.comp,
+# #   device = "svg",
+# #   width = 10,
+# #   height = 6,
+# #   units = "in"
+# # )
+# 
