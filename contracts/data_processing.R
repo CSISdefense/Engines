@@ -29,7 +29,8 @@ source("contracts/theme/money_labels.R")
 # read engine contract data
 
 read_engine_contracts <-
-  read.csv("contracts/data/engine_contracts.csv")
+  read.csv("contracts/data/engine_contracts.csv", na.strings=c("NA","NULL"))
+engine_contracts<-csis360::standardize_variable_names(read_engine_contracts)
 
 # --------------------------------------------------------------------------------
 # read topline contract data
@@ -70,14 +71,12 @@ topline_contracts<-csis360::standardize_variable_names(read_topline_contracts)
 
 # --------------------------------------------------------------------------------
 # clean and summarize data
-read_engine_contracts<-remove_bom(read_engine_contracts)
-engine_contracts<-csis360::standardize_variable_names(read_engine_contracts)
 
 
 engine_contracts <- engine_contracts %>%
-  # dplyr::rename(
+  dplyr::rename(
   #   Fiscal.Year = fiscal_year,
-  #   amount = SumOfobligatedAmount,
+  amount = Action.Obligation
   #   SimpleArea = Simple,
   #   platform_portfolio = PlatformPortfolio,
   #   customer_2 = Customer,
@@ -87,7 +86,7 @@ engine_contracts <- engine_contracts %>%
   #   Vendor.Size = VendorSize,
   #   ParentID = ParentID,
   #   ProjectName = ProjectName
-  # ) %>%
+  ) %>%
   # left_join(deflate.year, by = "Fiscal.Year") %>%
   # mutate(amount_19 = amount * deflator) %>%
   group_by(Fiscal.Year,
@@ -102,7 +101,7 @@ engine_contracts <- engine_contracts %>%
   # dplyr::summarise(amount = sum(amount_19, na.rm = TRUE))
 
 engine_contracts<-csis360::deflate(data=engine_contracts,
-                                          money_var= "Action.Obligation",
+                                          money_var= "amount",
                                           fy_var="Fiscal.Year",
                                           deflator_var="OMB.2019"
 )
@@ -110,140 +109,169 @@ engine_contracts<-csis360::deflate(data=engine_contracts,
 # colnames(engine_contracts)[colnames(engine_contracts)=="Action.Obligation.OMB.2019"]
 
 topline_contracts <- topline_contracts %>%
-  # dplyr::rename(
+  dplyr::rename(
+    SimpleArea=PS,
   #   Fiscal.Year = Fiscal.Year,
-  #   amount = Amount,
+    amount = Amount
   #   SimpleArea = SimpleArea,
   #   platform_portfolio = Portfolio,
   #   Customer = Customer,
   #   Vendor.Size = VendorSize
-  # ) %>%
+  ) %>%
   # left_join(deflate.year, by = "Fiscal.Year") %>%
   # mutate(amount_19 = amount * deflator) %>%
   group_by(Fiscal.Year, Customer, SimpleArea) %>%
   dplyr::summarise(amount = sum(amount, na.rm = TRUE))
 
 topline_contracts<-csis360::deflate(data=topline_contracts,
-                                   money_var= "Action.Obligation",
+                                   money_var= "amount",
                                    fy_var="Fiscal.Year",
                                    deflator_var="OMB.2019"
 )
 
 # --------------------------------------------------------------------------------
 # reclassify vendor size
+# 
+# engine_contracts$Vendor.Size <-
+#   as.character(engine_contracts$Vendor.Size)
+# engine_contracts$Vendor.Size[engine_contracts$Vendor.Size == "Medium <1B"] <-
+#   "Medium"
+# engine_contracts$Vendor.Size[engine_contracts$Vendor.Size == "Medium >1B"] <-
+#   "Medium"
+# engine_contracts$Vendor.Size[engine_contracts$Vendor.Size == "Small"] <-
+#   "Small"
+# engine_contracts$Vendor.Size[engine_contracts$Vendor.Size == "Large: Big 6"] <-
+#   "Big Five"
+# engine_contracts$Vendor.Size[engine_contracts$Vendor.Size == "Large: Big 6 JV"] <-
+#   "Big Five"
 
-engine_contracts$Vendor.Size <-
-  as.character(engine_contracts$Vendor.Size)
-engine_contracts$Vendor.Size[engine_contracts$Vendor.Size == "Medium <1B"] <-
-  "Medium"
-engine_contracts$Vendor.Size[engine_contracts$Vendor.Size == "Medium >1B"] <-
-  "Medium"
-engine_contracts$Vendor.Size[engine_contracts$Vendor.Size == "Small"] <-
-  "Small"
-engine_contracts$Vendor.Size[engine_contracts$Vendor.Size == "Large: Big 6"] <-
-  "Big Five"
-engine_contracts$Vendor.Size[engine_contracts$Vendor.Size == "Large: Big 6 JV"] <-
-  "Big Five"
 
-
-#Classify Product or Service Codes
+#Simplify Vendor Size Classifications
 engine_contracts<-csis360::read_and_join(engine_contracts,
                                   "LOOKUP_Contractor_Size.csv",
-                                  # by="ProductOrServiceArea",
                                   by="Vendor.Size",
-                                  # replace_na_var="ProductServiceOrRnDarea",
-                                  add_var="Vendor.Size.sum",
-                                  # path="https://raw.githubusercontent.com/CSISdefense/R-scripts-and-data/master/",
-                                  # dir="Lookups/"
-)
-
+                                  add_var="Vendor.Size.sum"
+) %>% select(-Vendor.Size) 
+colnames(engine_contracts)[colnames(engine_contracts)=="Vendor.Size.sum"]<-"Vendor.Size"
 
 # --------------------------------------------------------------------------------
 # reclassify CompetitionClassification
 
-engine_contracts$CompetitionClassification <-
-  as.character(engine_contracts$CompetitionClassification)
+# engine_contracts$CompetitionClassification <-
+#   as.character(engine_contracts$CompetitionClassification)
+# 
+# engine_contracts$CompetitionClassification[engine_contracts$CompetitionClassification == ""] <-
+#   "Unlabeled"
+# engine_contracts$CompetitionClassification[engine_contracts$CompetitionClassification == "NULL"] <-
+#   "Unlabeled"
+# engine_contracts$CompetitionClassification[engine_contracts$CompetitionClassification == "Unlabeled: Blank Extent Competed"] <-
+#   "Unlabeled"
+# engine_contracts$CompetitionClassification[engine_contracts$CompetitionClassification == "Unlabeled: Blank Fair Opportunity"] <-
+#   "Unlabeled"
+# engine_contracts$CompetitionClassification[engine_contracts$CompetitionClassification == "Unlabeled: CompetitionClassification; Zero Offers"] <-
+#   "Unlabeled"
+# engine_contracts$CompetitionClassification[engine_contracts$CompetitionClassification == "Unlabeled: No CompetitionClassification; multiple offers"] <-
+#   "Unlabeled"
+# engine_contracts$CompetitionClassification[engine_contracts$CompetitionClassification == "Unlabeled: No CompetitionClassification; multiple offers; Overrode blank Fair Opportunity)"] <-
+#   "Unlabeled"
+# engine_contracts$CompetitionClassification[engine_contracts$CompetitionClassification == "10-24 Offers"] <-
+#   "Effective CompetitionClassification"
+# engine_contracts$CompetitionClassification[engine_contracts$CompetitionClassification == "100+ Offers"] <-
+#   "Effective CompetitionClassification"
+# engine_contracts$CompetitionClassification[engine_contracts$CompetitionClassification == "25-99 Offers"] <-
+#   "Effective CompetitionClassification"
+# engine_contracts$CompetitionClassification[engine_contracts$CompetitionClassification == "3-4 Offers"] <-
+#   "Effective CompetitionClassification"
+# engine_contracts$CompetitionClassification[engine_contracts$CompetitionClassification == "5-9 Offers"] <-
+#   "Effective CompetitionClassification"
+# engine_contracts$CompetitionClassification[engine_contracts$CompetitionClassification == "Two Offers"] <-
+#   "Effective CompetitionClassification"
+# engine_contracts$CompetitionClassification[engine_contracts$CompetitionClassification == "No CompetitionClassification; Overrode blank Fair Opportunity)"] <-
+#   "No CompetitionClassification"
+# engine_contracts$CompetitionClassification[engine_contracts$CompetitionClassification == "One Offer"] <-
+#   "CompetitionClassification with single offer"
+# engine_contracts$CompetitionClassification[engine_contracts$CompetitionClassification == "Effective CompetitionClassification"] <-
+#   "Effective CompetitionClassification"
 
-engine_contracts$CompetitionClassification[engine_contracts$CompetitionClassification == ""] <-
-  "Unlabeled"
-engine_contracts$CompetitionClassification[engine_contracts$CompetitionClassification == "NULL"] <-
-  "Unlabeled"
-engine_contracts$CompetitionClassification[engine_contracts$CompetitionClassification == "Unlabeled: Blank Extent Competed"] <-
-  "Unlabeled"
-engine_contracts$CompetitionClassification[engine_contracts$CompetitionClassification == "Unlabeled: Blank Fair Opportunity"] <-
-  "Unlabeled"
-engine_contracts$CompetitionClassification[engine_contracts$CompetitionClassification == "Unlabeled: CompetitionClassification; Zero Offers"] <-
-  "Unlabeled"
-engine_contracts$CompetitionClassification[engine_contracts$CompetitionClassification == "Unlabeled: No CompetitionClassification; multiple offers"] <-
-  "Unlabeled"
-engine_contracts$CompetitionClassification[engine_contracts$CompetitionClassification == "Unlabeled: No CompetitionClassification; multiple offers; Overrode blank Fair Opportunity)"] <-
-  "Unlabeled"
-engine_contracts$CompetitionClassification[engine_contracts$CompetitionClassification == "10-24 Offers"] <-
-  "Effective CompetitionClassification"
-engine_contracts$CompetitionClassification[engine_contracts$CompetitionClassification == "100+ Offers"] <-
-  "Effective CompetitionClassification"
-engine_contracts$CompetitionClassification[engine_contracts$CompetitionClassification == "25-99 Offers"] <-
-  "Effective CompetitionClassification"
-engine_contracts$CompetitionClassification[engine_contracts$CompetitionClassification == "3-4 Offers"] <-
-  "Effective CompetitionClassification"
-engine_contracts$CompetitionClassification[engine_contracts$CompetitionClassification == "5-9 Offers"] <-
-  "Effective CompetitionClassification"
-engine_contracts$CompetitionClassification[engine_contracts$CompetitionClassification == "Two Offers"] <-
-  "Effective CompetitionClassification"
-engine_contracts$CompetitionClassification[engine_contracts$CompetitionClassification == "No CompetitionClassification; Overrode blank Fair Opportunity)"] <-
-  "No CompetitionClassification"
-engine_contracts$CompetitionClassification[engine_contracts$CompetitionClassification == "One Offer"] <-
-  "CompetitionClassification with single offer"
-engine_contracts$CompetitionClassification[engine_contracts$CompetitionClassification == "Effective CompetitionClassification"] <-
-  "Effective CompetitionClassification"
+#Simplify Vendor Size Classifications
+engine_contracts<-read_and_join(engine_contracts,"Lookup_SQL_CompetitionClassification.csv",
+                      by=c("CompetitionClassification",
+                           "ClassifyNumberOfOffers"),
+                      add_var="Competition.multisum") %>% select(-ClassifyNumberOfOffers,-CompetitionClassification) 
+
+
 
 # --------------------------------------------------------------------------------
 # reclassify contract type
 
-engine_contracts$Pricing.Mechanism <-
-  as.character(engine_contracts$Pricing.Mechanism)
+# engine_contracts$Pricing.Mechanism <-
+#   as.character(engine_contracts$Pricing.Mechanism)
+# 
+# engine_contracts$Pricing.Mechanism[engine_contracts$Pricing.Mechanism == "Combination (two or more)"] <-
+#   "Combination"
+# engine_contracts$Pricing.Mechanism[engine_contracts$Pricing.Mechanism == "Cost No Fee"] <-
+#   "Cost Reimbursement"
+# engine_contracts$Pricing.Mechanism[engine_contracts$Pricing.Mechanism == "Cost Plus Award Fee"] <-
+#   "Cost Reimbursement"
+# engine_contracts$Pricing.Mechanism[engine_contracts$Pricing.Mechanism == "Cost Plus Fixed Fee"] <-
+#   "Cost Reimbursement"
+# engine_contracts$Pricing.Mechanism[engine_contracts$Pricing.Mechanism == "Cost Plus Incentive"] <-
+#   "Cost Reimbursement"
+# engine_contracts$Pricing.Mechanism[engine_contracts$Pricing.Mechanism == "Cost Sharing"] <-
+#   "Cost Reimbursement"
+# engine_contracts$Pricing.Mechanism[engine_contracts$Pricing.Mechanism == "Firm Fixed Price"] <-
+#   "Fixed Price"
+# engine_contracts$Pricing.Mechanism[engine_contracts$Pricing.Mechanism == "Fixed Price Award Fee"] <-
+#   "Fixed Price"
+# engine_contracts$Pricing.Mechanism[engine_contracts$Pricing.Mechanism == "Fixed Price Incentive"] <-
+#   "Fixed Price"
+# engine_contracts$Pricing.Mechanism[engine_contracts$Pricing.Mechanism == "Fixed Price Level of Effort"] <-
+#   "Fixed Price"
+# engine_contracts$Pricing.Mechanism[engine_contracts$Pricing.Mechanism == "Fixed Price Redetermination"] <-
+#   "Fixed Price"
+# engine_contracts$Pricing.Mechanism[engine_contracts$Pricing.Mechanism == "Fixed Price with Economic Price Adjustment"] <-
+#   "Fixed Price"
+# engine_contracts$Pricing.Mechanism[engine_contracts$Pricing.Mechanism == "Labor Hours"] <-
+#   "Time and Materials"
+# engine_contracts$Pricing.Mechanism[engine_contracts$Pricing.Mechanism == "Not Reported"] <-
+#   "Unlabeled"
+# engine_contracts$Pricing.Mechanism[engine_contracts$Pricing.Mechanism == "Order Dependent (IDV only)"] <-
+#   "Other"
+# engine_contracts$Pricing.Mechanism[engine_contracts$Pricing.Mechanism == "Other (none of the above)"] <-
+#   "Other"
+# engine_contracts$Pricing.Mechanism[engine_contracts$Pricing.Mechanism == "Time and Materials"] <-
+#   "Time and Materials"
+# engine_contracts$Pricing.Mechanism[engine_contracts$Pricing.Mechanism == "NULL"] <-
+#   "Unlabeled"
 
-engine_contracts$Pricing.Mechanism[engine_contracts$Pricing.Mechanism == "Combination (two or more)"] <-
-  "Combination"
-engine_contracts$Pricing.Mechanism[engine_contracts$Pricing.Mechanism == "Cost No Fee"] <-
-  "Cost Reimbursement"
-engine_contracts$Pricing.Mechanism[engine_contracts$Pricing.Mechanism == "Cost Plus Award Fee"] <-
-  "Cost Reimbursement"
-engine_contracts$Pricing.Mechanism[engine_contracts$Pricing.Mechanism == "Cost Plus Fixed Fee"] <-
-  "Cost Reimbursement"
-engine_contracts$Pricing.Mechanism[engine_contracts$Pricing.Mechanism == "Cost Plus Incentive"] <-
-  "Cost Reimbursement"
-engine_contracts$Pricing.Mechanism[engine_contracts$Pricing.Mechanism == "Cost Sharing"] <-
-  "Cost Reimbursement"
-engine_contracts$Pricing.Mechanism[engine_contracts$Pricing.Mechanism == "Firm Fixed Price"] <-
-  "Fixed Price"
-engine_contracts$Pricing.Mechanism[engine_contracts$Pricing.Mechanism == "Fixed Price Award Fee"] <-
-  "Fixed Price"
-engine_contracts$Pricing.Mechanism[engine_contracts$Pricing.Mechanism == "Fixed Price Incentive"] <-
-  "Fixed Price"
-engine_contracts$Pricing.Mechanism[engine_contracts$Pricing.Mechanism == "Fixed Price Level of Effort"] <-
-  "Fixed Price"
-engine_contracts$Pricing.Mechanism[engine_contracts$Pricing.Mechanism == "Fixed Price Redetermination"] <-
-  "Fixed Price"
-engine_contracts$Pricing.Mechanism[engine_contracts$Pricing.Mechanism == "Fixed Price with Economic Price Adjustment"] <-
-  "Fixed Price"
-engine_contracts$Pricing.Mechanism[engine_contracts$Pricing.Mechanism == "Labor Hours"] <-
-  "Time and Materials"
-engine_contracts$Pricing.Mechanism[engine_contracts$Pricing.Mechanism == "Not Reported"] <-
-  "Unlabeled"
-engine_contracts$Pricing.Mechanism[engine_contracts$Pricing.Mechanism == "Order Dependent (IDV only)"] <-
-  "Other"
-engine_contracts$Pricing.Mechanism[engine_contracts$Pricing.Mechanism == "Other (none of the above)"] <-
-  "Other"
-engine_contracts$Pricing.Mechanism[engine_contracts$Pricing.Mechanism == "Time and Materials"] <-
-  "Time and Materials"
-engine_contracts$Pricing.Mechanism[engine_contracts$Pricing.Mechanism == "NULL"] <-
-  "Unlabeled"
+engine_contracts<-read_and_join(engine_contracts,
+                      "LOOKUP_Pricing_Mechanism.csv",
+                      by=c("Pricing.Mechanism"),
+                      replace_na_var="Pricing.Mechanism",
+                      add_var="Pricing.Mechanism.sum"
+) %>% select(-Pricing.Mechanism) 
+colnames(engine_contracts)[colnames(engine_contracts)=="Pricing.Mechanism.sum"]<-"Pricing.Mechanism"
 
 # --------------------------------------------------------------------------------
 # write a new dataset for powerbi
 
-write.csv(engine_contracts, "app/power_bi.csv")
+engine_contracts$Pricing.Mechanism
+
+biz_engine_contracts<-engine_contracts %>% dplyr::rename(
+  fy = Fiscal.Year,
+  amount = amount.OMB.2019,
+  category = SimpleArea,
+  platform_portfolio = PlatformPortfolio,
+  customer_2 = Customer,
+  customer = SubCustomer,
+  competition = Competition.multisum,
+  contract_type = Pricing.Mechanism,
+  vendor_size = Vendor.Size,
+  parent = ParentID,
+  project = ProjectName
+)
+
+write.csv(biz_engine_contracts, "contracts/app/power_bi.csv")
 
 # ================================================================================
 # charting engines 
