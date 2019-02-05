@@ -16,6 +16,7 @@ library(ggthemes)
 library(car)
 library(extrafont)
 library(csis360)
+library(scales)
 # --------------------------------------------------------------------------------
 # add theme
 
@@ -269,7 +270,7 @@ f135_f136 <- rbind(f135, f136)
 
 sum(f135_f136$Amount,na.rm=TRUE)
 summary(f135_f136)
-?substring
+
 
 
 if(nrow(engine_budget %>% filter(Program.Name %in% c("F135","F136") |
@@ -408,7 +409,8 @@ stages <- stages %>%
 if(any(duplicated(stages$project_name))) stop("Duplicate Project Name")
 engine_budget <- engine_budget %>%
   left_join(stages, by = "project_name") %>%
-  mutate(amount = amount * 1000000)
+  mutate(amount = amount * 1000000,
+         amount_19 = amount_19 * 1000000)
 
 # --------------------------------------------------------------------------------
 
@@ -490,10 +492,10 @@ engine_budget_future %>% group_by(fydp_year) %>%
     ), color = "#554449", size = 1) +
     ggtitle("DoD RDT&E Aircraft Engine Spending Projections") +
     chart_theme +
-    scale_y_continuous(labels = scales::comma) +
+    scale_y_continuous(label = unit_format(unit = "M", scale = 1e-6)) +
 
     xlab("Fiscal Year") + 
-    ylab("Constant 2019 $ Millions") 
+    ylab("Constant 2019 $") 
 )
 
 ggsave(
@@ -531,7 +533,7 @@ engine_budget_organization_future_wide <-
       size = 1
     ) +
     facet_wrap(~ organization) +
-    scale_y_continuous(labels = scales::comma) +
+    scale_y_continuous(label = unit_format(unit = "M", scale = 1e-6)) +
     scale_x_continuous(
       breaks = seq(2000, 2025, by = 5),
       labels = function(x) {
@@ -541,7 +543,7 @@ engine_budget_organization_future_wide <-
     ggtitle("DoD RDT&E Aircraft Engine Spending Projections by Service") +
     chart_theme +
     xlab("Fiscal Year") + 
-    ylab("Constant 2019 $ Millions") 
+    ylab("Constant 2019 $") 
 )
 
 ggsave(
@@ -579,7 +581,7 @@ engine_budget_project_future_wide <-
       size = 1
     ) +
     facet_wrap(~ project_name) +
-    scale_y_continuous(labels = scales::comma) +
+    scale_y_continuous(label = unit_format(unit = "M", scale = 1e-6)) +
     scale_x_continuous(
       breaks = seq(2000, 2025, by = 5),
       labels = function(x) {
@@ -589,7 +591,7 @@ engine_budget_project_future_wide <-
     ggtitle("DoD RDT&E Aircraft Engine Spending Projections by project") +
     chart_theme +
     xlab("Fiscal Year") + 
-    ylab("Constant 2019 $ Millions") 
+    ylab("Constant 2019 $") 
 )
 
 # --------------------------------------------------------------------------------
@@ -619,7 +621,7 @@ engine_budget_stage_future_wide <-
       size = 1
     ) +
     facet_wrap(~ stage) +
-    scale_y_continuous(labels = scales::comma) +
+    scale_y_continuous(label = unit_format(unit = "M", scale = 1e-6)) +
     scale_x_continuous(
       breaks = seq(2000, 2025, by = 5),
       labels = function(x) {
@@ -629,7 +631,7 @@ engine_budget_stage_future_wide <-
     ggtitle("DoD RDT&E Aircraft Engine Spending Projections by Stage") +
     chart_theme +
     xlab("Fiscal Year") + 
-    ylab("Constant 2019 $ Millions")  
+    ylab("Constant 2019 $")  
 )
 
 ggsave(
@@ -683,7 +685,7 @@ engine_budget_stage_service_future_wide <-
       size = 1
     ) +
     facet_grid(organization ~ stage) +
-    scale_y_continuous(labels = scales::comma) +
+    scale_y_continuous(label = unit_format(unit = "M", scale = 1e-6)) +
     scale_x_continuous(
       breaks = seq(2000, 2025, by = 5),
       labels = function(x) {
@@ -695,7 +697,7 @@ engine_budget_stage_service_future_wide <-
     theme(strip.text.x = element_text(size = 10)) +
     theme(strip.text.y = element_text(size = 10)) +
     xlab("Fiscal Year") +
-    ylab("Constant 2019 $ Millions") 
+    ylab("Constant 2019 $") 
 )
 
 # ggsave(
@@ -792,7 +794,7 @@ engine_actual_1 <- engine_actual %>%
     chart_theme +
     theme(strip.text.x = element_text(size = 8)) +
     theme(strip.text.y = element_text(size = 8)) +
-    scale_y_continuous(labels = scales::comma) +
+    scale_y_continuous(label = unit_format(unit = "M", scale = 1e-6)) +
     scale_x_continuous(
       breaks = seq(2000, 2023, by = 2),
       labels = function(x) {
@@ -801,7 +803,7 @@ engine_actual_1 <- engine_actual %>%
     ) +
     ggtitle("DoD RDT&E Aircraft Engine Spending By Project") +
     xlab("Fiscal Year") +
-    ylab("Constant 2019 $ Millions") + 
+    ylab("Constant 2019 $") + 
     geom_vline(
       xintercept = 2017,
       color = "#554449",
@@ -1004,8 +1006,8 @@ empty$amount_19<-0
     
     ggplot() +
     
-    geom_area(aes(y = amount, x = fy),
-                         # data = engine_actual_2,
+    geom_area(aes(y = amount_19, x = fy),
+                         # data = engine_actual_project,
                          stat = "identity") +
     facet_grid(organization ~ stage) +
     geom_rect(
@@ -1018,12 +1020,12 @@ empty$amount_19<-0
         fill = "grey",
       # ),
       
-      data = empty#engine_actual#engine_actual_2
+      data = empty#engine_actual#engine_actual_project
     ) +
     chart_theme +
     theme(strip.text.x = element_text(size = 8)) +
     theme(strip.text.y = element_text(size = 8)) +
-    scale_y_continuous(labels = scales::comma) +
+    scale_y_continuous(label = unit_format(unit = "M", scale = 1e-6)) +
     scale_x_continuous(
       breaks = seq(2000, 2023, by = 2),
       labels = function(x) {
@@ -1032,7 +1034,7 @@ empty$amount_19<-0
     ) +
     ggtitle("DoD RDT&E Aircraft Engine Spending by Service and Stage") +
     xlab("Fiscal Year") +
-    ylab("Constant 2019 $ Millions") + 
+    ylab("Constant 2019 $") + 
     geom_vline(
       xintercept = 2017,
       color = "#554449",
@@ -1060,82 +1062,86 @@ ggsave(
 # --------------------------------------------------------------------------------
 # read topline data 
 
-read_topline <- read_csv("budget/data/topline.csv")
+read_topline <- read_delim("budget/data/topline.csv",delim="\t")
 
 topline <- read_topline %>%
   select(fy, army, navy, air_force, dod_total, us_total) %>%
   gather(army:us_total, key = "project_name", value = "amount")
+#mutate(amount_19 = amount / deflator)
+
+
 
 # --------------------------------------------------------------------------------
 # clean and combine data
 # --------------------------------------------------------------------------------
 
-engine_actual <- filter(
-  engine_budget,
-  fydp_year == "2000 FYDP" & fy == "1998" |
-    fydp_year == "2001 FYDP" & fy == "1999" |
-    fydp_year == "2002 FYDP" & fy == "2000" |
-    fydp_year == "2003 FYDP" & fy == "2001" |
-    fydp_year == "2004 FYDP" & fy == "2002" |
-    fydp_year == "2005 FYDP" & fy == "2003" |
-    fydp_year == "2006 FYDP" & fy == "2004" |
-    fydp_year == "2007 FYDP" & fy == "2005" |
-    fydp_year == "2008 FYDP" & fy == "2006" |
-    fydp_year == "2009 FYDP" & fy == "2007" |
-    fydp_year == "2010 FYDP" & fy == "2008" |
-    fydp_year == "2011 FYDP" & fy == "2009" |
-    fydp_year == "2012 FYDP" & fy == "2010" |
-    fydp_year == "2013 FYDP" & fy == "2011" |
-    fydp_year == "2014 FYDP" & fy == "2012" |
-    fydp_year == "2015 FYDP" & fy == "2013" |
-    fydp_year == "2016 FYDP" & fy == "2014" |
-    fydp_year == "2017 FYDP" & fy == "2015" |
-    fydp_year == "2018 FYDP" & fy == "2016" |
-    fydp_year == "2018 FYDP" & fy == "2017" |
-    fydp_year == "2018 FYDP" & fy == "2018"
-)
+# engine_actual <- filter(
+#   engine_budget,
+#   fydp_year == "2000 FYDP" & fy == "1998" |
+#     fydp_year == "2001 FYDP" & fy == "1999" |
+#     fydp_year == "2002 FYDP" & fy == "2000" |
+#     fydp_year == "2003 FYDP" & fy == "2001" |
+#     fydp_year == "2004 FYDP" & fy == "2002" |
+#     fydp_year == "2005 FYDP" & fy == "2003" |
+#     fydp_year == "2006 FYDP" & fy == "2004" |
+#     fydp_year == "2007 FYDP" & fy == "2005" |
+#     fydp_year == "2008 FYDP" & fy == "2006" |
+#     fydp_year == "2009 FYDP" & fy == "2007" |
+#     fydp_year == "2010 FYDP" & fy == "2008" |
+#     fydp_year == "2011 FYDP" & fy == "2009" |
+#     fydp_year == "2012 FYDP" & fy == "2010" |
+#     fydp_year == "2013 FYDP" & fy == "2011" |
+#     fydp_year == "2014 FYDP" & fy == "2012" |
+#     fydp_year == "2015 FYDP" & fy == "2013" |
+#     fydp_year == "2016 FYDP" & fy == "2014" |
+#     fydp_year == "2017 FYDP" & fy == "2015" |
+#     fydp_year == "2018 FYDP" & fy == "2016" |
+#     fydp_year == "2018 FYDP" & fy == "2017" |
+#     fydp_year == "2018 FYDP" & fy == "2018"
+# )
 
-engine_actual <- mutate(engine_actual, amount = amount * 1000000)
 
-engine_actual <- engine_actual %>%
+
+engine_actual_project  <- engine_actual %>%
   group_by(project_name, fy) %>%
-  summarise(amount = sum(amount, na.rm = TRUE))
+  summarise(amount = sum(amount, na.rm = TRUE),
+            amount_19 = sum(amount_19, na.rm = TRUE)) %>%
+  filter(amount != 0 & fy<2018) 
 
-engine_actual <- filter(engine_actual, amount != 0)
 
-engine_actual_2 <- engine_actual
+engine_actual_wide <-
+  spread(engine_actual_project, key = "project_name", value = "amount")
 
-engine_actual_3 <- engine_actual_2
+engine_actual_wide[is.na(engine_actual_wide)] <- 0
 
-engine_actual_3 <-
-  spread(engine_actual_2, key = "project_name", value = "amount")
-
-engine_actual_3[is.na(engine_actual_3)] <- 0
-
-engine_actual_3 <-
+engine_actual_wide <-
   gather(
-    engine_actual_3,
+    engine_actual_wide,
     "ACFT Demo Engines":"Veh Prop & Struct Tech",
     key = "project_name",
     value = "amount"
   )
 
-data_fy <- select(engine_actual_3, fy)
+data_fy <- select(engine_actual_wide, fy)
 
-engine_actual_3 <- select(engine_actual_3,-fy)
+engine_actual_wide <- select(engine_actual_wide,-fy)
 
-engine_actual_3 <- cbind(data_fy, engine_actual_3)
+engine_actual_wide <- cbind(data_fy, engine_actual_wide)
 
-engine_actual_3$fy <- as.numeric(engine_actual_3$fy)
+engine_actual_wide$fy <- as.numeric(engine_actual_wide$fy)
 
-engine_actual_3 <- rbind(engine_actual_3, topline)
-data_year <- engine_actual_3
+#Here's the error
+View(engine_actual_wide)
+View(topline)
+
+engine_actual_wide <- rbind(engine_actual_wide, topline)
+data_year <- engine_actual_wide
 data_year <- mutate(data_year, fy2 = fy + 1)
 data_year <- select(data_year,-fy)
 colnames(data_year)[colnames(data_year) == "fy2"] <- "fy"
 
 engine_comparison <-
-  left_join(engine_actual_3, data_year, by = c("project_name", "fy"))
+  left_join(engine_actual_wide, data_year, by = c("project_name", "fy"))
 engine_comparison <- filter(engine_comparison, fy != 1998 |
                               fy != 1997)
 engine_comparison <-
@@ -1255,7 +1261,7 @@ eng.all$fy <- as.factor(eng.all$fy)
     geom_hline(yintercept = 100, color = "#554449") +
     facet_wrap(~ project_name) +
     chart_theme +
-    scale_y_continuous(labels = scales::comma) +
+    scale_y_continuous(label = unit_format(unit = "M", scale = 1e-6)) +
     scale_x_discrete(
       breaks = seq(2000, 2018, by = 2),
       labels = function(x) {
