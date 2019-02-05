@@ -17,196 +17,227 @@ library(extrafont)
 library(extrafontdb)
 library(svglite)
 library(scales)
+library(csis360)
 
 # --------------------------------------------------------------------------------
 # add theme
 
-source("theme/chart_theme.R")
-source("theme/money_labels.R")
+source("contracts/theme/chart_theme.R")
+source("contracts/theme/money_labels.R")
 
 # --------------------------------------------------------------------------------
 # read engine contract data
 
 read_engine_contracts <-
-  read.csv("data/engine_contracts.csv")
+  read.csv("contracts/data/engine_contracts.csv")
 
 # --------------------------------------------------------------------------------
 # read topline contract data
 
-read_topline_contracts <- read.csv("data/topline_contracts.csv")
-
+read_topline_contracts <- read.csv("contracts/data/topline_contracts.csv")
+topline_contracts<-csis360::standardize_variable_names(read_topline_contracts)
 # --------------------------------------------------------------------------------
 # deflate data
 
-deflator <-
-  c(
-    0.6981148243,
-    0.7148243359,
-    0.7263924593,
-    0.7402742074,
-    0.7586118252,
-    0.7824335904,
-    0.8078834619,
-    0.8298200514,
-    0.8470437018,
-    0.8568980291,
-    0.8644387318,
-    0.8820051414,
-    0.8981148243,
-    0.9132819195,
-    0.9299057412,
-    0.9411311054,
-    0.9520137104,
-    0.9683804627,
-    0.9835475578,
-    1,
-    1.018508997
-  )
-
-fy <- c(2000:2020)
-
-deflate.year <- as.data.frame(cbind(fy, deflator))
+# deflator <-
+#   c(
+#     0.6981148243,
+#     0.7148243359,
+#     0.7263924593,
+#     0.7402742074,
+#     0.7586118252,
+#     0.7824335904,
+#     0.8078834619,
+#     0.8298200514,
+#     0.8470437018,
+#     0.8568980291,
+#     0.8644387318,
+#     0.8820051414,
+#     0.8981148243,
+#     0.9132819195,
+#     0.9299057412,
+#     0.9411311054,
+#     0.9520137104,
+#     0.9683804627,
+#     0.9835475578,
+#     1,
+#     1.018508997
+#   )
+# 
+# Fiscal.Year <- c(2000:2020)
+# 
+# deflate.year <- as.data.frame(cbind(Fiscal.Year, deflator))
 
 # --------------------------------------------------------------------------------
 # clean and summarize data
+read_engine_contracts<-remove_bom(read_engine_contracts)
+engine_contracts<-csis360::standardize_variable_names(read_engine_contracts)
 
-engine_contracts <- read_engine_contracts %>%
-  dplyr::rename(
-    fy = "ï..fiscal_year",
-    amount = SumOfobligatedAmount,
-    category = Simple,
-    platform_portfolio = PlatformPortfolio,
-    customer_2 = Customer,
-    customer = SubCustomer,
-    competition = ClassifyNumberOfOffers,
-    contract_type = typeofcontractpricingtext,
-    vendor_size = VendorSize,
-    parent = ParentID,
-    project = ProjectName
-  ) %>%
-  left_join(deflate.year, by = "fy") %>%
-  mutate(amount_19 = amount * deflator) %>%
-  group_by(fy,
-           customer,
-           category,
-           parent,
-           project,
-           competition,
-           contract_type,
-           vendor_size) %>%
-  filter(fy <= 2017) %>%
-  dplyr::summarise(amount = sum(amount_19, na.rm = TRUE))
 
-topline_contracts <- read_topline_contracts %>%
-  dplyr::rename(
-    fy = FY,
-    amount = Amount,
-    category = Category,
-    platform_portfolio = Portfolio,
-    customer = Customer,
-    vendor_size = VendorSize
-  ) %>%
-  left_join(deflate.year, by = "fy") %>%
-  mutate(amount_19 = amount * deflator) %>%
-  group_by(fy, customer, category) %>%
-  dplyr::summarise(amount = sum(amount_19, na.rm = TRUE))
+engine_contracts <- engine_contracts %>%
+  # dplyr::rename(
+  #   Fiscal.Year = fiscal_year,
+  #   amount = SumOfobligatedAmount,
+  #   SimpleArea = Simple,
+  #   platform_portfolio = PlatformPortfolio,
+  #   customer_2 = Customer,
+  #   Customer = SubCustomer,
+  #   CompetitionClassification = ClassifyNumberOfOffers,
+  #   Pricing.Mechanism = typeofcontractpricingtext,
+  #   Vendor.Size = VendorSize,
+  #   ParentID = ParentID,
+  #   ProjectName = ProjectName
+  # ) %>%
+  # left_join(deflate.year, by = "Fiscal.Year") %>%
+  # mutate(amount_19 = amount * deflator) %>%
+  group_by(Fiscal.Year,
+           Customer,
+           SimpleArea,
+           ParentID,
+           ProjectName,
+           CompetitionClassification,
+           Pricing.Mechanism,
+           Vendor.Size) %>%
+  filter(Fiscal.Year <= 2017) #%>%
+  # dplyr::summarise(amount = sum(amount_19, na.rm = TRUE))
+
+engine_contracts<-csis360::deflate(data=engine_contracts,
+                                          money_var= "Action.Obligation",
+                                          fy_var="Fiscal.Year",
+                                          deflator_var="OMB.2019"
+)
+
+# colnames(engine_contracts)[colnames(engine_contracts)=="Action.Obligation.OMB.2019"]
+
+topline_contracts <- topline_contracts %>%
+  # dplyr::rename(
+  #   Fiscal.Year = Fiscal.Year,
+  #   amount = Amount,
+  #   SimpleArea = SimpleArea,
+  #   platform_portfolio = Portfolio,
+  #   Customer = Customer,
+  #   Vendor.Size = VendorSize
+  # ) %>%
+  # left_join(deflate.year, by = "Fiscal.Year") %>%
+  # mutate(amount_19 = amount * deflator) %>%
+  group_by(Fiscal.Year, Customer, SimpleArea) %>%
+  dplyr::summarise(amount = sum(amount, na.rm = TRUE))
+
+topline_contracts<-csis360::deflate(data=topline_contracts,
+                                   money_var= "Action.Obligation",
+                                   fy_var="Fiscal.Year",
+                                   deflator_var="OMB.2019"
+)
 
 # --------------------------------------------------------------------------------
 # reclassify vendor size
 
-engine_contracts$vendor_size <-
-  as.character(engine_contracts$vendor_size)
-engine_contracts$vendor_size[engine_contracts$vendor_size == "Medium <1B"] <-
+engine_contracts$Vendor.Size <-
+  as.character(engine_contracts$Vendor.Size)
+engine_contracts$Vendor.Size[engine_contracts$Vendor.Size == "Medium <1B"] <-
   "Medium"
-engine_contracts$vendor_size[engine_contracts$vendor_size == "Medium >1B"] <-
+engine_contracts$Vendor.Size[engine_contracts$Vendor.Size == "Medium >1B"] <-
   "Medium"
-engine_contracts$vendor_size[engine_contracts$vendor_size == "Small"] <-
+engine_contracts$Vendor.Size[engine_contracts$Vendor.Size == "Small"] <-
   "Small"
-engine_contracts$vendor_size[engine_contracts$vendor_size == "Large: Big 6"] <-
+engine_contracts$Vendor.Size[engine_contracts$Vendor.Size == "Large: Big 6"] <-
   "Big Five"
-engine_contracts$vendor_size[engine_contracts$vendor_size == "Large: Big 6 JV"] <-
+engine_contracts$Vendor.Size[engine_contracts$Vendor.Size == "Large: Big 6 JV"] <-
   "Big Five"
+
+
+#Classify Product or Service Codes
+engine_contracts<-csis360::read_and_join(engine_contracts,
+                                  "LOOKUP_Contractor_Size.csv",
+                                  # by="ProductOrServiceArea",
+                                  by="Vendor.Size",
+                                  # replace_na_var="ProductServiceOrRnDarea",
+                                  add_var="Vendor.Size.sum",
+                                  # path="https://raw.githubusercontent.com/CSISdefense/R-scripts-and-data/master/",
+                                  # dir="Lookups/"
+)
+
 
 # --------------------------------------------------------------------------------
-# reclassify competition
+# reclassify CompetitionClassification
 
-engine_contracts$competition <-
-  as.character(engine_contracts$competition)
+engine_contracts$CompetitionClassification <-
+  as.character(engine_contracts$CompetitionClassification)
 
-engine_contracts$competition[engine_contracts$competition == ""] <-
+engine_contracts$CompetitionClassification[engine_contracts$CompetitionClassification == ""] <-
   "Unlabeled"
-engine_contracts$competition[engine_contracts$competition == "NULL"] <-
+engine_contracts$CompetitionClassification[engine_contracts$CompetitionClassification == "NULL"] <-
   "Unlabeled"
-engine_contracts$competition[engine_contracts$competition == "Unlabeled: Blank Extent Competed"] <-
+engine_contracts$CompetitionClassification[engine_contracts$CompetitionClassification == "Unlabeled: Blank Extent Competed"] <-
   "Unlabeled"
-engine_contracts$competition[engine_contracts$competition == "Unlabeled: Blank Fair Opportunity"] <-
+engine_contracts$CompetitionClassification[engine_contracts$CompetitionClassification == "Unlabeled: Blank Fair Opportunity"] <-
   "Unlabeled"
-engine_contracts$competition[engine_contracts$competition == "Unlabeled: Competition; Zero Offers"] <-
+engine_contracts$CompetitionClassification[engine_contracts$CompetitionClassification == "Unlabeled: CompetitionClassification; Zero Offers"] <-
   "Unlabeled"
-engine_contracts$competition[engine_contracts$competition == "Unlabeled: No competition; multiple offers"] <-
+engine_contracts$CompetitionClassification[engine_contracts$CompetitionClassification == "Unlabeled: No CompetitionClassification; multiple offers"] <-
   "Unlabeled"
-engine_contracts$competition[engine_contracts$competition == "Unlabeled: No competition; multiple offers; Overrode blank Fair Opportunity)"] <-
+engine_contracts$CompetitionClassification[engine_contracts$CompetitionClassification == "Unlabeled: No CompetitionClassification; multiple offers; Overrode blank Fair Opportunity)"] <-
   "Unlabeled"
-engine_contracts$competition[engine_contracts$competition == "10-24 Offers"] <-
-  "Effective competition"
-engine_contracts$competition[engine_contracts$competition == "100+ Offers"] <-
-  "Effective competition"
-engine_contracts$competition[engine_contracts$competition == "25-99 Offers"] <-
-  "Effective competition"
-engine_contracts$competition[engine_contracts$competition == "3-4 Offers"] <-
-  "Effective competition"
-engine_contracts$competition[engine_contracts$competition == "5-9 Offers"] <-
-  "Effective competition"
-engine_contracts$competition[engine_contracts$competition == "Two Offers"] <-
-  "Effective competition"
-engine_contracts$competition[engine_contracts$competition == "No competition; Overrode blank Fair Opportunity)"] <-
-  "No competition"
-engine_contracts$competition[engine_contracts$competition == "One Offer"] <-
-  "Competition with single offer"
-engine_contracts$competition[engine_contracts$competition == "Effective Competition"] <-
-  "Effective competition"
+engine_contracts$CompetitionClassification[engine_contracts$CompetitionClassification == "10-24 Offers"] <-
+  "Effective CompetitionClassification"
+engine_contracts$CompetitionClassification[engine_contracts$CompetitionClassification == "100+ Offers"] <-
+  "Effective CompetitionClassification"
+engine_contracts$CompetitionClassification[engine_contracts$CompetitionClassification == "25-99 Offers"] <-
+  "Effective CompetitionClassification"
+engine_contracts$CompetitionClassification[engine_contracts$CompetitionClassification == "3-4 Offers"] <-
+  "Effective CompetitionClassification"
+engine_contracts$CompetitionClassification[engine_contracts$CompetitionClassification == "5-9 Offers"] <-
+  "Effective CompetitionClassification"
+engine_contracts$CompetitionClassification[engine_contracts$CompetitionClassification == "Two Offers"] <-
+  "Effective CompetitionClassification"
+engine_contracts$CompetitionClassification[engine_contracts$CompetitionClassification == "No CompetitionClassification; Overrode blank Fair Opportunity)"] <-
+  "No CompetitionClassification"
+engine_contracts$CompetitionClassification[engine_contracts$CompetitionClassification == "One Offer"] <-
+  "CompetitionClassification with single offer"
+engine_contracts$CompetitionClassification[engine_contracts$CompetitionClassification == "Effective CompetitionClassification"] <-
+  "Effective CompetitionClassification"
 
 # --------------------------------------------------------------------------------
 # reclassify contract type
 
-engine_contracts$contract_type <-
-  as.character(engine_contracts$contract_type)
+engine_contracts$Pricing.Mechanism <-
+  as.character(engine_contracts$Pricing.Mechanism)
 
-engine_contracts$contract_type[engine_contracts$contract_type == "Combination (two or more)"] <-
+engine_contracts$Pricing.Mechanism[engine_contracts$Pricing.Mechanism == "Combination (two or more)"] <-
   "Combination"
-engine_contracts$contract_type[engine_contracts$contract_type == "Cost No Fee"] <-
+engine_contracts$Pricing.Mechanism[engine_contracts$Pricing.Mechanism == "Cost No Fee"] <-
   "Cost Reimbursement"
-engine_contracts$contract_type[engine_contracts$contract_type == "Cost Plus Award Fee"] <-
+engine_contracts$Pricing.Mechanism[engine_contracts$Pricing.Mechanism == "Cost Plus Award Fee"] <-
   "Cost Reimbursement"
-engine_contracts$contract_type[engine_contracts$contract_type == "Cost Plus Fixed Fee"] <-
+engine_contracts$Pricing.Mechanism[engine_contracts$Pricing.Mechanism == "Cost Plus Fixed Fee"] <-
   "Cost Reimbursement"
-engine_contracts$contract_type[engine_contracts$contract_type == "Cost Plus Incentive"] <-
+engine_contracts$Pricing.Mechanism[engine_contracts$Pricing.Mechanism == "Cost Plus Incentive"] <-
   "Cost Reimbursement"
-engine_contracts$contract_type[engine_contracts$contract_type == "Cost Sharing"] <-
+engine_contracts$Pricing.Mechanism[engine_contracts$Pricing.Mechanism == "Cost Sharing"] <-
   "Cost Reimbursement"
-engine_contracts$contract_type[engine_contracts$contract_type == "Firm Fixed Price"] <-
+engine_contracts$Pricing.Mechanism[engine_contracts$Pricing.Mechanism == "Firm Fixed Price"] <-
   "Fixed Price"
-engine_contracts$contract_type[engine_contracts$contract_type == "Fixed Price Award Fee"] <-
+engine_contracts$Pricing.Mechanism[engine_contracts$Pricing.Mechanism == "Fixed Price Award Fee"] <-
   "Fixed Price"
-engine_contracts$contract_type[engine_contracts$contract_type == "Fixed Price Incentive"] <-
+engine_contracts$Pricing.Mechanism[engine_contracts$Pricing.Mechanism == "Fixed Price Incentive"] <-
   "Fixed Price"
-engine_contracts$contract_type[engine_contracts$contract_type == "Fixed Price Level of Effort"] <-
+engine_contracts$Pricing.Mechanism[engine_contracts$Pricing.Mechanism == "Fixed Price Level of Effort"] <-
   "Fixed Price"
-engine_contracts$contract_type[engine_contracts$contract_type == "Fixed Price Redetermination"] <-
+engine_contracts$Pricing.Mechanism[engine_contracts$Pricing.Mechanism == "Fixed Price Redetermination"] <-
   "Fixed Price"
-engine_contracts$contract_type[engine_contracts$contract_type == "Fixed Price with Economic Price Adjustment"] <-
+engine_contracts$Pricing.Mechanism[engine_contracts$Pricing.Mechanism == "Fixed Price with Economic Price Adjustment"] <-
   "Fixed Price"
-engine_contracts$contract_type[engine_contracts$contract_type == "Labor Hours"] <-
+engine_contracts$Pricing.Mechanism[engine_contracts$Pricing.Mechanism == "Labor Hours"] <-
   "Time and Materials"
-engine_contracts$contract_type[engine_contracts$contract_type == "Not Reported"] <-
+engine_contracts$Pricing.Mechanism[engine_contracts$Pricing.Mechanism == "Not Reported"] <-
   "Unlabeled"
-engine_contracts$contract_type[engine_contracts$contract_type == "Order Dependent (IDV only)"] <-
+engine_contracts$Pricing.Mechanism[engine_contracts$Pricing.Mechanism == "Order Dependent (IDV only)"] <-
   "Other"
-engine_contracts$contract_type[engine_contracts$contract_type == "Other (none of the above)"] <-
+engine_contracts$Pricing.Mechanism[engine_contracts$Pricing.Mechanism == "Other (none of the above)"] <-
   "Other"
-engine_contracts$contract_type[engine_contracts$contract_type == "Time and Materials"] <-
+engine_contracts$Pricing.Mechanism[engine_contracts$Pricing.Mechanism == "Time and Materials"] <-
   "Time and Materials"
-engine_contracts$contract_type[engine_contracts$contract_type == "NULL"] <-
+engine_contracts$Pricing.Mechanism[engine_contracts$Pricing.Mechanism == "NULL"] <-
   "Unlabeled"
 
 # --------------------------------------------------------------------------------
@@ -221,10 +252,10 @@ write.csv(engine_contracts, "app/power_bi.csv")
 
 (
   total <- engine_contracts %>%
-    group_by(fy) %>%
+    group_by(Fiscal.Year) %>%
     dplyr::summarise(amount = sum(amount, na.rm = TRUE)) %>%
     ggplot() +
-    geom_area(aes(y = amount, x = fy), alpha = .9 , stat = "identity") +
+    geom_area(aes(y = amount, x = Fiscal.Year), alpha = .9 , stat = "identity") +
     scale_x_continuous(
       breaks = seq(2000, 2020, by = 2),
       labels = function(x) {
@@ -251,13 +282,13 @@ ggsave(
 # engine contracts by vendor size 
 
 (
-  vendor_size <- engine_contracts %>%
-    filter(vendor_size != "Unlabeled") %>%
-    group_by(fy, vendor_size) %>%
+  Vendor.Size <- engine_contracts %>%
+    filter(Vendor.Size != "Unlabeled") %>%
+    group_by(Fiscal.Year, Vendor.Size) %>%
     dplyr::summarise(amount = sum(amount, na.rm = TRUE)) %>%
     ggplot() +
-    geom_area(aes(y = amount, x = fy), alpha = .9, stat = "identity") +
-    facet_wrap(~ vendor_size, nrow = 2) +
+    geom_area(aes(y = amount, x = Fiscal.Year), alpha = .9, stat = "identity") +
+    facet_wrap(~ Vendor.Size, nrow = 2) +
     chart_theme +
     ggtitle("DoD aircraft engine contract obligations by vendor size") +
     xlab("fiscal year") +
@@ -273,7 +304,7 @@ ggsave(
 
 ggsave(
   "charts/amount_vendor_size.svg",
-  vendor_size,
+  Vendor.Size,
   device = "svg",
   width = 8,
   height = 6,
@@ -281,19 +312,19 @@ ggsave(
 )
 
 # --------------------------------------------------------------------------------
-# engine contracts by competition  
+# engine contracts by CompetitionClassification  
 
 (
-  competition <- engine_contracts %>%
-    filter(competition != "Unlabeled") %>%
-    group_by(fy, competition) %>%
+  CompetitionClassification <- engine_contracts %>%
+    filter(CompetitionClassification != "Unlabeled") %>%
+    group_by(Fiscal.Year, CompetitionClassification) %>%
     dplyr::summarise(amount = sum(amount, na.rm = TRUE)) %>%
-    mutate(competition = factor(
-      competition,
+    mutate(CompetitionClassification = factor(
+      CompetitionClassification,
       levels = c(
-        "Effective competition",
-        "Competition with single offer",
-        "No competition"
+        "Effective CompetitionClassification",
+        "CompetitionClassification with single offer",
+        "No CompetitionClassification"
       )
     )) %>%
     ggplot() +
@@ -303,10 +334,10 @@ ggsave(
         substring(as.character(x), 3, 4)
       }
     ) +
-    geom_area(aes(y = amount, x = fy), alpha = .9, stat = "identity") +
-    facet_wrap(~ competition, nrow = 1) +
+    geom_area(aes(y = amount, x = Fiscal.Year), alpha = .9, stat = "identity") +
+    facet_wrap(~ CompetitionClassification, nrow = 1) +
     chart_theme +
-    ggtitle("DoD aircraft engine contract obligations by competition") +
+    ggtitle("DoD aircraft engine contract obligations by CompetitionClassification") +
     xlab("fiscal year") +
     ylab("constant fy19 dollars") +
     scale_y_continuous(labels = money_labels) +
@@ -320,7 +351,7 @@ ggsave(
 
 ggsave(
   "charts/amount_competition.svg",
-  competition,
+  CompetitionClassification,
   device = "svg",
   width = 8,
   height = 4,
@@ -331,12 +362,12 @@ ggsave(
 # engine contracts by contract type 
 
 (
-  contract_type <- engine_contracts %>%
-    filter(contract_type != "Other") %>%
-    group_by(fy, contract_type) %>%
+  Pricing.Mechanism <- engine_contracts %>%
+    filter(Pricing.Mechanism != "Other") %>%
+    group_by(Fiscal.Year, Pricing.Mechanism) %>%
     dplyr::summarise(amount = sum(amount, na.rm = TRUE)) %>%
-    mutate(contract_type = factor(
-      contract_type,
+    mutate(Pricing.Mechanism = factor(
+      Pricing.Mechanism,
       levels = c(
         "Cost Reimbursement",
         "Combination",
@@ -352,8 +383,8 @@ ggsave(
         substring(as.character(x), 3, 4)
       }
     ) +
-    geom_area(aes(y = amount, x = fy), alpha = .9, stat = "identity") +
-    facet_wrap(~ contract_type, nrow = 1) +
+    geom_area(aes(y = amount, x = Fiscal.Year), alpha = .9, stat = "identity") +
+    facet_wrap(~ Pricing.Mechanism, nrow = 1) +
     chart_theme +
     ggtitle("DoD aircraft engine contract obligations by contract type") +
     xlab("fiscal year") +
@@ -369,7 +400,7 @@ ggsave(
 
 ggsave(
   "charts/amount_contract_type.svg",
-  contract_type,
+  Pricing.Mechanism,
   device = "svg",
   width = 12,
   height = 4,
@@ -377,104 +408,104 @@ ggsave(
 )
 
 # --------------------------------------------------------------------------------
-# super facet: engine contracts by service and category
+# super facet: engine contracts by service and SimpleArea
 
 total <- engine_contracts %>%
-  group_by(fy) %>%
+  group_by(Fiscal.Year) %>%
   dplyr::summarise(amount = sum(amount, na.rm = TRUE)) %>%
-  mutate(category = "Total") %>%
+  mutate(SimpleArea = "Total") %>%
   as.data.frame(.)
 
 total_category <- engine_contracts %>%
-  group_by(fy, category) %>%
+  group_by(Fiscal.Year, SimpleArea) %>%
   dplyr::summarise(amount = sum(amount, na.rm = TRUE)) %>%
   as.data.frame(.)
 
 total <- total %>%
   rbind(total_category) %>%
-  mutate(customer = "Total")
+  mutate(Customer = "Total")
 
 army <- engine_contracts %>%
-  filter(customer == "Army") %>%
-  group_by(fy) %>%
+  filter(Customer == "Army") %>%
+  group_by(Fiscal.Year) %>%
   dplyr::summarise(amount = sum(amount, na.rm = TRUE)) %>%
-  mutate(category = "Total") %>%
+  mutate(SimpleArea = "Total") %>%
   as.data.frame(.)
 
 army_category <- engine_contracts %>%
-  filter(customer == "Army") %>%
-  group_by(fy, category) %>%
+  filter(Customer == "Army") %>%
+  group_by(Fiscal.Year, SimpleArea) %>%
   dplyr::summarise(amount = sum(amount, na.rm = TRUE)) %>%
   as.data.frame(.)
 
 army <- army %>%
   rbind(army_category) %>%
-  mutate(customer = "Army")
+  mutate(Customer = "Army")
 
 navy <- engine_contracts %>%
-  group_by(fy) %>%
-  filter(customer == "Navy") %>%
+  group_by(Fiscal.Year) %>%
+  filter(Customer == "Navy") %>%
   dplyr::summarise(amount = sum(amount, na.rm = TRUE)) %>%
-  mutate(category = "Total") %>%
-  mutate(category = as.factor(category)) %>%
+  mutate(SimpleArea = "Total") %>%
+  mutate(SimpleArea = as.factor(SimpleArea)) %>%
   as.data.frame(.)
 
 navy_category <- engine_contracts %>%
-  filter(customer == "Navy") %>%
-  group_by(fy, category) %>%
+  filter(Customer == "Navy") %>%
+  group_by(Fiscal.Year, SimpleArea) %>%
   dplyr::summarise(amount = sum(amount, na.rm = TRUE)) %>%
   as.data.frame(.)
 
 navy <- navy %>%
   rbind(navy_category) %>%
-  mutate(customer = "Navy")
+  mutate(Customer = "Navy")
 
 air_force <- engine_contracts %>%
-  group_by(fy) %>%
-  filter(customer == "Air Force") %>%
+  group_by(Fiscal.Year) %>%
+  filter(Customer == "Air Force") %>%
   dplyr::summarise(amount = sum(amount, na.rm = TRUE)) %>%
-  mutate(category = "Total") %>%
-  mutate(category = as.factor(category)) %>%
+  mutate(SimpleArea = "Total") %>%
+  mutate(SimpleArea = as.factor(SimpleArea)) %>%
   as.data.frame(.)
 
 air_force_category <- engine_contracts %>%
-  filter(customer == "Air Force") %>%
-  group_by(fy, category) %>%
+  filter(Customer == "Air Force") %>%
+  group_by(Fiscal.Year, SimpleArea) %>%
   dplyr::summarise(amount = sum(amount, na.rm = TRUE)) %>%
   as.data.frame(.)
 
 air_force <- air_force %>%
   rbind(air_force_category) %>%
-  mutate(customer = "Air Force")
+  mutate(Customer = "Air Force")
 
 dla <- engine_contracts %>%
-  group_by(fy) %>%
-  filter(customer == "DLA") %>%
+  group_by(Fiscal.Year) %>%
+  filter(Customer == "DLA") %>%
   dplyr::summarise(amount = sum(amount, na.rm = TRUE)) %>%
-  mutate(category = "Total") %>%
-  mutate(category = as.factor(category)) %>%
+  mutate(SimpleArea = "Total") %>%
+  mutate(SimpleArea = as.factor(SimpleArea)) %>%
   as.data.frame(.)
 
 dla_category <- engine_contracts %>%
-  filter(customer == "DLA") %>%
-  group_by(fy, category) %>%
+  filter(Customer == "DLA") %>%
+  group_by(Fiscal.Year, SimpleArea) %>%
   dplyr::summarise(amount = sum(amount, na.rm = TRUE)) %>%
   as.data.frame(.)
 
 dla <- dla %>%
   rbind(dla_category) %>%
-  mutate(customer = "DLA")
+  mutate(Customer = "DLA")
 
 (
   super_facet <- total %>%
     rbind(army, navy, air_force, dla) %>%
     mutate(
-      customer = factor(customer, levels = c("Army",
+      Customer = factor(Customer, levels = c("Army",
                                              "Navy",
                                              "Air Force",
                                              "DLA",
                                              "Total")),
-      category = factor(category, levels = c("Products",
+      SimpleArea = factor(SimpleArea, levels = c("Products",
                                              "Services",
                                              "R&D",
                                              "Total"))
@@ -487,12 +518,12 @@ dla <- dla %>%
         substring(as.character(x), 3, 4)
       }
     ) +
-    geom_area(aes(x = fy, y = amount), alpha = .9) +
-    facet_grid(customer ~ category) +
+    geom_area(aes(x = Fiscal.Year, y = amount), alpha = .9) +
+    facet_grid(Customer ~ SimpleArea) +
     chart_theme +
     xlab("fiscal year") +
     ylab("constant fy19 dollars") +
-    ggtitle("DoD Aircraft Engine Contract Obligations by service and category") +
+    ggtitle("DoD Aircraft Engine Contract Obligations by service and SimpleArea") +
     scale_y_continuous(labels = money_labels) +
     scale_x_continuous(
       breaks = seq(2000, 2020, by = 2),
@@ -523,28 +554,28 @@ topline_contracts <- topline_contracts %>%
   mutate(type = "Topline")
 
 engine_contracts <- engine_contracts %>%
-  select(fy, customer, category, amount, type)
+  select(Fiscal.Year, Customer, SimpleArea, amount, type)
 
 comparison_contracts_og <- engine_contracts %>%
   rbind(topline_contracts) %>%
-  group_by(fy, type) %>%
+  group_by(Fiscal.Year, type) %>%
   dplyr::summarise(amount = sum(amount, na.rm = TRUE))
 
 dyear <- comparison_contracts_og %>%
-  dplyr::rename(fyb = fy) %>%
-  mutate(fy = fyb + 1) %>%
+  dplyr::rename(fyb = Fiscal.Year) %>%
+  mutate(Fiscal.Year = fyb + 1) %>%
   select(-fyb)
 
 (
   comparison_contracts <- comparison_contracts_og %>%
-    left_join(dyear, by = c("fy", "type")) %>%
-    filter(fy >= 2001) %>%
-    select(fy, amount.x, amount.y, type) %>%
+    left_join(dyear, by = c("Fiscal.Year", "type")) %>%
+    filter(Fiscal.Year >= 2001) %>%
+    select(Fiscal.Year, amount.x, amount.y, type) %>%
     mutate(amount_change = amount.x - amount.y) %>%
     mutate(amount_percent_change = (amount_change) / amount.y * 100) %>%
     dplyr::rename(amount = amount.x) %>%
-    select(fy, amount, amount_change, amount_percent_change, type) %>%
-    group_by(fy, type) %>%
+    select(Fiscal.Year, amount, amount_change, amount_percent_change, type) %>%
+    group_by(Fiscal.Year, type) %>%
     dplyr::summarise(
       amount = sum(amount, na.rm = TRUE),
       amount_change = sum(amount_change, na.rm = TRUE),
@@ -553,49 +584,49 @@ dyear <- comparison_contracts_og %>%
 )
 
 # --------------------------------------------------------------------------------
-# percent change comparison by customer
+# percent change comparison by Customer
 
 base_year <- engine_contracts %>%
   as.tibble(.) %>%
-  group_by(fy, type, customer) %>%
+  group_by(Fiscal.Year, type, Customer) %>%
   dplyr::summarise(amount = sum(amount, na.rm = TRUE))
 
 dyear <- base_year %>%
-  filter(fy == 2000) %>%
-  select(amount, type, customer)
+  filter(Fiscal.Year == 2000) %>%
+  select(amount, type, Customer)
 
 base_year.eng <- base_year %>%
-  left_join(dyear, by = c("type", "customer")) %>%
-  filter(customer != "Other DoD") %>%
-  select(-fy.y) %>%
+  left_join(dyear, by = c("type", "Customer")) %>%
+  filter(Customer != "Other DoD") %>%
+  select(-Fiscal.Year.y) %>%
   mutate(amount_change = amount.x - amount.y) %>%
   mutate(amount_percent_change = (amount_change) / amount.y * 100) %>%
   mutate(base = 0) %>%
   mutate(amount = base + amount_percent_change) %>%
-  dplyr::rename(fy = fy.x) %>%
-  group_by(fy, customer) %>%
+  dplyr::rename(Fiscal.Year = Fiscal.Year.x) %>%
+  group_by(Fiscal.Year, Customer) %>%
   dplyr::summarise(amount = sum(amount, na.rm = TRUE)) %>%
   mutate(data_type = "engine") %>%
   mutate(amount = amount / 100)
 
 base_year <- topline_contracts %>%
-  group_by(fy, type, customer) %>%
+  group_by(Fiscal.Year, type, Customer) %>%
   dplyr::summarise(amount = sum(amount, na.rm = TRUE))
 
 dyear <- base_year %>%
-  filter(fy == 2000) %>%
-  select(amount, type, customer)
+  filter(Fiscal.Year == 2000) %>%
+  select(amount, type, Customer)
 
 base_year.top <- base_year %>%
-  left_join(dyear, by = c("type", "customer")) %>%
-  filter(customer != "Other DoD") %>%
-  select(-fy.y) %>%
+  left_join(dyear, by = c("type", "Customer")) %>%
+  filter(Customer != "Other DoD") %>%
+  select(-Fiscal.Year.y) %>%
   mutate(amount_change = amount.x - amount.y) %>%
   mutate(amount_percent_change = (amount_change) / amount.y * 100) %>%
   mutate(base = 0) %>%
   mutate(amount = base + amount_percent_change) %>%
-  dplyr::rename(fy = fy.x) %>%
-  group_by(fy, customer) %>%
+  dplyr::rename(Fiscal.Year = Fiscal.Year.x) %>%
+  group_by(Fiscal.Year, Customer) %>%
   dplyr::summarise(amount = sum(amount, na.rm = TRUE)) %>%
   mutate(data_type = "topline") %>%
   mutate(amount = amount / 100)
@@ -604,9 +635,9 @@ eng.topline <- rbind(base_year.eng, base_year.top)
 
 (
   eng.topline1 <- eng.topline %>%
-    filter(customer != "NULL" & customer != "MDA") %>%
-    mutate(customer = factor(
-      customer, levels = c("Total",
+    filter(Customer != "NULL" & Customer != "MDA") %>%
+    mutate(Customer = factor(
+      Customer, levels = c("Total",
                            "Army",
                            "Navy",
                            "Air Force",
@@ -615,7 +646,7 @@ eng.topline <- rbind(base_year.eng, base_year.top)
     mutate(data_type = factor(data_type, levels = c("topline", "engine"))) %>%
     ggplot() +
     geom_line(
-      aes(x = fy, y = amount),
+      aes(x = Fiscal.Year, y = amount),
       alpha = .9,
       color = "#554449",
       size = 1
@@ -628,7 +659,7 @@ eng.topline <- rbind(base_year.eng, base_year.top)
       linetype = "dotted"
     ) +
     
-    facet_grid(data_type ~ customer) +
+    facet_grid(data_type ~ Customer) +
     chart_theme +
     #scale_x_continuous(breaks = seq(2000, 2020, by = 2),
     #labels = function(x) {substring(as.character(x), 3, 4)})+
@@ -655,49 +686,49 @@ ggsave(
 )
 
 # --------------------------------------------------------------------------------
-# percent change comparison by category 
+# percent change comparison by SimpleArea 
 
 base_year <- engine_contracts %>%
   as.tibble(.) %>%
-  group_by(fy, type, category) %>%
+  group_by(Fiscal.Year, type, SimpleArea) %>%
   dplyr::summarise(amount = sum(amount, na.rm = TRUE))
 
 dyear <- base_year %>%
-  filter(fy == 2000) %>%
-  select(amount, type, category)
+  filter(Fiscal.Year == 2000) %>%
+  select(amount, type, SimpleArea)
 
 base_year.eng <- base_year %>%
-  left_join(dyear, by = c("type", "category")) %>%
-  filter(category != "Services") %>%
-  select(-fy.y) %>%
+  left_join(dyear, by = c("type", "SimpleArea")) %>%
+  filter(SimpleArea != "Services") %>%
+  select(-Fiscal.Year.y) %>%
   mutate(amount_change = amount.x - amount.y) %>%
   mutate(amount_percent_change = (amount_change) / amount.y * 100) %>%
   mutate(base = 0) %>%
   mutate(amount = base + amount_percent_change) %>%
-  dplyr::rename(fy = fy.x) %>%
-  group_by(fy, category) %>%
+  dplyr::rename(Fiscal.Year = Fiscal.Year.x) %>%
+  group_by(Fiscal.Year, SimpleArea) %>%
   dplyr::summarise(amount = sum(amount, na.rm = TRUE)) %>%
   mutate(data_type = "engine") %>%
   mutate(amount = amount / 100)
 
 base_year <- topline_contracts %>%
-  group_by(fy, type, category) %>%
+  group_by(Fiscal.Year, type, SimpleArea) %>%
   dplyr::summarise(amount = sum(amount, na.rm = TRUE))
 
 dyear <- base_year %>%
-  filter(fy == 2000) %>%
-  select(amount, type, category)
+  filter(Fiscal.Year == 2000) %>%
+  select(amount, type, SimpleArea)
 
 base_year.top <- base_year %>%
-  left_join(dyear, by = c("type", "category")) %>%
-  filter(category != "Services") %>%
-  select(-fy.y) %>%
+  left_join(dyear, by = c("type", "SimpleArea")) %>%
+  filter(SimpleArea != "Services") %>%
+  select(-Fiscal.Year.y) %>%
   mutate(amount_change = amount.x - amount.y) %>%
   mutate(amount_percent_change = (amount_change) / amount.y * 100) %>%
   mutate(base = 0) %>%
   mutate(amount = base + amount_percent_change) %>%
-  dplyr::rename(fy = fy.x) %>%
-  group_by(fy, category) %>%
+  dplyr::rename(Fiscal.Year = Fiscal.Year.x) %>%
+  group_by(Fiscal.Year, SimpleArea) %>%
   dplyr::summarise(amount = sum(amount, na.rm = TRUE)) %>%
   mutate(data_type = "topline") %>%
   mutate(amount = amount / 100)
@@ -706,14 +737,14 @@ eng.topline <- rbind(base_year.eng, base_year.top)
 
 (
   eng.topline1 <- eng.topline %>%
-    filter(category != "NULL" & category != "MDA") %>%
-    mutate(category = factor(category, levels = c("Products",
+    filter(SimpleArea != "NULL" & SimpleArea != "MDA") %>%
+    mutate(SimpleArea = factor(SimpleArea, levels = c("Products",
                                                   # "Services",
                                                   "R&D"))) %>%
     mutate(data_type = factor(data_type, levels = c("topline", "engine"))) %>%
     ggplot() +
     geom_line(
-      aes(x = fy, y = amount),
+      aes(x = Fiscal.Year, y = amount),
       alpha = .9,
       color = "#554449",
       size = 1
@@ -725,7 +756,7 @@ eng.topline <- rbind(base_year.eng, base_year.top)
       size = .5,
       linetype = "dotted"
     ) +
-    facet_grid(data_type ~ category) +
+    facet_grid(data_type ~ SimpleArea) +
     chart_theme +
     ggtitle("Change in aircraft engine contract obligations") +
     xlab("fiscal year") +
@@ -753,44 +784,44 @@ ggsave(
 
 base_year <- engine_contracts %>%
   as.tibble(.) %>%
-  group_by(fy, type) %>%
+  group_by(Fiscal.Year, type) %>%
   dplyr::summarise(amount = sum(amount, na.rm = TRUE))
 
 dyear <- base_year %>%
-  filter(fy == 2000) %>%
+  filter(Fiscal.Year == 2000) %>%
   select(amount, type)
 
 base_year.eng <- base_year %>%
   left_join(dyear, by = "type") %>%
-  select(-fy.y) %>%
+  select(-Fiscal.Year.y) %>%
   mutate(amount_change = amount.x - amount.y) %>%
   mutate(amount_percent_change = (amount_change) / amount.y * 100) %>%
   mutate(base = 0) %>%
   mutate(amount = base + amount_percent_change) %>%
-  dplyr::rename(fy = fy.x) %>%
-  group_by(fy) %>%
+  dplyr::rename(Fiscal.Year = Fiscal.Year.x) %>%
+  group_by(Fiscal.Year) %>%
   dplyr::summarise(amount = sum(amount, na.rm = TRUE)) %>%
   mutate(data_type = "engine") %>%
   mutate(amount = amount / 100)
 
 base_year <- topline_contracts %>%
-  group_by(fy, type) %>%
+  group_by(Fiscal.Year, type) %>%
   dplyr::summarise(amount = sum(amount, na.rm = TRUE))
 
 dyear <- base_year %>%
-  filter(fy == 2000) %>%
+  filter(Fiscal.Year == 2000) %>%
   select(amount, type)
 
 (
   base_year.top <- base_year %>%
     left_join(dyear, by = "type") %>%
-    select(-fy.y) %>%
+    select(-Fiscal.Year.y) %>%
     mutate(amount_change = amount.x - amount.y) %>%
     mutate(amount_percent_change = (amount_change) / amount.y * 100) %>%
     mutate(base = 0) %>%
     mutate(amount = base + amount_percent_change) %>%
-    dplyr::rename(fy = fy.x) %>%
-    group_by(fy) %>%
+    dplyr::rename(Fiscal.Year = Fiscal.Year.x) %>%
+    group_by(Fiscal.Year) %>%
     dplyr::summarise(amount = sum(amount, na.rm = TRUE)) %>%
     mutate(data_type = "topline") %>%
     mutate(amount = amount / 100)
@@ -803,7 +834,7 @@ eng.topline <- rbind(base_year.eng, base_year.top)
     mutate(data_type = factor(data_type, levels = c("topline", "engine"))) %>%
     ggplot() +
     geom_line(
-      aes(x = fy, y = amount),
+      aes(x = Fiscal.Year, y = amount),
       alpha = .9,
       color = "#554449",
       size = 1

@@ -1,3 +1,5 @@
+library(ggplot2)
+
 chart_theme <- theme(
   plot.title = element_text(
     family = "Open Sans",
