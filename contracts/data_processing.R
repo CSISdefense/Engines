@@ -130,7 +130,7 @@ topline_contracts<-csis360::deflate(data=topline_contracts,
 )
 
 # --------------------------------------------------------------------------------
-# reclassify vendor size
+# reclassify Vendor Size
 # 
 # engine_contracts$Vendor.Size <-
 #   as.character(engine_contracts$Vendor.Size)
@@ -272,7 +272,8 @@ biz_engine_contracts<-engine_contracts %>% dplyr::rename(
 )
 
 write.csv(biz_engine_contracts, "contracts/app/power_bi.csv")
-
+save(topline_contracts ,engine_contracts,file="contracts/app/engine_contract.Rdata")
+# load(file="contracts/app/engine_contract.Rdata")
 # ================================================================================
 # charting engines 
 # --------------------------------------------------------------------------------
@@ -281,9 +282,9 @@ write.csv(biz_engine_contracts, "contracts/app/power_bi.csv")
 (
   total <- engine_contracts %>%
     group_by(Fiscal.Year) %>%
-    dplyr::summarise(amount = sum(amount, na.rm = TRUE)) %>%
+    dplyr::summarise(amount.OMB.2019 = sum(amount.OMB.2019, na.rm = TRUE)) %>%
     ggplot() +
-    geom_area(aes(y = amount, x = Fiscal.Year), alpha = .9 , stat = "identity") +
+    geom_area(aes(y = amount.OMB.2019, x = Fiscal.Year), alpha = .9 , stat = "identity") +
     scale_x_continuous(
       breaks = seq(2000, 2020, by = 2),
       labels = function(x) {
@@ -292,13 +293,13 @@ write.csv(biz_engine_contracts, "contracts/app/power_bi.csv")
     ) +
     scale_y_continuous(labels = money_labels) +
     chart_theme +
-    ggtitle("DoD aircraft engine contract obligations") +
-    xlab("fiscal year") +
-    ylab("constant fy19 dollars")
+    ggtitle("DoD Aircraft Engine Contract Obligations") +
+    xlab("Fiscal Year") +
+    ylab("Constant 2019 $")
 )
 
 ggsave(
-  "charts/amount_total.svg",
+  "contracts/charts/amount_total.svg",
   total,
   device = "svg",
   width = 8,
@@ -307,20 +308,20 @@ ggsave(
 )
 
 # --------------------------------------------------------------------------------
-# engine contracts by vendor size 
-
+# engine contracts by Vendor Size 
+engine_contracts$Vendor.Size<-factor(engine_contracts$Vendor.Size,c("Large (Big 5)" ,"Large","Medium",        "Small",         "Unlabeled" ))
 (
   Vendor.Size <- engine_contracts %>%
     filter(Vendor.Size != "Unlabeled") %>%
     group_by(Fiscal.Year, Vendor.Size) %>%
-    dplyr::summarise(amount = sum(amount, na.rm = TRUE)) %>%
+    dplyr::summarise(amount.OMB.2019 = sum(amount.OMB.2019, na.rm = TRUE)) %>%
     ggplot() +
-    geom_area(aes(y = amount, x = Fiscal.Year), alpha = .9, stat = "identity") +
+    geom_area(aes(y = amount.OMB.2019, x = Fiscal.Year), alpha = .9, stat = "identity") +
     facet_wrap(~ Vendor.Size, nrow = 2) +
     chart_theme +
-    ggtitle("DoD aircraft engine contract obligations by vendor size") +
-    xlab("fiscal year") +
-    ylab("constant fy19 dollars") +
+    ggtitle("DoD Aircraft Engine Contract Obligations by Vendor Size") +
+    xlab("Fiscal Year") +
+    ylab("Constant 2019 $") +
     scale_y_continuous(labels = money_labels) +
     scale_x_continuous(
       breaks = seq(2000, 2020, by = 2),
@@ -331,7 +332,7 @@ ggsave(
 )
 
 ggsave(
-  "charts/amount_vendor_size.svg",
+  "contracts/charts/amount_vendor_size.svg",
   Vendor.Size,
   device = "svg",
   width = 8,
@@ -341,18 +342,24 @@ ggsave(
 
 # --------------------------------------------------------------------------------
 # engine contracts by CompetitionClassification  
-
+engine_contracts$Competiton<-factor(engine_contracts$Competition.multisum,
+                                    levels=c("2+ Offers" ,"1 Offer"   ,"No Comp.",  "Unlabeled"),
+                                    values=c())
+levels(factor(engine_contracts$Competition.multisum))
 (
-  CompetitionClassification <- engine_contracts %>%
-    filter(CompetitionClassification != "Unlabeled") %>%
-    group_by(Fiscal.Year, CompetitionClassification) %>%
-    dplyr::summarise(amount = sum(amount, na.rm = TRUE)) %>%
-    mutate(CompetitionClassification = factor(
-      CompetitionClassification,
-      levels = c(
-        "Effective CompetitionClassification",
-        "CompetitionClassification with single offer",
-        "No CompetitionClassification"
+  Competition.multisum <- engine_contracts %>%
+    filter(Competition.multisum != "Unlabeled") %>%
+    group_by(Fiscal.Year, Competition.multisum) %>%
+    dplyr::summarise(amount.OMB.2019 = sum(amount.OMB.2019, na.rm = TRUE)) %>%
+    mutate(Competiton = factor(
+      Competition.multisum,
+      levels=c("2+ Offers" ,
+               "1 Offer"   ,
+               "No Comp."),
+      labels = c(
+        "Effective Competition",
+        "Competition with single offer",
+        "No Competition"
       )
     )) %>%
     ggplot() +
@@ -362,12 +369,12 @@ ggsave(
         substring(as.character(x), 3, 4)
       }
     ) +
-    geom_area(aes(y = amount, x = Fiscal.Year), alpha = .9, stat = "identity") +
-    facet_wrap(~ CompetitionClassification, nrow = 1) +
+    geom_area(aes(y = amount.OMB.2019, x = Fiscal.Year), alpha = .9, stat = "identity") +
+    facet_wrap(~ Competition.multisum, nrow = 1) +
     chart_theme +
-    ggtitle("DoD aircraft engine contract obligations by CompetitionClassification") +
-    xlab("fiscal year") +
-    ylab("constant fy19 dollars") +
+    ggtitle("DoD Aircraft Engine Contract Obligations by Extent of Competition") +
+    xlab("Fiscal Year") +
+    ylab("Constant 2019 $") +
     scale_y_continuous(labels = money_labels) +
     scale_x_continuous(
       breaks = seq(2000, 2020, by = 2),
@@ -378,8 +385,8 @@ ggsave(
 )
 
 ggsave(
-  "charts/amount_competition.svg",
-  CompetitionClassification,
+  "contracts/charts/amount_competition.svg",
+  Competition.multisum,
   device = "svg",
   width = 8,
   height = 4,
@@ -393,7 +400,7 @@ ggsave(
   Pricing.Mechanism <- engine_contracts %>%
     filter(Pricing.Mechanism != "Other") %>%
     group_by(Fiscal.Year, Pricing.Mechanism) %>%
-    dplyr::summarise(amount = sum(amount, na.rm = TRUE)) %>%
+    dplyr::summarise(amount.OMB.2019 = sum(amount.OMB.2019, na.rm = TRUE)) %>%
     mutate(Pricing.Mechanism = factor(
       Pricing.Mechanism,
       levels = c(
@@ -411,12 +418,12 @@ ggsave(
         substring(as.character(x), 3, 4)
       }
     ) +
-    geom_area(aes(y = amount, x = Fiscal.Year), alpha = .9, stat = "identity") +
+    geom_area(aes(y = amount.OMB.2019, x = Fiscal.Year), alpha = .9, stat = "identity") +
     facet_wrap(~ Pricing.Mechanism, nrow = 1) +
     chart_theme +
-    ggtitle("DoD aircraft engine contract obligations by contract type") +
-    xlab("fiscal year") +
-    ylab("constant fy19 dollars") +
+    ggtitle("DoD Aircraft Engine Contract Obligations by contract type") +
+    xlab("Fiscal Year") +
+    ylab("Constant 2019 $") +
     scale_y_continuous(labels = money_labels) +
     scale_x_continuous(
       breaks = seq(2000, 2020, by = 2),
@@ -427,7 +434,7 @@ ggsave(
 )
 
 ggsave(
-  "charts/amount_contract_type.svg",
+  "contracts/charts/amount_contract_type.svg",
   Pricing.Mechanism,
   device = "svg",
   width = 12,
@@ -440,13 +447,13 @@ ggsave(
 
 total <- engine_contracts %>%
   group_by(Fiscal.Year) %>%
-  dplyr::summarise(amount = sum(amount, na.rm = TRUE)) %>%
+  dplyr::summarise(amount.OMB.2019 = sum(amount.OMB.2019, na.rm = TRUE)) %>%
   mutate(SimpleArea = "Total") %>%
   as.data.frame(.)
 
 total_category <- engine_contracts %>%
   group_by(Fiscal.Year, SimpleArea) %>%
-  dplyr::summarise(amount = sum(amount, na.rm = TRUE)) %>%
+  dplyr::summarise(amount.OMB.2019 = sum(amount.OMB.2019, na.rm = TRUE)) %>%
   as.data.frame(.)
 
 total <- total %>%
@@ -456,14 +463,14 @@ total <- total %>%
 army <- engine_contracts %>%
   filter(Customer == "Army") %>%
   group_by(Fiscal.Year) %>%
-  dplyr::summarise(amount = sum(amount, na.rm = TRUE)) %>%
+  dplyr::summarise(amount.OMB.2019 = sum(amount.OMB.2019, na.rm = TRUE)) %>%
   mutate(SimpleArea = "Total") %>%
   as.data.frame(.)
 
 army_category <- engine_contracts %>%
   filter(Customer == "Army") %>%
   group_by(Fiscal.Year, SimpleArea) %>%
-  dplyr::summarise(amount = sum(amount, na.rm = TRUE)) %>%
+  dplyr::summarise(amount.OMB.2019 = sum(amount.OMB.2019, na.rm = TRUE)) %>%
   as.data.frame(.)
 
 army <- army %>%
@@ -473,7 +480,7 @@ army <- army %>%
 navy <- engine_contracts %>%
   group_by(Fiscal.Year) %>%
   filter(Customer == "Navy") %>%
-  dplyr::summarise(amount = sum(amount, na.rm = TRUE)) %>%
+  dplyr::summarise(amount.OMB.2019 = sum(amount.OMB.2019, na.rm = TRUE)) %>%
   mutate(SimpleArea = "Total") %>%
   mutate(SimpleArea = as.factor(SimpleArea)) %>%
   as.data.frame(.)
@@ -481,7 +488,7 @@ navy <- engine_contracts %>%
 navy_category <- engine_contracts %>%
   filter(Customer == "Navy") %>%
   group_by(Fiscal.Year, SimpleArea) %>%
-  dplyr::summarise(amount = sum(amount, na.rm = TRUE)) %>%
+  dplyr::summarise(amount.OMB.2019 = sum(amount.OMB.2019, na.rm = TRUE)) %>%
   as.data.frame(.)
 
 navy <- navy %>%
@@ -491,7 +498,7 @@ navy <- navy %>%
 air_force <- engine_contracts %>%
   group_by(Fiscal.Year) %>%
   filter(Customer == "Air Force") %>%
-  dplyr::summarise(amount = sum(amount, na.rm = TRUE)) %>%
+  dplyr::summarise(amount.OMB.2019 = sum(amount.OMB.2019, na.rm = TRUE)) %>%
   mutate(SimpleArea = "Total") %>%
   mutate(SimpleArea = as.factor(SimpleArea)) %>%
   as.data.frame(.)
@@ -499,7 +506,7 @@ air_force <- engine_contracts %>%
 air_force_category <- engine_contracts %>%
   filter(Customer == "Air Force") %>%
   group_by(Fiscal.Year, SimpleArea) %>%
-  dplyr::summarise(amount = sum(amount, na.rm = TRUE)) %>%
+  dplyr::summarise(amount.OMB.2019 = sum(amount.OMB.2019, na.rm = TRUE)) %>%
   as.data.frame(.)
 
 air_force <- air_force %>%
@@ -509,7 +516,7 @@ air_force <- air_force %>%
 dla <- engine_contracts %>%
   group_by(Fiscal.Year) %>%
   filter(Customer == "DLA") %>%
-  dplyr::summarise(amount = sum(amount, na.rm = TRUE)) %>%
+  dplyr::summarise(amount.OMB.2019 = sum(amount.OMB.2019, na.rm = TRUE)) %>%
   mutate(SimpleArea = "Total") %>%
   mutate(SimpleArea = as.factor(SimpleArea)) %>%
   as.data.frame(.)
@@ -517,7 +524,7 @@ dla <- engine_contracts %>%
 dla_category <- engine_contracts %>%
   filter(Customer == "DLA") %>%
   group_by(Fiscal.Year, SimpleArea) %>%
-  dplyr::summarise(amount = sum(amount, na.rm = TRUE)) %>%
+  dplyr::summarise(amount.OMB.2019 = sum(amount.OMB.2019, na.rm = TRUE)) %>%
   as.data.frame(.)
 
 dla <- dla %>%
@@ -546,11 +553,11 @@ dla <- dla %>%
         substring(as.character(x), 3, 4)
       }
     ) +
-    geom_area(aes(x = Fiscal.Year, y = amount), alpha = .9) +
+    geom_area(aes(x = Fiscal.Year, y = amount.OMB.2019), alpha = .9) +
     facet_grid(Customer ~ SimpleArea) +
     chart_theme +
-    xlab("fiscal year") +
-    ylab("constant fy19 dollars") +
+    xlab("Fiscal Year") +
+    ylab("Constant 2019 $") +
     ggtitle("DoD Aircraft Engine Contract Obligations by service and SimpleArea") +
     scale_y_continuous(labels = money_labels) +
     scale_x_continuous(
@@ -562,7 +569,7 @@ dla <- dla %>%
 )
 
 ggsave(
-  "charts/amount_customer_category.svg",
+  "contracts/charts/amount_customer_category.svg",
   super_facet,
   device = "svg",
   width = 10,
@@ -582,12 +589,12 @@ topline_contracts <- topline_contracts %>%
   mutate(type = "Topline")
 
 engine_contracts <- engine_contracts %>%
-  select(Fiscal.Year, Customer, SimpleArea, amount, type)
+  select(Fiscal.Year, Customer, SimpleArea, amount.OMB.2019, type)
 
 comparison_contracts_og <- engine_contracts %>%
   rbind(topline_contracts) %>%
   group_by(Fiscal.Year, type) %>%
-  dplyr::summarise(amount = sum(amount, na.rm = TRUE))
+  dplyr::summarise(amount.OMB.2019 = sum(amount.OMB.2019, na.rm = TRUE))
 
 dyear <- comparison_contracts_og %>%
   dplyr::rename(fyb = Fiscal.Year) %>%
@@ -598,14 +605,14 @@ dyear <- comparison_contracts_og %>%
   comparison_contracts <- comparison_contracts_og %>%
     left_join(dyear, by = c("Fiscal.Year", "type")) %>%
     filter(Fiscal.Year >= 2001) %>%
-    select(Fiscal.Year, amount.x, amount.y, type) %>%
-    mutate(amount_change = amount.x - amount.y) %>%
-    mutate(amount_percent_change = (amount_change) / amount.y * 100) %>%
-    dplyr::rename(amount = amount.x) %>%
-    select(Fiscal.Year, amount, amount_change, amount_percent_change, type) %>%
+    select(Fiscal.Year, amount.OMB.2019.x, amount.OMB.2019.y, type) %>%
+    mutate(amount_change = amount.OMB.2019.x - amount.OMB.2019.y) %>%
+    mutate(amount_percent_change = (amount_change) / amount.OMB.2019.y * 100) %>%
+    dplyr::rename(amount.OMB.2019 = amount.OMB.2019.x) %>%
+    select(Fiscal.Year, amount.OMB.2019, amount_change, amount_percent_change, type) %>%
     group_by(Fiscal.Year, type) %>%
     dplyr::summarise(
-      amount = sum(amount, na.rm = TRUE),
+      amount.OMB.2019 = sum(amount.OMB.2019, na.rm = TRUE),
       amount_change = sum(amount_change, na.rm = TRUE),
       amount_percent_change = sum(amount_percent_change, na.rm = TRUE)
     )
@@ -617,47 +624,47 @@ dyear <- comparison_contracts_og %>%
 base_year <- engine_contracts %>%
   as.tibble(.) %>%
   group_by(Fiscal.Year, type, Customer) %>%
-  dplyr::summarise(amount = sum(amount, na.rm = TRUE))
+  dplyr::summarise(amount.OMB.2019 = sum(amount.OMB.2019, na.rm = TRUE))
 
 dyear <- base_year %>%
   filter(Fiscal.Year == 2000) %>%
-  select(amount, type, Customer)
+  select(amount.OMB.2019, type, Customer)
 
 base_year.eng <- base_year %>%
   left_join(dyear, by = c("type", "Customer")) %>%
   filter(Customer != "Other DoD") %>%
   select(-Fiscal.Year.y) %>%
-  mutate(amount_change = amount.x - amount.y) %>%
-  mutate(amount_percent_change = (amount_change) / amount.y * 100) %>%
+  mutate(amount_change = amount.OMB.2019.x - amount.OMB.2019.y) %>%
+  mutate(amount_percent_change = (amount_change) / amount.OMB.2019.y * 100) %>%
   mutate(base = 0) %>%
-  mutate(amount = base + amount_percent_change) %>%
+  mutate(amount.OMB.2019 = base + amount_percent_change) %>%
   dplyr::rename(Fiscal.Year = Fiscal.Year.x) %>%
   group_by(Fiscal.Year, Customer) %>%
-  dplyr::summarise(amount = sum(amount, na.rm = TRUE)) %>%
+  dplyr::summarise(amount.OMB.2019 = sum(amount.OMB.2019, na.rm = TRUE)) %>%
   mutate(data_type = "engine") %>%
-  mutate(amount = amount / 100)
+  mutate(amount.OMB.2019 = amount.OMB.2019 / 100)
 
 base_year <- topline_contracts %>%
   group_by(Fiscal.Year, type, Customer) %>%
-  dplyr::summarise(amount = sum(amount, na.rm = TRUE))
+  dplyr::summarise(amount.OMB.2019 = sum(amount.OMB.2019, na.rm = TRUE))
 
 dyear <- base_year %>%
   filter(Fiscal.Year == 2000) %>%
-  select(amount, type, Customer)
+  select(amount.OMB.2019, type, Customer)
 
 base_year.top <- base_year %>%
   left_join(dyear, by = c("type", "Customer")) %>%
   filter(Customer != "Other DoD") %>%
   select(-Fiscal.Year.y) %>%
-  mutate(amount_change = amount.x - amount.y) %>%
-  mutate(amount_percent_change = (amount_change) / amount.y * 100) %>%
+  mutate(amount_change = amount.OMB.2019.x - amount.OMB.2019.y) %>%
+  mutate(amount_percent_change = (amount_change) / amount.OMB.2019.y * 100) %>%
   mutate(base = 0) %>%
-  mutate(amount = base + amount_percent_change) %>%
+  mutate(amount.OMB.2019 = base + amount_percent_change) %>%
   dplyr::rename(Fiscal.Year = Fiscal.Year.x) %>%
   group_by(Fiscal.Year, Customer) %>%
-  dplyr::summarise(amount = sum(amount, na.rm = TRUE)) %>%
+  dplyr::summarise(amount.OMB.2019 = sum(amount.OMB.2019, na.rm = TRUE)) %>%
   mutate(data_type = "topline") %>%
-  mutate(amount = amount / 100)
+  mutate(amount.OMB.2019 = amount.OMB.2019 / 100)
 
 eng.topline <- rbind(base_year.eng, base_year.top)
 
@@ -674,7 +681,7 @@ eng.topline <- rbind(base_year.eng, base_year.top)
     mutate(data_type = factor(data_type, levels = c("topline", "engine"))) %>%
     ggplot() +
     geom_line(
-      aes(x = Fiscal.Year, y = amount),
+      aes(x = Fiscal.Year, y = amount.OMB.2019),
       alpha = .9,
       color = "#554449",
       size = 1
@@ -692,8 +699,8 @@ eng.topline <- rbind(base_year.eng, base_year.top)
     #scale_x_continuous(breaks = seq(2000, 2020, by = 2),
     #labels = function(x) {substring(as.character(x), 3, 4)})+
     #scale_y_continuous(limits = c(0:750)) +
-    ggtitle("Change in aircraft engine contract obligations") +
-    xlab("fiscal year") +
+    ggtitle("Change in Aircraft Engine Contract Obligations") +
+    xlab("Fiscal Year") +
     ylab(NULL) +
     scale_y_continuous(labels = percent) +
     scale_x_continuous(
@@ -705,7 +712,7 @@ eng.topline <- rbind(base_year.eng, base_year.top)
 )
 
 ggsave(
-  "charts/percent_change_customer.svg",
+  "contracts/charts/percent_change_customer.svg",
   eng.topline1,
   width = 9,
   height = 6,
@@ -719,47 +726,47 @@ ggsave(
 base_year <- engine_contracts %>%
   as.tibble(.) %>%
   group_by(Fiscal.Year, type, SimpleArea) %>%
-  dplyr::summarise(amount = sum(amount, na.rm = TRUE))
+  dplyr::summarise(amount.OMB.2019 = sum(amount.OMB.2019, na.rm = TRUE))
 
 dyear <- base_year %>%
   filter(Fiscal.Year == 2000) %>%
-  select(amount, type, SimpleArea)
+  select(amount.OMB.2019, type, SimpleArea)
 
 base_year.eng <- base_year %>%
   left_join(dyear, by = c("type", "SimpleArea")) %>%
   filter(SimpleArea != "Services") %>%
   select(-Fiscal.Year.y) %>%
-  mutate(amount_change = amount.x - amount.y) %>%
-  mutate(amount_percent_change = (amount_change) / amount.y * 100) %>%
+  mutate(amount_change = amount.OMB.2019.x - amount.OMB.2019.y) %>%
+  mutate(amount_percent_change = (amount_change) / amount.OMB.2019.y * 100) %>%
   mutate(base = 0) %>%
-  mutate(amount = base + amount_percent_change) %>%
+  mutate(amount.OMB.2019 = base + amount_percent_change) %>%
   dplyr::rename(Fiscal.Year = Fiscal.Year.x) %>%
   group_by(Fiscal.Year, SimpleArea) %>%
-  dplyr::summarise(amount = sum(amount, na.rm = TRUE)) %>%
+  dplyr::summarise(amount.OMB.2019 = sum(amount.OMB.2019, na.rm = TRUE)) %>%
   mutate(data_type = "engine") %>%
-  mutate(amount = amount / 100)
+  mutate(amount.OMB.2019 = amount.OMB.2019 / 100)
 
 base_year <- topline_contracts %>%
   group_by(Fiscal.Year, type, SimpleArea) %>%
-  dplyr::summarise(amount = sum(amount, na.rm = TRUE))
+  dplyr::summarise(amount.OMB.2019 = sum(amount.OMB.2019, na.rm = TRUE))
 
 dyear <- base_year %>%
   filter(Fiscal.Year == 2000) %>%
-  select(amount, type, SimpleArea)
+  select(amount.OMB.2019, type, SimpleArea)
 
 base_year.top <- base_year %>%
   left_join(dyear, by = c("type", "SimpleArea")) %>%
   filter(SimpleArea != "Services") %>%
   select(-Fiscal.Year.y) %>%
-  mutate(amount_change = amount.x - amount.y) %>%
-  mutate(amount_percent_change = (amount_change) / amount.y * 100) %>%
+  mutate(amount_change = amount.OMB.2019.x - amount.OMB.2019.y) %>%
+  mutate(amount_percent_change = (amount_change) / amount.OMB.2019.y * 100) %>%
   mutate(base = 0) %>%
-  mutate(amount = base + amount_percent_change) %>%
+  mutate(amount.OMB.2019 = base + amount_percent_change) %>%
   dplyr::rename(Fiscal.Year = Fiscal.Year.x) %>%
   group_by(Fiscal.Year, SimpleArea) %>%
-  dplyr::summarise(amount = sum(amount, na.rm = TRUE)) %>%
+  dplyr::summarise(amount.OMB.2019 = sum(amount.OMB.2019, na.rm = TRUE)) %>%
   mutate(data_type = "topline") %>%
-  mutate(amount = amount / 100)
+  mutate(amount.OMB.2019 = amount.OMB.2019 / 100)
 
 eng.topline <- rbind(base_year.eng, base_year.top)
 
@@ -772,7 +779,7 @@ eng.topline <- rbind(base_year.eng, base_year.top)
     mutate(data_type = factor(data_type, levels = c("topline", "engine"))) %>%
     ggplot() +
     geom_line(
-      aes(x = Fiscal.Year, y = amount),
+      aes(x = Fiscal.Year, y = amount.OMB.2019),
       alpha = .9,
       color = "#554449",
       size = 1
@@ -786,8 +793,8 @@ eng.topline <- rbind(base_year.eng, base_year.top)
     ) +
     facet_grid(data_type ~ SimpleArea) +
     chart_theme +
-    ggtitle("Change in aircraft engine contract obligations") +
-    xlab("fiscal year") +
+    ggtitle("Change in Aircraft Engine Contract Obligations") +
+    xlab("Fiscal Year") +
     ylab(NULL) +
     scale_y_continuous(labels = percent) +
     scale_x_continuous(
@@ -799,7 +806,7 @@ eng.topline <- rbind(base_year.eng, base_year.top)
 )
 
 ggsave(
-  "charts/percent_change_category.svg",
+  "contracts/charts/percent_change_category.svg",
   eng.topline1,
   width = 9,
   height = 6,
@@ -813,46 +820,46 @@ ggsave(
 base_year <- engine_contracts %>%
   as.tibble(.) %>%
   group_by(Fiscal.Year, type) %>%
-  dplyr::summarise(amount = sum(amount, na.rm = TRUE))
+  dplyr::summarise(amount.OMB.2019 = sum(amount.OMB.2019, na.rm = TRUE))
 
 dyear <- base_year %>%
   filter(Fiscal.Year == 2000) %>%
-  select(amount, type)
+  select(amount.OMB.2019, type)
 
 base_year.eng <- base_year %>%
   left_join(dyear, by = "type") %>%
   select(-Fiscal.Year.y) %>%
-  mutate(amount_change = amount.x - amount.y) %>%
-  mutate(amount_percent_change = (amount_change) / amount.y * 100) %>%
+  mutate(amount_change = amount.OMB.2019.x - amount.OMB.2019.y) %>%
+  mutate(amount_percent_change = (amount_change) / amount.OMB.2019.y * 100) %>%
   mutate(base = 0) %>%
-  mutate(amount = base + amount_percent_change) %>%
+  mutate(amount.OMB.2019 = base + amount_percent_change) %>%
   dplyr::rename(Fiscal.Year = Fiscal.Year.x) %>%
   group_by(Fiscal.Year) %>%
-  dplyr::summarise(amount = sum(amount, na.rm = TRUE)) %>%
+  dplyr::summarise(amount.OMB.2019 = sum(amount.OMB.2019, na.rm = TRUE)) %>%
   mutate(data_type = "engine") %>%
-  mutate(amount = amount / 100)
+  mutate(amount.OMB.2019 = amount.OMB.2019 / 100)
 
 base_year <- topline_contracts %>%
   group_by(Fiscal.Year, type) %>%
-  dplyr::summarise(amount = sum(amount, na.rm = TRUE))
+  dplyr::summarise(amount.OMB.2019 = sum(amount.OMB.2019, na.rm = TRUE))
 
 dyear <- base_year %>%
   filter(Fiscal.Year == 2000) %>%
-  select(amount, type)
+  select(amount.OMB.2019, type)
 
 (
   base_year.top <- base_year %>%
     left_join(dyear, by = "type") %>%
     select(-Fiscal.Year.y) %>%
-    mutate(amount_change = amount.x - amount.y) %>%
-    mutate(amount_percent_change = (amount_change) / amount.y * 100) %>%
+    mutate(amount_change = amount.OMB.2019.x - amount.OMB.2019.y) %>%
+    mutate(amount_percent_change = (amount_change) / amount.OMB.2019.y * 100) %>%
     mutate(base = 0) %>%
-    mutate(amount = base + amount_percent_change) %>%
+    mutate(amount.OMB.2019 = base + amount_percent_change) %>%
     dplyr::rename(Fiscal.Year = Fiscal.Year.x) %>%
     group_by(Fiscal.Year) %>%
-    dplyr::summarise(amount = sum(amount, na.rm = TRUE)) %>%
+    dplyr::summarise(amount.OMB.2019 = sum(amount.OMB.2019, na.rm = TRUE)) %>%
     mutate(data_type = "topline") %>%
-    mutate(amount = amount / 100)
+    mutate(amount.OMB.2019 = amount.OMB.2019 / 100)
 )
 
 eng.topline <- rbind(base_year.eng, base_year.top)
@@ -862,7 +869,7 @@ eng.topline <- rbind(base_year.eng, base_year.top)
     mutate(data_type = factor(data_type, levels = c("topline", "engine"))) %>%
     ggplot() +
     geom_line(
-      aes(x = Fiscal.Year, y = amount),
+      aes(x = Fiscal.Year, y = amount.OMB.2019),
       alpha = .9,
       color = "#554449",
       size = 1
@@ -876,8 +883,8 @@ eng.topline <- rbind(base_year.eng, base_year.top)
     ) +
     facet_wrap(~ data_type) +
     chart_theme +
-    ggtitle("Change in aircraft engine contract obligations") +
-    xlab("fiscal year") +
+    ggtitle("Change in Aircraft Engine Contract Obligations") +
+    xlab("Fiscal Year") +
     ylab(NULL) +
     scale_y_continuous(labels = percent) +
     scale_x_continuous(
