@@ -89,7 +89,7 @@ engine_contracts <- engine_contracts %>%
   #   ProjectName = ProjectName
   ) %>%
   # left_join(deflate.year, by = "Fiscal.Year") %>%
-  # mutate(amount_19 = amount * deflator) %>%
+  # mutate(amount_19 = amount / deflator) %>% #This was where the deflator mistake was made.
   group_by(Fiscal.Year,
            Customer,
            SimpleArea,
