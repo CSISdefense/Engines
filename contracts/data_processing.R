@@ -588,34 +588,33 @@ engine_contracts <- engine_contracts %>%
 topline_contracts <- topline_contracts %>%
   mutate(type = "Topline")
 
-engine_contracts <- engine_contracts %>%
-  select(Fiscal.Year, Customer, SimpleArea, amount.OMB.2019, type)
-
-comparison_contracts_og <- engine_contracts %>%
-  rbind(topline_contracts) %>%
+comparison_contracts_og <- engine_contracts  %>%
+  select(Fiscal.Year, Customer, SimpleArea, amount.OMB.2019, type) %>%
+  rbind(topline_contracts %>%
+          select(Fiscal.Year, Customer, SimpleArea, amount.OMB.2019, type)) %>%
   group_by(Fiscal.Year, type) %>%
   dplyr::summarise(amount.OMB.2019 = sum(amount.OMB.2019, na.rm = TRUE))
 
 dyear <- comparison_contracts_og %>%
   dplyr::rename(fyb = Fiscal.Year) %>%
-  mutate(Fiscal.Year = fyb + 1) %>%
+  mutate(Fiscal.Year = Fiscal.Year + 1) %>%
   select(-fyb)
 
 (
   comparison_contracts <- comparison_contracts_og %>%
     left_join(dyear, by = c("Fiscal.Year", "type")) %>%
     filter(Fiscal.Year >= 2001) %>%
-    select(Fiscal.Year, amount.OMB.2019.x, amount.OMB.2019.y, type) %>%
-    mutate(amount_change = amount.OMB.2019.x - amount.OMB.2019.y) %>%
-    mutate(amount_percent_change = (amount_change) / amount.OMB.2019.y * 100) %>%
-    dplyr::rename(amount.OMB.2019 = amount.OMB.2019.x) %>%
+    select(Fiscal.Year, amount.OMB.2019, amount.OMB.2019.lagged, type) %>%
+    mutate(amount_change = amount.OMB.2019 - amount.OMB.2019.lagged) %>%
+    mutate(amount_percent_change = (amount_change) / amount.OMB.2019.lagged * 100) %>%
+    dplyr::rename(amount.OMB.2019 = amount.OMB.2019) %>%
     select(Fiscal.Year, amount.OMB.2019, amount_change, amount_percent_change, type) %>%
     group_by(Fiscal.Year, type) %>%
-    dplyr::summarise(
-      amount.OMB.2019 = sum(amount.OMB.2019, na.rm = TRUE),
-      amount_change = sum(amount_change, na.rm = TRUE),
-      amount_percent_change = sum(amount_percent_change, na.rm = TRUE)
-    )
+    # dplyr::summarise(
+    #   amount.OMB.2019 = sum(amount.OMB.2019, na.rm = TRUE),
+    #   amount_change = sum(amount_change, na.rm = TRUE),
+    #   amount_percent_change = sum(amount_percent_change, na.rm = TRUE)
+    # )
 )
 
 # --------------------------------------------------------------------------------
@@ -634,8 +633,8 @@ base_year.eng <- base_year %>%
   left_join(dyear, by = c("type", "Customer")) %>%
   filter(Customer != "Other DoD") %>%
   select(-Fiscal.Year.y) %>%
-  mutate(amount_change = amount.OMB.2019.x - amount.OMB.2019.y) %>%
-  mutate(amount_percent_change = (amount_change) / amount.OMB.2019.y * 100) %>%
+  mutate(amount_change = amount.OMB.2019 - amount.OMB.2019.lagged) %>%
+  mutate(amount_percent_change = (amount_change) / amount.OMB.2019.lagged * 100) %>%
   mutate(base = 0) %>%
   mutate(amount.OMB.2019 = base + amount_percent_change) %>%
   dplyr::rename(Fiscal.Year = Fiscal.Year.x) %>%
@@ -656,8 +655,8 @@ base_year.top <- base_year %>%
   left_join(dyear, by = c("type", "Customer")) %>%
   filter(Customer != "Other DoD") %>%
   select(-Fiscal.Year.y) %>%
-  mutate(amount_change = amount.OMB.2019.x - amount.OMB.2019.y) %>%
-  mutate(amount_percent_change = (amount_change) / amount.OMB.2019.y * 100) %>%
+  mutate(amount_change = amount.OMB.2019 - amount.OMB.2019.lagged) %>%
+  mutate(amount_percent_change = (amount_change) / amount.OMB.2019.lagged * 100) %>%
   mutate(base = 0) %>%
   mutate(amount.OMB.2019 = base + amount_percent_change) %>%
   dplyr::rename(Fiscal.Year = Fiscal.Year.x) %>%
@@ -736,8 +735,8 @@ base_year.eng <- base_year %>%
   left_join(dyear, by = c("type", "SimpleArea")) %>%
   filter(SimpleArea != "Services") %>%
   select(-Fiscal.Year.y) %>%
-  mutate(amount_change = amount.OMB.2019.x - amount.OMB.2019.y) %>%
-  mutate(amount_percent_change = (amount_change) / amount.OMB.2019.y * 100) %>%
+  mutate(amount_change = amount.OMB.2019 - amount.OMB.2019.lagged) %>%
+  mutate(amount_percent_change = (amount_change) / amount.OMB.2019.lagged * 100) %>%
   mutate(base = 0) %>%
   mutate(amount.OMB.2019 = base + amount_percent_change) %>%
   dplyr::rename(Fiscal.Year = Fiscal.Year.x) %>%
@@ -758,8 +757,8 @@ base_year.top <- base_year %>%
   left_join(dyear, by = c("type", "SimpleArea")) %>%
   filter(SimpleArea != "Services") %>%
   select(-Fiscal.Year.y) %>%
-  mutate(amount_change = amount.OMB.2019.x - amount.OMB.2019.y) %>%
-  mutate(amount_percent_change = (amount_change) / amount.OMB.2019.y * 100) %>%
+  mutate(amount_change = amount.OMB.2019 - amount.OMB.2019.lagged) %>%
+  mutate(amount_percent_change = (amount_change) / amount.OMB.2019.lagged * 100) %>%
   mutate(base = 0) %>%
   mutate(amount.OMB.2019 = base + amount_percent_change) %>%
   dplyr::rename(Fiscal.Year = Fiscal.Year.x) %>%
@@ -829,8 +828,8 @@ dyear <- base_year %>%
 base_year.eng <- base_year %>%
   left_join(dyear, by = "type") %>%
   select(-Fiscal.Year.y) %>%
-  mutate(amount_change = amount.OMB.2019.x - amount.OMB.2019.y) %>%
-  mutate(amount_percent_change = (amount_change) / amount.OMB.2019.y * 100) %>%
+  mutate(amount_change = amount.OMB.2019 - amount.OMB.2019.lagged) %>%
+  mutate(amount_percent_change = (amount_change) / amount.OMB.2019.lagged * 100) %>%
   mutate(base = 0) %>%
   mutate(amount.OMB.2019 = base + amount_percent_change) %>%
   dplyr::rename(Fiscal.Year = Fiscal.Year.x) %>%
@@ -851,8 +850,8 @@ dyear <- base_year %>%
   base_year.top <- base_year %>%
     left_join(dyear, by = "type") %>%
     select(-Fiscal.Year.y) %>%
-    mutate(amount_change = amount.OMB.2019.x - amount.OMB.2019.y) %>%
-    mutate(amount_percent_change = (amount_change) / amount.OMB.2019.y * 100) %>%
+    mutate(amount_change = amount.OMB.2019 - amount.OMB.2019.lagged) %>%
+    mutate(amount_percent_change = (amount_change) / amount.OMB.2019.lagged * 100) %>%
     mutate(base = 0) %>%
     mutate(amount.OMB.2019 = base + amount_percent_change) %>%
     dplyr::rename(Fiscal.Year = Fiscal.Year.x) %>%
