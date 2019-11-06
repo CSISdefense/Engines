@@ -29,7 +29,8 @@ source("contracts/theme/money_labels.R")
 # read engine contract data
 
 read_engine_contracts <-
-  read.csv("contracts/data/engine_contracts.csv", na.strings=c("NA","NULL"))
+  read.csv("contracts/data/Project.SP_EngineAllVendorHistoryCompetitionFundingMechanismVendorSizeProdServAreaSubCustomer.csv",
+           na.strings=c("NA","NULL"))
 engine_contracts<-csis360::standardize_variable_names(read_engine_contracts)
 
 # --------------------------------------------------------------------------------
@@ -77,7 +78,7 @@ topline_contracts<-csis360::standardize_variable_names(read_topline_contracts)
 engine_contracts <- engine_contracts %>%
   dplyr::rename(
   #   Fiscal.Year = fiscal_year,
-  amount = Action.Obligation
+  amount = Action_Obligation
   #   SimpleArea = Simple,
   #   platform_portfolio = PlatformPortfolio,
   #   customer_2 = Customer,
@@ -104,10 +105,10 @@ engine_contracts <- engine_contracts %>%
 engine_contracts<-csis360::deflate(data=engine_contracts,
                                           money_var= "amount",
                                           fy_var="Fiscal.Year",
-                                          deflator_var="OMB.2019"
+                                          deflator_var="OMB19_19"
 )
 
-# colnames(engine_contracts)[colnames(engine_contracts)=="Action.Obligation.OMB.2019"]
+# colnames(engine_contracts)[colnames(engine_contracts)=="Action_Obligation_OMB_2019"]
 
 topline_contracts <- topline_contracts %>%
   dplyr::rename(
@@ -127,7 +128,7 @@ topline_contracts <- topline_contracts %>%
 topline_contracts<-csis360::deflate(data=topline_contracts,
                                    money_var= "amount",
                                    fy_var="Fiscal.Year",
-                                   deflator_var="OMB.2019"
+                                   deflator_var="OMB19_19"
 )
 
 # --------------------------------------------------------------------------------
@@ -286,7 +287,7 @@ engine_contracts$Pricing.Mechanism
 
 biz_engine_contracts<-engine_contracts %>% dplyr::rename(
   fy = Fiscal.Year,
-  amount = amount.OMB.2019,
+  amount = amount_OMB_2019,
   category = SimpleArea,
   platform_portfolio = PlatformPortfolio,
   customer_2 = Customer,
