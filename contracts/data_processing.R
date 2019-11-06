@@ -35,7 +35,8 @@ engine_contracts<-csis360::standardize_variable_names(read_engine_contracts)
 # --------------------------------------------------------------------------------
 # read topline contract data
 
-read_topline_contracts <- read.csv("contracts/data/topline_contracts.csv")
+read_topline_contracts <- read.csv("contracts/data/topline_contracts.csv",
+                                   na.strings=c("NA","NULL"))
 topline_contracts<-csis360::standardize_variable_names(read_topline_contracts)
 # --------------------------------------------------------------------------------
 # deflate data
@@ -88,7 +89,7 @@ engine_contracts <- engine_contracts %>%
   #   ProjectName = ProjectName
   ) %>%
   # left_join(deflate.year, by = "Fiscal.Year") %>%
-  # mutate(amount_19 = amount * deflator) %>%
+  # mutate(amount_19 = amount / deflator) %>% #This was where the deflator mistake was made.
   group_by(Fiscal.Year,
            Customer,
            SimpleArea,
@@ -110,7 +111,7 @@ engine_contracts<-csis360::deflate(data=engine_contracts,
 
 topline_contracts <- topline_contracts %>%
   dplyr::rename(
-    SimpleArea=PS,
+    ProductOrServiceArea=PS,
   #   Fiscal.Year = Fiscal.Year,
     amount = Amount
   #   SimpleArea = SimpleArea,
@@ -120,7 +121,7 @@ topline_contracts <- topline_contracts %>%
   ) %>%
   # left_join(deflate.year, by = "Fiscal.Year") %>%
   # mutate(amount_19 = amount * deflator) %>%
-  group_by(Fiscal.Year, Customer, SimpleArea) %>%
+  group_by(Fiscal.Year, Customer, ProductOrServiceArea) %>%
   dplyr::summarise(amount = sum(amount, na.rm = TRUE))
 
 topline_contracts<-csis360::deflate(data=topline_contracts,
@@ -251,6 +252,32 @@ engine_contracts<-read_and_join(engine_contracts,
                       add_var="Pricing.Mechanism.sum"
 ) %>% select(-Pricing.Mechanism) 
 colnames(engine_contracts)[colnames(engine_contracts)=="Pricing.Mechanism.sum"]<-"Pricing.Mechanism"
+
+
+# --------------------------------------------------------------------------------
+# reclassify product or service area
+
+
+colnames(topline_contracts)[colnames(topline_contracts)=="ProductOrServiceArea"]<-"ProductServiceOrRnDarea"
+topline_contracts<-read_and_join(topline_contracts,
+                      "LOOKUP_Buckets.csv",
+                      by="ProductServiceOrRnDarea",
+                      replace_na_var="ProductServiceOrRnDarea",
+                      add_var="ServicesCategory.sum")  %>% select(-ProductServiceOrRnDarea) 
+colnames(topline_contracts)[colnames(topline_contracts)=="ServicesCategory.sum"]<-"SimpleArea"
+topline_contracts$SimpleArea<-
+  factor(topline_contracts$SimpleArea,
+         levels=c( "Products (All)" , 
+                   "R&D"            ,
+                   "Services (Non-R&D)",
+                   "Unlabeled"),
+         labels=c( "Products" , 
+                   "R&D"            ,
+                   "Services",
+                   "Unlabeled"))
+  
+
+
 
 # --------------------------------------------------------------------------------
 # write a new dataset for powerbi
