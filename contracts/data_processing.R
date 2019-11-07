@@ -36,8 +36,8 @@ engine_contracts<-csis360::standardize_variable_names(read_engine_contracts)
 # --------------------------------------------------------------------------------
 # read topline contract data
 
-read_topline_contracts <- read.csv("contracts/data/topline_contracts.csv",
-                                   na.strings=c("NA","NULL"))
+read_topline_contracts <- read.delim("contracts/data/Summary.SP_CompetitionVendorSizeHistoryBucketPlatformSubCustomer.txt",
+                                     na.strings=c("NA","NULL"),sep="\t")
 topline_contracts<-csis360::standardize_variable_names(read_topline_contracts)
 colnames(topline_contracts)[colnames(topline_contracts)=="FY"]<-"Fiscal.Year"
 # --------------------------------------------------------------------------------
@@ -70,7 +70,7 @@ engine_contracts$Fiscal.Year<-text_to_number(engine_contracts$Fiscal.Year)
              CompetitionClassification,
              Pricing.Mechanism,
              Vendor.Size) %>%
-    dplyr::filter(Fiscal.Year <= 2018) #%>%
+    dplyr::filter(Fiscal.Year <= 2018 & Fiscal.Year >= 2000) #%>%
     # dplyr::summarise(amount = sum(amount_19, na.rm = TRUE))
 
 engine_contracts<-csis360::deflate(data=engine_contracts,
@@ -82,19 +82,9 @@ engine_contracts<-csis360::deflate(data=engine_contracts,
 # colnames(engine_contracts)[colnames(engine_contracts)=="Action_Obligation_OMB_2019"]
 
 topline_contracts <- topline_contracts %>%
-  dplyr::rename(
-    ProductOrServiceArea=PS,
-  #   Fiscal.Year = Fiscal.Year,
-    amount = Amount
-  #   SimpleArea = SimpleArea,
-  #   platform_portfolio = Portfolio,
-  #   Customer = Customer,
-  #   Vendor.Size = VendorSize
-  ) %>%
-  # left_join(deflate.year, by = "Fiscal.Year") %>%
-  # mutate(amount_19 = amount * deflator) %>%
-  group_by(Fiscal.Year, Customer, ProductOrServiceArea) %>%
-  dplyr::summarise(amount = sum(amount, na.rm = TRUE))
+  group_by(Fiscal.Year, Customer, ProductServiceOrRnDarea) %>%
+  dplyr::summarise(amount = sum(Action_Obligation, na.rm = TRUE)) %>%
+  dplyr::filter(Fiscal.Year <= 2018 & Fiscal.Year >= 2000)
 
 topline_contracts<-csis360::deflate(data=topline_contracts,
                                    money_var= "amount",
@@ -111,6 +101,7 @@ engine_contracts<-csis360::read_and_join(engine_contracts,
                                   add_var="Vendor.Size.sum"
 ) %>% select(-Vendor.Size) 
 colnames(engine_contracts)[colnames(engine_contracts)=="Vendor.Size.sum"]<-"Vendor.Size"
+engine_contracts$Vendor.Size<-factor(engine_contracts$Vendor.Size,c("Large (Big 5)" ,"Large","Medium",        "Small",         "Unlabeled" ))
 
 # --------------------------------------------------------------------------------
 #Simplify Competition Classifications
@@ -138,9 +129,9 @@ colnames(engine_contracts)[colnames(engine_contracts)=="Pricing.Mechanism.sum"]<
 
 topline_contracts<-read_and_join_experiment(topline_contracts,
                       "LOOKUP_Buckets.csv",
-                      by=c("ProductOrServiceArea"="ProductServiceOrRnDarea"),
-                      replace_na_var="ProductOrServiceArea",
-                      add_var="ServicesCategory.sum")  %>% dplyr::select(-ProductOrServiceArea) 
+                      by=c("ProductServiceOrRnDarea"),
+                      replace_na_var="ProductServiceOrRnDarea",
+                      add_var="ServicesCategory.sum")  %>% dplyr::select(-ProductServiceOrRnDarea) 
 colnames(topline_contracts)[colnames(topline_contracts)=="ServicesCategory.sum"]<-"SimpleArea"
 topline_contracts$SimpleArea<-
   factor(topline_contracts$SimpleArea,
