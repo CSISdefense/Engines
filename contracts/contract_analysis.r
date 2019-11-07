@@ -160,6 +160,7 @@ ggsave(
                   linetype=Competiton)) +#, alpha = .9, stat = "identity"
     # facet_wrap(~ SimpleArea, nrow = 1) +#Competiton
     chart_theme +
+    scale_y_continuous(label=scales::percent_format(accuracy = 1)) +#,breaks=c(-0.5,0,0.5,1,1.5)
     ggtitle("DoD Aircraft Engine Contract Obligations\nby Extent of Competition") +
     xlab("Fiscal Year") +
     ylab("Percent of Contract Obligations") +
@@ -179,7 +180,7 @@ ggsave(
   "contracts/charts/share_competition.svg",
   Competiton_Share,
   device = "svg",
-  width = 8,
+  width = 5.5,
   height = 4,
   units = "in"
 )
@@ -694,7 +695,7 @@ summary(comparison_contracts_area_total$SimpleArea)
     ggtitle("Change in Aircraft Engine Contract Obligations") +
     xlab("Fiscal Year") +
     ylab("Cumulative Percent Change, Inflation Adjusted (2000=0%)") +
-    scale_y_continuous(labels = percent) +
+    scale_y_continuous(labels = percent, breaks = c(-0.5,0,0.5,1,1.5)) +
     scale_x_continuous(
       breaks = seq(2000, 2020, by = 2),
       labels = function(x) {
