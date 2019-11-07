@@ -40,6 +40,13 @@ ggsave(
   units = "in"
 )
 
+
+
+write.csv(total$data %>%
+            spread(key=Fiscal.Year, value=amount_OMB19_19),
+          file="contracts/charts/amount_total.csv",row.names = FALSE)
+
+
 # --------------------------------------------------------------------------------
 # engine contracts by Vendor Size 
 
@@ -64,6 +71,9 @@ ggsave(
     )
 )
 
+
+
+
 ggsave(
   "contracts/charts/amount_vendor_size.svg",
   Vendor.Size,
@@ -73,16 +83,20 @@ ggsave(
   units = "in"
 )
 
+write.csv(Vendor.Size$data %>%
+            spread(key=Fiscal.Year, value=amount_OMB19_19),
+          file="contracts/charts/amount_vendor_size.csv",row.names = FALSE)
+
 # --------------------------------------------------------------------------------
 sum((engine_contracts %>% filter(Competition.multisum == "Unlabeled"))$amount_OMB19_19 )
 
 # engine contracts by CompetitionClassification  
 (
-  Competiton <- engine_contracts %>%
+  Competition <- engine_contracts %>%
     filter(Competition.multisum != "Unlabeled") %>%
     group_by(Fiscal.Year, Competition.multisum) %>%
     dplyr::summarise(amount_OMB19_19 = sum(amount_OMB19_19, na.rm = TRUE)) %>%
-    mutate(Competiton = factor(
+    mutate(Competition = factor(
       Competition.multisum,
       levels=c("2+ Offers" ,
                "1 Offer"   ,
@@ -101,7 +115,7 @@ sum((engine_contracts %>% filter(Competition.multisum == "Unlabeled"))$amount_OM
       }
     ) +
     geom_area(aes(y = amount_OMB19_19, x = Fiscal.Year), alpha = .9, stat = "identity") +
-    facet_wrap(~ Competiton, nrow = 1) +
+    facet_wrap(~ Competition, nrow = 1) +
     chart_theme +
     ggtitle("DoD Aircraft Engine Contract Obligations by Extent of Competition") +
     xlab("Fiscal Year") +
@@ -117,7 +131,7 @@ sum((engine_contracts %>% filter(Competition.multisum == "Unlabeled"))$amount_OM
 
 ggsave(
   "contracts/charts/amount_competition.svg",
-  Competiton,
+  Competition,
   device = "svg",
   width = 8,
   height = 4,
@@ -125,8 +139,18 @@ ggsave(
 )
 
 
+
+
+write.csv(Competition$data %>%
+            spread(key=Fiscal.Year, value=amount_OMB19_19),
+          file="contracts/charts/amount_competition.csv",row.names = FALSE)
+
+
+
+
+
 (
-  Competiton_Share <- engine_contracts %>%
+  Competition_Share <- engine_contracts %>%
     # filter(Competition.multisum != "Unlabeled") %>%
     # group_by(Fiscal.Year, Competition.multisum,SimpleArea) %>%
     group_by(Fiscal.Year, Competition.multisum) %>%
@@ -135,7 +159,7 @@ ggsave(
     group_by(Fiscal.Year) %>%#Competition.multisum,
     mutate(
       amount_share = amount_OMB19_19/ sum(amount_OMB19_19, na.rm = TRUE),
-      Competiton = factor(
+      Competition = factor(
       Competition.multisum,
       levels=c("No Comp.",
                "1 Offer"   ,
@@ -157,8 +181,8 @@ ggsave(
     ) +
     geom_line(aes(y = amount_share, 
                   x = Fiscal.Year,
-                  linetype=Competiton)) +#, alpha = .9, stat = "identity"
-    # facet_wrap(~ SimpleArea, nrow = 1) +#Competiton
+                  linetype=Competition)) +#, alpha = .9, stat = "identity"
+    # facet_wrap(~ SimpleArea, nrow = 1) +#Competition
     chart_theme +
     scale_y_continuous(label=scales::percent_format(accuracy = 1)) +#,breaks=c(-0.5,0,0.5,1,1.5)
     ggtitle("DoD Aircraft Engine Contract Obligations\nby Extent of Competition") +
@@ -178,12 +202,16 @@ ggsave(
 
 ggsave(
   "contracts/charts/share_competition.svg",
-  Competiton_Share,
+  Competition_Share,
   device = "svg",
   width = 5.5,
   height = 4,
   units = "in"
 )
+
+write.csv(Competition_Share$data %>%
+            spread(key=Fiscal.Year, value=amount_share),
+          file="contracts/charts/share_competition.csv",row.names = FALSE)
 
 
 # --------------------------------------------------------------------------------
@@ -241,6 +269,11 @@ ggsave(
   height = 4,
   units = "in"
 )
+
+write.csv(Pricing.Mechanism$data %>%
+            spread(key=Fiscal.Year, value=amount_OMB19_19),
+          file="contracts/charts/amount_contract_type.csv",row.names = FALSE)
+
 
 # --------------------------------------------------------------------------------
 # super facet: engine contracts by service and SimpleArea
@@ -381,6 +414,11 @@ ggsave(
   units = "in"
 )
 
+write.csv(super_facet$data %>%
+            spread(key=Fiscal.Year, value=amount_OMB19_19),
+          file="contracts/charts/amount_customer_category.csv",row.names = FALSE)
+
+
 # ================================================================================
 # charting engines and topline 
 # --------------------------------------------------------------------------------
@@ -501,6 +539,12 @@ ggsave(
   device = "svg"
 )
 
+write.csv(graph_contracts_overall$data,# %>%
+            # spread(key=Fiscal.Year, value=amount_OMB19_19),
+          file="contracts/charts/percent_change_total.csv",row.names = FALSE)
+
+
+
 # --------------------------------------------------------------------------------
 # percent change comparison by SubCustomer
 
@@ -583,6 +627,11 @@ ggsave(
   device = "svg"
 )
 
+write.csv(graph_contracts_subcustomer$data,# %>%
+            # spread(key=Fiscal.Year, value=amount_OMB19_19),
+          file="contracts/charts/percent_change_customer.csv",row.names = FALSE)
+
+
 # --------------------------------------------------------------------------------
 # percent change comparison by SimpleArea 
 # 
@@ -646,6 +695,11 @@ ggsave(
   units = "in",
   device = "svg"
 )
+
+write.csv(graph_contracts_area$data, #%>%
+            # spread(key=Fiscal.Year, value=amount_OMB19_19),
+          file="contracts/charts/percent_change_category.csv",row.names = FALSE)
+
 
 # -----------------------------------------------------------------------------------
 # Product / R&D and topline.
@@ -714,3 +768,8 @@ ggsave(
   units = "in",
   device = "svg"
 )
+
+write.csv(graph_contracts_overall_area$data, #%>%
+            # spread(key=Fiscal.Year, value=amount_OMB19_19),
+          file="contracts/charts/percent_change_total_area.csv",row.names = FALSE)
+
