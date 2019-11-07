@@ -6,7 +6,7 @@
 # ================================================================================
 
 
-# load(file="contracts/app/engine_contract.Rdata")
+load(file="contracts/app/engine_contract.Rdata")
 # ================================================================================
 # charting engines 
 # --------------------------------------------------------------------------------
@@ -15,9 +15,9 @@
 (
   total <- engine_contracts %>%
     group_by(Fiscal.Year) %>%
-    dplyr::summarise(amount.OMB.2019 = sum(amount.OMB.2019, na.rm = TRUE)) %>%
+    dplyr::summarise(amount_OMB19_19 = sum(amount_OMB19_19, na.rm = TRUE)) %>%
     ggplot() +
-    geom_area(aes(y = amount.OMB.2019, x = Fiscal.Year), alpha = .9 , stat = "identity") +
+    geom_area(aes(y = amount_OMB19_19, x = Fiscal.Year), alpha = .9 , stat = "identity") +
     scale_x_continuous(
       breaks = seq(2000, 2020, by = 2),
       labels = function(x) {
@@ -47,9 +47,9 @@ engine_contracts$Vendor.Size<-factor(engine_contracts$Vendor.Size,c("Large (Big 
   Vendor.Size <- engine_contracts %>%
     filter(Vendor.Size != "Unlabeled") %>%
     group_by(Fiscal.Year, Vendor.Size) %>%
-    dplyr::summarise(amount.OMB.2019 = sum(amount.OMB.2019, na.rm = TRUE)) %>%
+    dplyr::summarise(amount_OMB19_19 = sum(amount_OMB19_19, na.rm = TRUE)) %>%
     ggplot() +
-    geom_area(aes(y = amount.OMB.2019, x = Fiscal.Year), alpha = .9, stat = "identity") +
+    geom_area(aes(y = amount_OMB19_19, x = Fiscal.Year), alpha = .9, stat = "identity") +
     facet_wrap(~ Vendor.Size, nrow = 2) +
     chart_theme +
     ggtitle("DoD Aircraft Engine Contract Obligations by Vendor Size") +
@@ -79,7 +79,7 @@ ggsave(
   Competiton <- engine_contracts %>%
     filter(Competition.multisum != "Unlabeled") %>%
     group_by(Fiscal.Year, Competition.multisum) %>%
-    dplyr::summarise(amount.OMB.2019 = sum(amount.OMB.2019, na.rm = TRUE)) %>%
+    dplyr::summarise(amount_OMB19_19 = sum(amount_OMB19_19, na.rm = TRUE)) %>%
     mutate(Competiton = factor(
       Competition.multisum,
       levels=c("2+ Offers" ,
@@ -98,7 +98,7 @@ ggsave(
         substring(as.character(x), 3, 4)
       }
     ) +
-    geom_area(aes(y = amount.OMB.2019, x = Fiscal.Year), alpha = .9, stat = "identity") +
+    geom_area(aes(y = amount_OMB19_19, x = Fiscal.Year), alpha = .9, stat = "identity") +
     facet_wrap(~ Competiton, nrow = 1) +
     chart_theme +
     ggtitle("DoD Aircraft Engine Contract Obligations by Extent of Competition") +
@@ -129,7 +129,7 @@ levels(factor(engine_contracts$Pricing.Mechanism))
   Pricing.Mechanism <- engine_contracts %>%
     filter(Pricing.Mechanism != "Other") %>%
     group_by(Fiscal.Year, Pricing.Mechanism) %>%
-    dplyr::summarise(amount.OMB.2019 = sum(amount.OMB.2019, na.rm = TRUE)) %>%
+    dplyr::summarise(amount_OMB19_19 = sum(amount_OMB19_19, na.rm = TRUE)) %>%
     mutate(Pricing.Mechanism = factor(
       Pricing.Mechanism,
       levels = c(
@@ -154,7 +154,7 @@ levels(factor(engine_contracts$Pricing.Mechanism))
         substring(as.character(x), 3, 4)
       }
     ) +
-    geom_area(aes(y = amount.OMB.2019, x = Fiscal.Year), alpha = .9, stat = "identity") +
+    geom_area(aes(y = amount_OMB19_19, x = Fiscal.Year), alpha = .9, stat = "identity") +
     facet_wrap(~ Pricing.Mechanism, nrow = 1) +
     chart_theme +
     ggtitle("DoD Aircraft Engine Contract Obligations by Contract Type") +
@@ -185,13 +185,13 @@ ggsave(
 
 total <- engine_contracts %>%
   group_by(Fiscal.Year) %>%
-  dplyr::summarise(amount.OMB.2019 = sum(amount.OMB.2019, na.rm = TRUE)) %>%
+  dplyr::summarise(amount_OMB19_19 = sum(amount_OMB19_19, na.rm = TRUE)) %>%
   mutate(SimpleArea = "Total") %>%
   as.data.frame(.)
 
 total_category <- engine_contracts %>%
   group_by(Fiscal.Year, SimpleArea) %>%
-  dplyr::summarise(amount.OMB.2019 = sum(amount.OMB.2019, na.rm = TRUE)) %>%
+  dplyr::summarise(amount_OMB19_19 = sum(amount_OMB19_19, na.rm = TRUE)) %>%
   as.data.frame(.)
 
 total <- total %>%
@@ -201,14 +201,14 @@ total <- total %>%
 army <- engine_contracts %>%
   filter(SubCustomer == "Army") %>%
   group_by(Fiscal.Year) %>%
-  dplyr::summarise(amount.OMB.2019 = sum(amount.OMB.2019, na.rm = TRUE)) %>%
+  dplyr::summarise(amount_OMB19_19 = sum(amount_OMB19_19, na.rm = TRUE)) %>%
   mutate(SimpleArea = "Total") %>%
   as.data.frame(.)
 
 army_category <- engine_contracts %>%
   filter(SubCustomer == "Army") %>%
   group_by(Fiscal.Year, SimpleArea) %>%
-  dplyr::summarise(amount.OMB.2019 = sum(amount.OMB.2019, na.rm = TRUE)) %>%
+  dplyr::summarise(amount_OMB19_19 = sum(amount_OMB19_19, na.rm = TRUE)) %>%
   as.data.frame(.)
 
 army <- army %>%
@@ -218,7 +218,7 @@ army <- army %>%
 navy <- engine_contracts %>%
   group_by(Fiscal.Year) %>%
   filter(SubCustomer == "Navy") %>%
-  dplyr::summarise(amount.OMB.2019 = sum(amount.OMB.2019, na.rm = TRUE)) %>%
+  dplyr::summarise(amount_OMB19_19 = sum(amount_OMB19_19, na.rm = TRUE)) %>%
   mutate(SimpleArea = "Total") %>%
   mutate(SimpleArea = as.factor(SimpleArea)) %>%
   as.data.frame(.)
@@ -226,7 +226,7 @@ navy <- engine_contracts %>%
 navy_category <- engine_contracts %>%
   filter(SubCustomer == "Navy") %>%
   group_by(Fiscal.Year, SimpleArea) %>%
-  dplyr::summarise(amount.OMB.2019 = sum(amount.OMB.2019, na.rm = TRUE)) %>%
+  dplyr::summarise(amount_OMB19_19 = sum(amount_OMB19_19, na.rm = TRUE)) %>%
   as.data.frame(.)
 
 navy <- navy %>%
@@ -236,7 +236,7 @@ navy <- navy %>%
 air_force <- engine_contracts %>%
   group_by(Fiscal.Year) %>%
   filter(SubCustomer == "Air Force") %>%
-  dplyr::summarise(amount.OMB.2019 = sum(amount.OMB.2019, na.rm = TRUE)) %>%
+  dplyr::summarise(amount_OMB19_19 = sum(amount_OMB19_19, na.rm = TRUE)) %>%
   mutate(SimpleArea = "Total") %>%
   mutate(SimpleArea = as.factor(SimpleArea)) %>%
   as.data.frame(.)
@@ -244,7 +244,7 @@ air_force <- engine_contracts %>%
 air_force_category <- engine_contracts %>%
   filter(SubCustomer == "Air Force") %>%
   group_by(Fiscal.Year, SimpleArea) %>%
-  dplyr::summarise(amount.OMB.2019 = sum(amount.OMB.2019, na.rm = TRUE)) %>%
+  dplyr::summarise(amount_OMB19_19 = sum(amount_OMB19_19, na.rm = TRUE)) %>%
   as.data.frame(.)
 
 air_force <- air_force %>%
@@ -254,7 +254,7 @@ air_force <- air_force %>%
 dla <- engine_contracts %>%
   group_by(Fiscal.Year) %>%
   filter(SubCustomer == "DLA") %>%
-  dplyr::summarise(amount.OMB.2019 = sum(amount.OMB.2019, na.rm = TRUE)) %>%
+  dplyr::summarise(amount_OMB19_19 = sum(amount_OMB19_19, na.rm = TRUE)) %>%
   mutate(SimpleArea = "Total") %>%
   mutate(SimpleArea = as.factor(SimpleArea)) %>%
   as.data.frame(.)
@@ -262,7 +262,7 @@ dla <- engine_contracts %>%
 dla_category <- engine_contracts %>%
   filter(SubCustomer == "DLA") %>%
   group_by(Fiscal.Year, SimpleArea) %>%
-  dplyr::summarise(amount.OMB.2019 = sum(amount.OMB.2019, na.rm = TRUE)) %>%
+  dplyr::summarise(amount_OMB19_19 = sum(amount_OMB19_19, na.rm = TRUE)) %>%
   as.data.frame(.)
 
 dla <- dla %>%
@@ -291,7 +291,7 @@ dla <- dla %>%
         substring(as.character(x), 3, 4)
       }
     ) +
-    geom_area(aes(x = Fiscal.Year, y = amount.OMB.2019), alpha = .9) +
+    geom_area(aes(x = Fiscal.Year, y = amount_OMB19_19), alpha = .9) +
     facet_grid(SubCustomer ~ SimpleArea) +
     chart_theme +
     xlab("Fiscal Year") +
@@ -329,42 +329,42 @@ topline_contracts <- topline_contracts %>%
   mutate(type = "Topline")
 colnames(topline_contracts)[colnames(topline_contracts)=="Customer"]<-"SubCustomer"
 # engine_contracts <- engine_contracts %>%
-#   select(Fiscal.Year, SubCustomer, SimpleArea, amount.OMB.2019, type)
+#   select(Fiscal.Year, SubCustomer, SimpleArea, amount_OMB19_19, type)
 
 comparison_contracts <- engine_contracts %>%
-  select(Fiscal.Year, SubCustomer, SimpleArea, amount.OMB.2019, type) %>%
+  select(Fiscal.Year, SubCustomer, SimpleArea, amount_OMB19_19, type) %>%
   rbind(topline_contracts %>%
-          select(Fiscal.Year, SubCustomer, SimpleArea, amount.OMB.2019, type)) %>%
+          select(Fiscal.Year, SubCustomer, SimpleArea, amount_OMB19_19, type)) %>%
   group_by(Fiscal.Year, SubCustomer, SimpleArea, type) %>%
-  dplyr::summarise(amount.OMB.2019 = sum(amount.OMB.2019, na.rm = TRUE))
+  dplyr::summarise(amount_OMB19_19 = sum(amount_OMB19_19, na.rm = TRUE))
 
 dyear <- comparison_contracts %>%
   group_by() %>%
-  dplyr::rename(amount.OMB.2019.lagged = amount.OMB.2019) %>%
+  dplyr::rename(amount_OMB19_19.lagged = amount_OMB19_19) %>%
   mutate(Fiscal.Year = Fiscal.Year + 1) # %>%
 # select(-fyb)
 
 # comparison_contracts <- comparison_contracts %>% filter(Fiscal.Year >= 2001)
 #Add lagged year
-sumcheck<-sum(comparison_contracts$amount.OMB.2019,na.rm=TRUE)
+sumcheck<-sum(comparison_contracts$amount_OMB19_19,na.rm=TRUE)
 comparison_contracts <- comparison_contracts %>%
   left_join(dyear, by = c("Fiscal.Year", "SubCustomer", "SimpleArea", "type"))# %>%
-if(sumcheck!=sum(comparison_contracts$amount.OMB.2019,na.rm=TRUE)) stop("Sum Check Error")
+if(sumcheck!=sum(comparison_contracts$amount_OMB19_19,na.rm=TRUE)) stop("Sum Check Error")
 
 
 dyear <- comparison_contracts %>%
   filter(Fiscal.Year==2000) %>%
-  dplyr::rename(amount.OMB.2019.2000 = amount.OMB.2019) %>%
+  dplyr::rename(amount_OMB19_19.2000 = amount_OMB19_19) %>%
   group_by()%>%
-  select(-amount.OMB.2019.lagged,-Fiscal.Year)
+  select(-amount_OMB19_19.lagged,-Fiscal.Year)
 
 #Add 2000
-sumcheck<-sum(comparison_contracts$amount.OMB.2019,na.rm=TRUE)
+sumcheck<-sum(comparison_contracts$amount_OMB19_19,na.rm=TRUE)
 comparison_contracts <- comparison_contracts %>%
   left_join(dyear, by = c("SubCustomer", "SimpleArea", "type")) %>%
-  mutate(amount_change = amount.OMB.2019 - amount.OMB.2019.lagged,
-         baseline_change = amount.OMB.2019 - amount.OMB.2019.2000) #%>% 
-if(sumcheck!=sum(comparison_contracts$amount.OMB.2019,na.rm=TRUE)) stop("Sum Check Error")
+  mutate(amount_change = amount_OMB19_19 - amount_OMB19_19.lagged,
+         baseline_change = amount_OMB19_19 - amount_OMB19_19.2000) #%>% 
+if(sumcheck!=sum(comparison_contracts$amount_OMB19_19,na.rm=TRUE)) stop("Sum Check Error")
 
 
 
@@ -375,19 +375,19 @@ rm(dyear)
 (
   comparison_contracts_overall <- comparison_contracts %>%
     group_by(Fiscal.Year, type) %>%
-    dplyr::summarise(amount.OMB.2019 = sum(amount.OMB.2019, na.rm = TRUE),
-                     amount.OMB.2019.lagged = sum(amount.OMB.2019.lagged, na.rm = TRUE),
+    dplyr::summarise(amount_OMB19_19 = sum(amount_OMB19_19, na.rm = TRUE),
+                     amount_OMB19_19.lagged = sum(amount_OMB19_19.lagged, na.rm = TRUE),
                      amount_change = sum(amount_change, na.rm = TRUE),
-                     amount.OMB.2019.2000 = sum(amount.OMB.2019.2000, na.rm = TRUE),
+                     amount_OMB19_19.2000 = sum(amount_OMB19_19.2000, na.rm = TRUE),
                      baseline_change = sum(baseline_change, na.rm = TRUE)) %>%
-    mutate(amount_percent_change = (amount_change) / amount.OMB.2019.lagged,
-           baseline_percent_change = (baseline_change) / amount.OMB.2019.2000) #%>%
-  # dplyr::rename(amount.OMB.2019 = amount.OMB.2019) %>%
-  # select(Fiscal.Year, amount.OMB.2019, amount_change, amount_percent_change, type) #%>%
+    mutate(amount_percent_change = (amount_change) / amount_OMB19_19.lagged,
+           baseline_percent_change = (baseline_change) / amount_OMB19_19.2000) #%>%
+  # dplyr::rename(amount_OMB19_19 = amount_OMB19_19) %>%
+  # select(Fiscal.Year, amount_OMB19_19, amount_change, amount_percent_change, type) #%>%
   # This has already been done, which is good, as I don't htink it makes sense to sum percent changes like that.
   # group_by(Fiscal.Year, type) %>%
   # dplyr::summarise(
-  #   amount.OMB.2019 = sum(amount.OMB.2019, na.rm = TRUE),
+  #   amount_OMB19_19 = sum(amount_OMB19_19, na.rm = TRUE),
   #   amount_change = sum(amount_change, na.rm = TRUE),
   #   amount_percent_change = sum(amount_percent_change, na.rm = TRUE)
   # )
@@ -400,46 +400,46 @@ rm(dyear)
 # base_year <- engine_contracts %>%
 #   as.tibble(.) %>%
 #   group_by(Fiscal.Year, type) %>%
-#   dplyr::summarise(amount.OMB.2019 = sum(amount.OMB.2019, na.rm = TRUE))
+#   dplyr::summarise(amount_OMB19_19 = sum(amount_OMB19_19, na.rm = TRUE))
 # 
 # dyear <- base_year %>%
 #   filter(Fiscal.Year == 2000) %>%
-#   select(amount.OMB.2019, type)
+#   select(amount_OMB19_19, type)
 # 
 # base_year.eng <- base_year %>%
 #   left_join(dyear, by = "type") %>%
 #   select(-Fiscal.Year.y) %>%
-#   mutate(amount_change = amount.OMB.2019 - amount.OMB.2019.lagged) %>%
-#   mutate(amount_percent_change = (amount_change) / amount.OMB.2019.lagged * 100) %>%
+#   mutate(amount_change = amount_OMB19_19 - amount_OMB19_19.lagged) %>%
+#   mutate(amount_percent_change = (amount_change) / amount_OMB19_19.lagged * 100) %>%
 #   mutate(base = 0) %>%
-#   mutate(amount.OMB.2019 = base + amount_percent_change) %>%
+#   mutate(amount_OMB19_19 = base + amount_percent_change) %>%
 #   dplyr::rename(Fiscal.Year = Fiscal.Year.x) %>%
 #   group_by(Fiscal.Year) %>%
-#   dplyr::summarise(amount.OMB.2019 = sum(amount.OMB.2019, na.rm = TRUE)) %>%
+#   dplyr::summarise(amount_OMB19_19 = sum(amount_OMB19_19, na.rm = TRUE)) %>%
 #   mutate(type = "engine") %>%
-#   mutate(amount.OMB.2019 = amount.OMB.2019 / 100)
+#   mutate(amount_OMB19_19 = amount_OMB19_19 / 100)
 # 
 # base_year <- topline_contracts %>%
 #   group_by(Fiscal.Year, type) %>%
-#   dplyr::summarise(amount.OMB.2019 = sum(amount.OMB.2019, na.rm = TRUE))
+#   dplyr::summarise(amount_OMB19_19 = sum(amount_OMB19_19, na.rm = TRUE))
 # 
 # dyear <- base_year %>%
 #   filter(Fiscal.Year == 2000) %>%
-#   select(amount.OMB.2019, type)
+#   select(amount_OMB19_19, type)
 # 
 # (
 #   base_year.top <- base_year %>%
 #     left_join(dyear, by = "type") %>%
 #     select(-Fiscal.Year.y) %>%
-#     mutate(amount_change = amount.OMB.2019 - amount.OMB.2019.lagged) %>%
-#     mutate(amount_percent_change = (amount_change) / amount.OMB.2019.lagged * 100) %>%
+#     mutate(amount_change = amount_OMB19_19 - amount_OMB19_19.lagged) %>%
+#     mutate(amount_percent_change = (amount_change) / amount_OMB19_19.lagged * 100) %>%
 #     mutate(base = 0) %>%
-#     mutate(amount.OMB.2019 = base + amount_percent_change) %>%
+#     mutate(amount_OMB19_19 = base + amount_percent_change) %>%
 #     dplyr::rename(Fiscal.Year = Fiscal.Year.x) %>%
 #     group_by(Fiscal.Year) %>%
-#     dplyr::summarise(amount.OMB.2019 = sum(amount.OMB.2019, na.rm = TRUE)) %>%
+#     dplyr::summarise(amount_OMB19_19 = sum(amount_OMB19_19, na.rm = TRUE)) %>%
 #     mutate(type = "topline") %>%
-#     mutate(amount.OMB.2019 = amount.OMB.2019 / 100)
+#     mutate(amount_OMB19_19 = amount_OMB19_19 / 100)
 # )
 
 # eng.topline <- rbind(base_year.eng, base_year.top)
@@ -493,47 +493,47 @@ ggsave(
 # base_year <- engine_contracts %>%
 #   as.tibble(.) %>%
 #   group_by(Fiscal.Year, type, SubCustomer) %>%
-#   dplyr::summarise(amount.OMB.2019 = sum(amount.OMB.2019, na.rm = TRUE))
+#   dplyr::summarise(amount_OMB19_19 = sum(amount_OMB19_19, na.rm = TRUE))
 # 
 # dyear <- base_year %>%
 #   filter(Fiscal.Year == 2000) %>%
-#   select(amount.OMB.2019, type, SubCustomer)
+#   select(amount_OMB19_19, type, SubCustomer)
 # 
 # base_year.eng <- base_year %>%
 #   left_join(dyear, by = c("type", "SubCustomer")) %>%
 #   filter(SubCustomer != "Other DoD") %>%
 #   select(-Fiscal.Year.y) %>%
-#   mutate(amount_change = amount.OMB.2019 - amount.OMB.2019.lagged) %>%
-#   mutate(amount_percent_change = (amount_change) / amount.OMB.2019.lagged * 100) %>%
+#   mutate(amount_change = amount_OMB19_19 - amount_OMB19_19.lagged) %>%
+#   mutate(amount_percent_change = (amount_change) / amount_OMB19_19.lagged * 100) %>%
 #   mutate(base = 0) %>%
-#   mutate(amount.OMB.2019 = base + amount_percent_change) %>%
+#   mutate(amount_OMB19_19 = base + amount_percent_change) %>%
 #   dplyr::rename(Fiscal.Year = Fiscal.Year.x) %>%
 #   group_by(Fiscal.Year, SubCustomer) %>%
-#   dplyr::summarise(amount.OMB.2019 = sum(amount.OMB.2019, na.rm = TRUE)) %>%
+#   dplyr::summarise(amount_OMB19_19 = sum(amount_OMB19_19, na.rm = TRUE)) %>%
 #   mutate(data_type = "engine") %>%
-#   mutate(amount.OMB.2019 = amount.OMB.2019 / 100)
+#   mutate(amount_OMB19_19 = amount_OMB19_19 / 100)
 # 
 # base_year <- topline_contracts %>%
 #   group_by(Fiscal.Year, type, SubCustomer) %>%
-#   dplyr::summarise(amount.OMB.2019 = sum(amount.OMB.2019, na.rm = TRUE))
+#   dplyr::summarise(amount_OMB19_19 = sum(amount_OMB19_19, na.rm = TRUE))
 # 
 # dyear <- base_year %>%
 #   filter(Fiscal.Year == 2000) %>%
-#   select(amount.OMB.2019, type, SubCustomer)
+#   select(amount_OMB19_19, type, SubCustomer)
 # 
 # base_year.top <- base_year %>%
 #   left_join(dyear, by = c("type", "SubCustomer")) %>%
 #   filter(SubCustomer != "Other DoD") %>%
 #   select(-Fiscal.Year.y) %>%
-#   mutate(amount_change = amount.OMB.2019 - amount.OMB.2019.lagged) %>%
-#   mutate(amount_percent_change = (amount_change) / amount.OMB.2019.lagged * 100) %>%
+#   mutate(amount_change = amount_OMB19_19 - amount_OMB19_19.lagged) %>%
+#   mutate(amount_percent_change = (amount_change) / amount_OMB19_19.lagged * 100) %>%
 #   mutate(base = 0) %>%
-#   mutate(amount.OMB.2019 = base + amount_percent_change) %>%
+#   mutate(amount_OMB19_19 = base + amount_percent_change) %>%
 #   dplyr::rename(Fiscal.Year = Fiscal.Year.x) %>%
 #   group_by(Fiscal.Year, SubCustomer) %>%
-#   dplyr::summarise(amount.OMB.2019 = sum(amount.OMB.2019, na.rm = TRUE)) %>%
+#   dplyr::summarise(amount_OMB19_19 = sum(amount_OMB19_19, na.rm = TRUE)) %>%
 #   mutate(data_type = "topline") %>%
-#   mutate(amount.OMB.2019 = amount.OMB.2019 / 100)
+#   mutate(amount_OMB19_19 = amount_OMB19_19 / 100)
 # 
 # eng.topline <- rbind(base_year.eng, base_year.top)
 
@@ -542,19 +542,19 @@ ggsave(
 (
   comparison_contracts_subcustomer <- comparison_contracts %>%
     group_by(Fiscal.Year, SubCustomer, type) %>%
-    dplyr::summarise(amount.OMB.2019 = sum(amount.OMB.2019, na.rm = TRUE),
-                     amount.OMB.2019.lagged = sum(amount.OMB.2019.lagged, na.rm = TRUE),
+    dplyr::summarise(amount_OMB19_19 = sum(amount_OMB19_19, na.rm = TRUE),
+                     amount_OMB19_19.lagged = sum(amount_OMB19_19.lagged, na.rm = TRUE),
                      amount_change = sum(amount_change, na.rm = TRUE),
-                     amount.OMB.2019.2000 = sum(amount.OMB.2019.2000, na.rm = TRUE),
+                     amount_OMB19_19.2000 = sum(amount_OMB19_19.2000, na.rm = TRUE),
                      baseline_change = sum(baseline_change, na.rm = TRUE)) %>%
-    mutate(amount_percent_change = (amount_change) / amount.OMB.2019.lagged,
-           baseline_percent_change = (baseline_change) / amount.OMB.2019.2000) #%>%
+    mutate(amount_percent_change = (amount_change) / amount_OMB19_19.lagged,
+           baseline_percent_change = (baseline_change) / amount_OMB19_19.2000) #%>%
 )
 
 levels(factor(comparison_contracts_subcustomer$type))
 max((comparison_contracts_subcustomer %>% 
        filter(SubCustomer=="Other DoD" &
-                type =="Engines"))$amount.OMB.2019
+                type =="Engines"))$amount_OMB19_19
 )
 
 (
@@ -622,47 +622,47 @@ ggsave(
 # base_year <- engine_contracts %>%
 #   as.tibble(.) %>%
 #   group_by(Fiscal.Year, type, SimpleArea) %>%
-#   dplyr::summarise(amount.OMB.2019 = sum(amount.OMB.2019, na.rm = TRUE))
+#   dplyr::summarise(amount_OMB19_19 = sum(amount_OMB19_19, na.rm = TRUE))
 # 
 # dyear <- base_year %>%
 #   filter(Fiscal.Year == 2000) %>%
-#   select(amount.OMB.2019, type, SimpleArea)
+#   select(amount_OMB19_19, type, SimpleArea)
 # 
 # base_year.eng <- base_year %>%
 #   left_join(dyear, by = c("type", "SimpleArea")) %>%
 #   filter(SimpleArea != "Services") %>%
 #   select(-Fiscal.Year.y) %>%
-#   mutate(amount_change = amount.OMB.2019 - amount.OMB.2019.lagged) %>%
-#   mutate(amount_percent_change = (amount_change) / amount.OMB.2019.lagged * 100) %>%
+#   mutate(amount_change = amount_OMB19_19 - amount_OMB19_19.lagged) %>%
+#   mutate(amount_percent_change = (amount_change) / amount_OMB19_19.lagged * 100) %>%
 #   mutate(base = 0) %>%
-#   mutate(amount.OMB.2019 = base + amount_percent_change) %>%
+#   mutate(amount_OMB19_19 = base + amount_percent_change) %>%
 #   dplyr::rename(Fiscal.Year = Fiscal.Year.x) %>%
 #   group_by(Fiscal.Year, SimpleArea) %>%
-#   dplyr::summarise(amount.OMB.2019 = sum(amount.OMB.2019, na.rm = TRUE)) %>%
+#   dplyr::summarise(amount_OMB19_19 = sum(amount_OMB19_19, na.rm = TRUE)) %>%
 #   mutate(type = "engine") %>%
-#   mutate(amount.OMB.2019 = amount.OMB.2019 / 100)
+#   mutate(amount_OMB19_19 = amount_OMB19_19 / 100)
 # 
 # base_year <- topline_contracts %>%
 #   group_by(Fiscal.Year, type, SimpleArea) %>%
-#   dplyr::summarise(amount.OMB.2019 = sum(amount.OMB.2019, na.rm = TRUE))
+#   dplyr::summarise(amount_OMB19_19 = sum(amount_OMB19_19, na.rm = TRUE))
 # 
 # dyear <- base_year %>%
 #   filter(Fiscal.Year == 2000) %>%
-#   select(amount.OMB.2019, type, SimpleArea)
+#   select(amount_OMB19_19, type, SimpleArea)
 # 
 # base_year.top <- base_year %>%
 #   left_join(dyear, by = c("type", "SimpleArea")) %>%
 #   filter(SimpleArea != "Services") %>%
 #   select(-Fiscal.Year.y) %>%
-#   mutate(amount_change = amount.OMB.2019 - amount.OMB.2019.lagged) %>%
-#   mutate(amount_percent_change = (amount_change) / amount.OMB.2019.lagged * 100) %>%
+#   mutate(amount_change = amount_OMB19_19 - amount_OMB19_19.lagged) %>%
+#   mutate(amount_percent_change = (amount_change) / amount_OMB19_19.lagged * 100) %>%
 #   mutate(base = 0) %>%
-#   mutate(amount.OMB.2019 = base + amount_percent_change) %>%
+#   mutate(amount_OMB19_19 = base + amount_percent_change) %>%
 #   dplyr::rename(Fiscal.Year = Fiscal.Year.x) %>%
 #   group_by(Fiscal.Year, SimpleArea) %>%
-#   dplyr::summarise(amount.OMB.2019 = sum(amount.OMB.2019, na.rm = TRUE)) %>%
+#   dplyr::summarise(amount_OMB19_19 = sum(amount_OMB19_19, na.rm = TRUE)) %>%
 #   mutate(type = "topline") %>%
-#   mutate(amount.OMB.2019 = amount.OMB.2019 / 100)
+#   mutate(amount_OMB19_19 = amount_OMB19_19 / 100)
 # 
 # eng.topline <- rbind(base_year.eng, base_year.top)
 
@@ -670,13 +670,13 @@ ggsave(
 (
   comparison_contracts_area <- comparison_contracts %>%
     group_by(Fiscal.Year, SimpleArea, type) %>%
-    dplyr::summarise(amount.OMB.2019 = sum(amount.OMB.2019, na.rm = TRUE),
-                     amount.OMB.2019.lagged = sum(amount.OMB.2019.lagged, na.rm = TRUE),
+    dplyr::summarise(amount_OMB19_19 = sum(amount_OMB19_19, na.rm = TRUE),
+                     amount_OMB19_19.lagged = sum(amount_OMB19_19.lagged, na.rm = TRUE),
                      amount_change = sum(amount_change, na.rm = TRUE),
-                     amount.OMB.2019.2000 = sum(amount.OMB.2019.2000, na.rm = TRUE),
+                     amount_OMB19_19.2000 = sum(amount_OMB19_19.2000, na.rm = TRUE),
                      baseline_change = sum(baseline_change, na.rm = TRUE)) %>%
-    mutate(amount_percent_change = (amount_change) / amount.OMB.2019.lagged,
-           baseline_percent_change = (baseline_change) / amount.OMB.2019.2000) #%>%
+    mutate(amount_percent_change = (amount_change) / amount_OMB19_19.lagged,
+           baseline_percent_change = (baseline_change) / amount_OMB19_19.2000) #%>%
 )
 
 (
