@@ -1,10 +1,14 @@
 # ================================================================================
 # The Future of Military Engines
-# By Gabriel Coll
+# Created by Gabriel Coll 
+# Maintained by Greg Sanders
 # --------------------------------------------------------------------------------
 # contract analysis
 # ================================================================================
-
+library(tidyverse)
+library(csis360)
+source("contracts/theme/chart_theme.R")
+source("contracts/theme/money_labels.R")
 
 load(file="contracts/app/engine_contract.Rdata")
 # ================================================================================
@@ -117,7 +121,7 @@ sum((engine_contracts %>% filter(Competition.multisum == "Unlabeled"))$amount_OM
     geom_area(aes(y = amount_OMB19_19, x = Fiscal.Year), alpha = .9, stat = "identity") +
     facet_wrap(~ Competition, nrow = 1) +
     chart_theme +
-    ggtitle("DoD Aircraft Engine Contract Obligations by Extent of Competition") +
+    ggtitle("DoD Aircraft Engine Contract Obligations\nby Extent of Competition") + 
     xlab("Fiscal Year") +
     ylab("Constant 2019 $") +
     scale_y_continuous(labels = money_labels) +
@@ -134,7 +138,7 @@ ggsave(
   Competition,
   device = "svg",
   width = 8,
-  height = 4,
+  height = 4.25,
   units = "in"
 )
 
@@ -521,7 +525,7 @@ rm(dyear)
     ggtitle("Change in Aircraft Engine Contract Obligations") +
     xlab("Fiscal Year") +
     ylab("Cumulative Percent Change, Inflation Adjusted (2000=0%)") +
-    scale_y_continuous(labels = percent) +
+    scale_y_continuous(labels = scales::percent) +
     scale_x_continuous(
       breaks = seq(2000, 2020, by = 2),
       labels = function(x) {
@@ -608,7 +612,7 @@ max((comparison_contracts_subcustomer %>%
     ggtitle("Change in Aircraft Engine Contract Obligations") +
     xlab("Fiscal Year") +
     ylab("Cumulative Percent Change, Inflation Adjusted (2000=0%)") +
-    scale_y_continuous(labels = percent) +
+    scale_y_continuous(labels = scales::percent) +
     scale_x_continuous(
       breaks = seq(2000, 2020, by = 2),
       labels = function(x) {
@@ -675,7 +679,7 @@ write.csv(graph_contracts_subcustomer$data,# %>%
     ggtitle("Change in Aircraft Engine Contract Obligations") +
     xlab("Fiscal Year") +
     ylab("Cumulative Percent Change, Inflation Adjusted (2000=0%)") +
-    scale_y_continuous(labels = percent) +
+    scale_y_continuous(labels = scales::percent) +
     scale_x_continuous(
       breaks = seq(2000, 2020, by = 2),
       labels = function(x) {
@@ -749,7 +753,7 @@ summary(comparison_contracts_area_total$SimpleArea)
     ggtitle("Change in Aircraft Engine Contract Obligations") +
     xlab("Fiscal Year") +
     ylab("Cumulative Percent Change, Inflation Adjusted (2000=0%)") +
-    scale_y_continuous(labels = percent, breaks = c(-0.5,0,0.5,1,1.5)) +
+    scale_y_continuous(labels = scales::percent, breaks = c(-0.5,0,0.5,1,1.5)) +
     scale_x_continuous(
       breaks = seq(2000, 2020, by = 2),
       labels = function(x) {
