@@ -83,8 +83,8 @@ ggsave(
   units = "in"
 )
 
-write.csv(Vendor.Size$data %>%
-            spread(key=Fiscal.Year, value=amount_OMB19_19),
+write.csv(Vendor.Size$data,# %>%
+            # spread(key=Fiscal.Year, value=amount_OMB19_19),
           file="contracts/charts/amount_vendor_size.csv",row.names = FALSE)
 
 # --------------------------------------------------------------------------------
@@ -270,8 +270,8 @@ ggsave(
   units = "in"
 )
 
-write.csv(Pricing.Mechanism$data %>%
-            spread(key=Fiscal.Year, value=amount_OMB19_19),
+write.csv(Pricing.Mechanism$data,# %>%
+            # spread(key=Fiscal.Year, value=amount_OMB19_19),
           file="contracts/charts/amount_contract_type.csv",row.names = FALSE)
 
 
