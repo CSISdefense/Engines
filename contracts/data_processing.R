@@ -168,3 +168,51 @@ biz_engine_contracts<-engine_contracts %>% dplyr::rename(
 
 write.csv(biz_engine_contracts, "contracts/app/power_bi.csv")
 save(topline_contracts ,engine_contracts,file="contracts/app/engine_contract.Rdata")
+
+
+#-----------------------------------------------------------------------
+# Top 10 Data processing
+###############################################################
+# Get Top 10 rows of aggregated Amount and # of action
+################################################################
+library(dplyr)
+library(tidyr)
+library(csis360)
+library(readr)
+
+
+engine_vendor <- read.delim("contracts/data/Project.SP_EngineAllVendorHistoryCompetitionFundingMechanismVendorSizeProdServAreaSubCustomer.txt",
+                                     na.strings=c("NA","NULL"),sep="\t")
+
+engine_vendor<-remove_bom(engine_vendor)
+engine_vendor<-standardize_variable_names(engine_vendor)
+
+
+engine_vendor<-engine_vendor%>% 
+  group_by(Fiscal_Year,ParentID, ContractorDisplayName) %>% # group_by(Fiscal_Year,IsDefense,PlatformPortfolioUAV) %>%
+  summarise(numberOfActions=sum(numberOfActions,na.rm=TRUE),
+            Action_Obligation=sum(Action_Obligation,na.rm=TRUE)) %>%
+  group_by(Fiscal_Year) %>%
+  dplyr::mutate(pos=rank(-Action_Obligation))%>%
+  arrange(Fiscal_Year,pos)
+
+engine_vendor_overall<-engine_vendor%>% 
+  group_by(ParentID, ContractorDisplayName) %>% # group_by(Fiscal_Year,IsDefense,PlatformPortfolioUAV) %>%
+  summarise(numberOfActions=sum(numberOfActions,na.rm=TRUE),
+            Action_Obligation=sum(Action_Obligation,na.rm=TRUE),
+            MinOfFiscalYear=min(Fiscal_Year),
+            MaxOfFiscalYear=max(Fiscal_Year),
+            ) %>%
+  group_by() %>%
+  dplyr::mutate(pos=rank(-Action_Obligation))%>%
+  arrange(pos)
+
+write.csv(engine_vendor_overall, file="contracts/data/TopEngineVendors.csv")
+save(file="data/clean/TopVendorUAVHistoryPlatformCustomer.rda",engine_vendor)
+colnames(engine_vendor)
+
+
+View(engine_vendor %>% filter(PlatformPortfolioUAV=="Remotely Operated" & pos<=10 & IsDefense==TRUE & Fiscal_Year>=2000))
+summary(factor(engine_vendor$PlatformPortfolioUAV))
+
+
