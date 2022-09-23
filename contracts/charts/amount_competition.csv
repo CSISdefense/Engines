@@ -1,58 +1,67 @@
-"Fiscal.Year","Competition.multisum","amount_OMB19_19","Competition",".group"
-2000,"1 Offer",1172749565.75195,"Competition with single offer",1
-2000,"2+ Offers",1407173775.5116,"Effective Competition",1
-2000,"No Comp.",3619714878.7072,"No Competition",1
-2001,"1 Offer",546740077.429372,"Competition with single offer",2
-2001,"2+ Offers",1864730560.23806,"Effective Competition",2
-2001,"No Comp.",4804112828.61465,"No Competition",2
-2002,"1 Offer",769371864.07469,"Competition with single offer",3
-2002,"2+ Offers",1332654558.3912,"Effective Competition",3
-2002,"No Comp.",5867932653.1005,"No Competition",3
-2003,"1 Offer",723800807.541303,"Competition with single offer",4
-2003,"2+ Offers",1575711497.16265,"Effective Competition",4
-2003,"No Comp.",7709651040.36152,"No Competition",4
-2004,"1 Offer",386369428.2226,"Competition with single offer",5
-2004,"2+ Offers",2133284065.7125,"Effective Competition",5
-2004,"No Comp.",5769442673.99574,"No Competition",5
-2005,"1 Offer",427841107.895176,"Competition with single offer",6
-2005,"2+ Offers",1882250888.0994,"Effective Competition",6
-2005,"No Comp.",7343516039.97804,"No Competition",6
-2006,"1 Offer",198848517.538532,"Competition with single offer",7
-2006,"2+ Offers",1751075324.16581,"Effective Competition",7
-2006,"No Comp.",5914328888.74479,"No Competition",7
-2007,"1 Offer",313056949.436086,"Competition with single offer",8
-2007,"2+ Offers",1013651350.28034,"Effective Competition",8
-2007,"No Comp.",7001411983.10983,"No Competition",8
-2008,"1 Offer",434012426.876323,"Competition with single offer",9
-2008,"2+ Offers",1312603323.13953,"Effective Competition",9
-2008,"No Comp.",5331573350.43458,"No Competition",9
-2009,"1 Offer",736776122.953509,"Competition with single offer",10
-2009,"2+ Offers",908490201.1328,"Effective Competition",10
-2009,"No Comp.",5621399136.66309,"No Competition",10
-2010,"1 Offer",594253461.90678,"Competition with single offer",11
-2010,"2+ Offers",1067219274.59648,"Effective Competition",11
-2010,"No Comp.",5449623163.02336,"No Competition",11
-2011,"1 Offer",652526978.832572,"Competition with single offer",12
-2011,"2+ Offers",457866213.142023,"Effective Competition",12
-2011,"No Comp.",5747089644.04607,"No Competition",12
-2012,"1 Offer",436252708.267636,"Competition with single offer",13
-2012,"2+ Offers",703964575.64702,"Effective Competition",13
-2012,"No Comp.",5185327834.50283,"No Competition",13
-2013,"1 Offer",339284028.093319,"Competition with single offer",14
-2013,"2+ Offers",771865695.722083,"Effective Competition",14
-2013,"No Comp.",5582825021.5676,"No Competition",14
-2014,"1 Offer",329937574.172948,"Competition with single offer",15
-2014,"2+ Offers",1531844095.99268,"Effective Competition",15
-2014,"No Comp.",4538451294.28613,"No Competition",15
-2015,"1 Offer",340881645.107131,"Competition with single offer",16
-2015,"2+ Offers",684725118.113139,"Effective Competition",16
-2015,"No Comp.",5154892214.43514,"No Competition",16
-2016,"1 Offer",367754541.260335,"Competition with single offer",17
-2016,"2+ Offers",679657645.122569,"Effective Competition",17
-2016,"No Comp.",6178201176.24325,"No Competition",17
-2017,"1 Offer",269364816.162441,"Competition with single offer",18
-2017,"2+ Offers",746704823.018527,"Effective Competition",18
-2017,"No Comp.",4349871142.16214,"No Competition",18
-2018,"1 Offer",94033507.8259967,"Competition with single offer",19
-2018,"2+ Offers",252902974.437352,"Effective Competition",19
-2018,"No Comp.",8289121404.11441,"No Competition",19
+"Fiscal_Year","Competition.multisum","Action_Obligation_OMB23_GDP21","Competition",".group"
+2000,"1 Offer",1258677586.65398,"Competition with single offer",1
+2000,"2+ Offers",1508929361.93392,"Effective Competition",1
+2000,"No Comp.",3886177855.11231,"No Competition",1
+2001,"1 Offer",585406730.778209,"Competition with single offer",2
+2001,"2+ Offers",1996458323.14971,"Effective Competition",2
+2001,"No Comp.",5142735378.77387,"No Competition",2
+2002,"1 Offer",824116653.277091,"Competition with single offer",3
+2002,"2+ Offers",1428697468.95239,"Effective Competition",3
+2002,"No Comp.",6297484308.773,"No Competition",3
+2003,"1 Offer",767824315.618532,"Competition with single offer",4
+2003,"2+ Offers",1672881629.87028,"Effective Competition",4
+2003,"No Comp.",8180310079.64312,"No Competition",4
+2004,"1 Offer",409445564.728207,"Competition with single offer",5
+2004,"2+ Offers",2260366502.34337,"Effective Competition",5
+2004,"No Comp.",6109534026.24459,"No Competition",5
+2005,"1 Offer",451810614.69651,"Competition with single offer",6
+2005,"2+ Offers",1988549555.05582,"Effective Competition",6
+2005,"No Comp.",7757343062.43099,"No Competition",6
+2006,"1 Offer",209422185.926277,"Competition with single offer",7
+2006,"2+ Offers",1847453207.5061,"Effective Competition",7
+2006,"No Comp.",6229823440.60151,"No Competition",7
+2007,"1 Offer",330056073.507664,"Competition with single offer",8
+2007,"2+ Offers",1067092596.87241,"Effective Competition",8
+2007,"No Comp.",7376701730.47124,"No Competition",8
+2008,"1 Offer",450582099.953802,"Competition with single offer",9
+2008,"2+ Offers",1362732485.4611,"Effective Competition",9
+2008,"No Comp.",5535240388.8795,"No Competition",9
+2009,"1 Offer",775598157.116133,"Competition with single offer",10
+2009,"2+ Offers",955634175.075682,"Effective Competition",10
+2009,"No Comp.",5912608634.77309,"No Competition",10
+2010,"1 Offer",619449913.539978,"Competition with single offer",11
+2010,"2+ Offers",1112578024.51399,"Effective Competition",11
+2010,"No Comp.",5682412531.91973,"No Competition",11
+2011,"1 Offer",677924971.095624,"Competition with single offer",12
+2011,"2+ Offers",476290614.196741,"Effective Competition",12
+2011,"No Comp.",5964680061.24689,"No Competition",12
+2012,"1 Offer",452715453.790196,"Competition with single offer",13
+2012,"2+ Offers",730962460.46601,"Effective Competition",13
+2012,"No Comp.",5381712715.29832,"No Competition",13
+2013,"1 Offer",353388608.718642,"Competition with single offer",14
+2013,"2+ Offers",803277002.283508,"Effective Competition",14
+2013,"No Comp.",5809086985.00137,"No Competition",14
+2014,"1 Offer",344188029.821977,"Competition with single offer",15
+2014,"2+ Offers",1597239103.35347,"Effective Competition",15
+2014,"No Comp.",4734408958.76517,"No Competition",15
+2015,"1 Offer",357823023.97835,"Competition with single offer",16
+2015,"2+ Offers",718783659.449844,"Effective Competition",16
+2015,"No Comp.",5417494572.72237,"No Competition",16
+2016,"1 Offer",388205759.682189,"Competition with single offer",17
+2016,"2+ Offers",717264170.086239,"Effective Competition",17
+2016,"No Comp.",6528166847.30721,"No Competition",17
+2017,"1 Offer",284326036.190487,"Competition with single offer",18
+2017,"2+ Offers",788716579.799244,"Effective Competition",18
+2017,"No Comp.",4595250299.05278,"No Competition",18
+2018,"1 Offer",92414569.6680624,"Competition with single offer",19
+2018,"2+ Offers",273988365.532391,"Effective Competition",19
+2018,"No Comp.",8702730662.53036,"No Competition",19
+2019,"1 Offer",139493045.714315,"Competition with single offer",20
+2019,"2+ Offers",284113861.716356,"Effective Competition",20
+2019,"No Comp.",10692547132.422,"No Competition",20
+2020,"1 Offer",86870423.1456305,"Competition with single offer",21
+2020,"2+ Offers",138618157.934357,"Effective Competition",21
+2020,"No Comp.",9218756185.12916,"No Competition",21
+2021,"1 Offer",75657941.7653,"Competition with single offer",22
+2021,"2+ Offers",213445621.8638,"Effective Competition",22
+2021,"No Comp.",5599308253.6145,"No Competition",22
