@@ -32,7 +32,7 @@ load(file="contracts/app/engine_contract.Rdata")
     chart_theme +
     ggtitle("DoD Aircraft Engine Contract Obligations") +
     xlab("Fiscal Year") +
-    ylab("Constant 2019 $")
+    ylab("Constant 2021 $")
 )
 
 ggsave(
@@ -65,7 +65,7 @@ write.csv(total$data %>%
     chart_theme +
     ggtitle("DoD Aircraft Engine Contract Obligations by Vendor Size") +
     xlab("Fiscal Year") +
-    ylab("Constant 2019 $") +
+    ylab("Constant 2021 $") +
     scale_y_continuous(labels = money_labels) +
     scale_x_continuous(
       breaks = seq(2000, 2020, by = 2),
@@ -123,7 +123,7 @@ sum((engine_contracts %>% filter(Competition.multisum == "Unlabeled"))$Action_Ob
     chart_theme +
     ggtitle("DoD Aircraft Engine Contract Obligations\nby Extent of Competition") + 
     xlab("Fiscal Year") +
-    ylab("Constant 2019 $") +
+    ylab("Constant 2021 $") +
     scale_y_continuous(labels = money_labels) +
     scale_x_continuous(
       breaks = seq(2000, 2020, by = 2),
@@ -218,6 +218,99 @@ write.csv(Competition_Share$data,# %>%
           file="contracts/charts/share_competition.csv",row.names = FALSE)
 
 
+#----------------------------------------------
+#Simple Area
+labels_and_colors<-prepare_labels_and_colors(engine_contracts %>% select(-PricingMechanism))
+column_key<-get_column_key(engine_contracts)
+(
+  SimpleArea<-build_plot(
+    data=engine_contracts ,
+    chart_geom = "Bar Chart",
+    share = FALSE,
+    labels_and_colors=labels_and_colors,
+    # NA, #VAR.ncol
+    x_var="Fiscal_Year", #x_var
+    y_var="Action_Obligation_OMB23_GDP21", #VAR.y.variable
+    color_var="SimpleArea", #color_var
+    facet_var="SimpleArea", #facet_var
+    column_key=column_key,
+    format=TRUE,
+    ytextposition=FALSE
+  )+
+    # theme(strip.text.y = element_text(angle=0))+
+    # theme(axis.text.x = element_text(angle=90))+
+    #    scale_y_continuous("Percent of Obligations", labels = percent_format(accuracy=1))+
+    #      facet_grid(.~Competition.sum ,scales="free_x", space="free_x"
+    #             )+labs(title=NULL,
+    # x="Fiscal Year",
+    # y="Percent of Obligations",
+    # color="Competition")+
+    theme(legend.position = "right")+
+    labs(y="Obligations (Constant 2021 $s), Variable Scale")+
+    facet_grid(SimpleArea~.,scales="free_y")
+)
+
+ggsave600dpi(SimpleArea,file="contracts/charts/SimpleArea.png",width=5,height=6,size = 11)
+
+#-----------------------------------------------------------------------
+# R&D phase
+
+
+
+(
+  RnDphase<-build_plot(
+    data=engine_contracts %>% filter(SimpleArea=="R&D"),
+    chart_geom = "Bar Chart",
+    share = FALSE,
+    labels_and_colors=labels_and_colors,
+    # NA, #VAR.ncol
+    x_var="Fiscal_Year", #x_var
+    y_var="Action_Obligation_OMB23_GDP21", #VAR.y.variable
+    color_var="ProductServiceOrRnDarea", #color_var
+    # facet_var="Competition.sum", #facet_var
+    column_key=column_key,
+    format=TRUE,
+    ytextposition=FALSE
+  )+
+    # theme(strip.text.y = element_text(angle=0))+
+    # theme(axis.text.x = element_text(angle=90))+
+    #    scale_y_continuous("Percent of Obligations", labels = percent_format(accuracy=1))+
+    #      facet_grid(.~Competition.sum ,scales="free_x", space="free_x"
+    #             )+labs(title=NULL,
+    # x="Fiscal Year",
+    # y="Percent of Obligations",
+    # color="Competition")+
+    theme(legend.position = "right")+
+    labs(y="Obligations (Constant 2021 $s)")
+)
+
+ggsave600dpi("..//Output//psr_RnDPhase.png", RnDphase, 
+             width=12, height= 6, units="in",size=12, lineheight=1.2
+)
+
+
+write.csv(file="..//Output//psr_RnDPhase.csv",row.names = FALSE, na = "",
+          pivot_wider(RnDphase$data,id_cols=c(ProductServiceOrRnDarea),
+                      names_from=Fiscal_Year,values_from=Action_Obligation_OMB23_GDP21)%>%
+            arrange(ProductServiceOrRnDarea))
+
+
+output_TY<-full_data %>% filter(SimpleArea=="R&D") %>%
+  format_data_for_plot(fy_var="Fiscal_Year",y_var="Action_Obligation_Then_Year",color_var = "ProductServiceOrRnDarea",
+                       labels_and_colors=labels_and_colors) %>%
+  pivot_wider(id_cols=c(ProductServiceOrRnDarea),
+              names_from=Fiscal_Year,values_from=Action_Obligation_Then_Year)%>%
+  arrange(ProductServiceOrRnDarea)
+
+write.csv(file="..//Output//psr_RnDPhase_current.csv",row.names = FALSE, na = "",
+          output_TY)
+
+wb <- loadWorkbook("..//Output//DoD_Acq_Trends_Contracts.xlsx", create = TRUE)
+createSheet(wb, name = "R&D")
+writeWorksheet(wb, output_TY, sheet = "R&D", startRow = 15, startCol = 13)
+saveWorkbook(wb)
+
+
 # --------------------------------------------------------------------------------
 # engine contracts by Contract Type 
 levels(factor(engine_contracts$PricingMechanism))
@@ -255,7 +348,7 @@ levels(factor(engine_contracts$PricingMechanism))
     chart_theme +
     ggtitle("DoD Aircraft Engine Contract Obligations by Contract Type") +
     xlab("Fiscal Year") +
-    ylab("Constant 2019 $") +
+    ylab("Constant 2021 $") +
     scale_y_continuous(labels = money_labels) +
     scale_x_continuous(
       breaks = seq(2000, 2020, by = 2),
@@ -396,7 +489,7 @@ dla <- dla %>%
     facet_grid(SubCustomer ~ SimpleArea) +
     chart_theme +
     xlab("Fiscal Year") +
-    ylab("Constant 2019 $") +
+    ylab("Constant 2021 $") +
     ggtitle("DoD Aircraft Engine Contract Obligations by service and SimpleArea") +
     scale_y_continuous(labels = money_labels) +
     scale_x_continuous(
