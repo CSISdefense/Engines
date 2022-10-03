@@ -4,3 +4,5 @@
 .Ruserdata
 
 contracts/data/Project.SP_EngineAllVendorHistoryCompetitionFundingMechanismVendorSizeProdServAreaSubCustomer.txt
+
+contracts/data/Vendor.sp_EntityCountHistoryEngineSubCustomer.txt
