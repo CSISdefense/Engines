@@ -18,10 +18,10 @@ load(file="contracts/app/engine_contract.Rdata")
 
 (
   total <- engine_contracts %>%
-    group_by(Fiscal.Year) %>%
-    dplyr::summarise(amount_OMB19_19 = sum(amount_OMB19_19, na.rm = TRUE)) %>%
+    group_by(Fiscal_Year) %>%
+    dplyr::summarise(Action_Obligation_OMB23_GDP21 = sum(Action_Obligation_OMB23_GDP21, na.rm = TRUE)) %>%
     ggplot() +
-    geom_area(aes(y = amount_OMB19_19, x = Fiscal.Year), alpha = .9 , stat = "identity") +
+    geom_area(aes(y = Action_Obligation_OMB23_GDP21, x = Fiscal_Year), alpha = .9 , stat = "identity") +
     scale_x_continuous(
       breaks = seq(2000, 2020, by = 2),
       labels = function(x) {
@@ -32,7 +32,7 @@ load(file="contracts/app/engine_contract.Rdata")
     chart_theme +
     ggtitle("DoD Aircraft Engine Contract Obligations") +
     xlab("Fiscal Year") +
-    ylab("Constant 2019 $")
+    ylab("Constant 2021 $")
 )
 
 ggsave(
@@ -47,7 +47,7 @@ ggsave(
 
 
 write.csv(total$data %>%
-            spread(key=Fiscal.Year, value=amount_OMB19_19),
+            spread(key=Fiscal_Year, value=Action_Obligation_OMB23_GDP21),
           file="contracts/charts/amount_total.csv",row.names = FALSE)
 
 
@@ -55,17 +55,17 @@ write.csv(total$data %>%
 # engine contracts by Vendor Size 
 
 (
-  Vendor.Size <- engine_contracts %>%
-    filter(Vendor.Size != "Unlabeled") %>%
-    group_by(Fiscal.Year, Vendor.Size) %>%
-    dplyr::summarise(amount_OMB19_19 = sum(amount_OMB19_19, na.rm = TRUE)) %>%
+  Shiny.VendorSize <- engine_contracts %>%
+    filter(Shiny.VendorSize != "Unlabeled") %>%
+    group_by(Fiscal_Year, Shiny.VendorSize) %>%
+    dplyr::summarise(Action_Obligation_OMB23_GDP21 = sum(Action_Obligation_OMB23_GDP21, na.rm = TRUE)) %>%
     ggplot() +
-    geom_area(aes(y = amount_OMB19_19, x = Fiscal.Year), alpha = .9, stat = "identity") +
-    facet_wrap(~ Vendor.Size, nrow = 2) +
+    geom_area(aes(y = Action_Obligation_OMB23_GDP21, x = Fiscal_Year), alpha = .9, stat = "identity") +
+    facet_wrap(~ Shiny.VendorSize, nrow = 2) +
     chart_theme +
     ggtitle("DoD Aircraft Engine Contract Obligations by Vendor Size") +
     xlab("Fiscal Year") +
-    ylab("Constant 2019 $") +
+    ylab("Constant 2021 $") +
     scale_y_continuous(labels = money_labels) +
     scale_x_continuous(
       breaks = seq(2000, 2020, by = 2),
@@ -80,26 +80,26 @@ write.csv(total$data %>%
 
 ggsave(
   "contracts/charts/amount_vendor_size.svg",
-  Vendor.Size,
+  Shiny.VendorSize,
   device = "svg",
   width = 8,
   height = 6,
   units = "in"
 )
 
-write.csv(Vendor.Size$data,# %>%
-            # spread(key=Fiscal.Year, value=amount_OMB19_19),
+write.csv(Shiny.VendorSize$data,# %>%
+            # spread(key=Fiscal_Year, value=Action_Obligation_OMB23_GDP21),
           file="contracts/charts/amount_vendor_size.csv",row.names = FALSE)
 
 # --------------------------------------------------------------------------------
-sum((engine_contracts %>% filter(Competition.multisum == "Unlabeled"))$amount_OMB19_19 )
+sum((engine_contracts %>% filter(Competition.multisum == "Unlabeled"))$Action_Obligation_OMB23_GDP21 )
 
 # engine contracts by CompetitionClassification  
 (
   Competition <- engine_contracts %>%
     filter(Competition.multisum != "Unlabeled") %>%
-    group_by(Fiscal.Year, Competition.multisum) %>%
-    dplyr::summarise(amount_OMB19_19 = sum(amount_OMB19_19, na.rm = TRUE)) %>%
+    group_by(Fiscal_Year, Competition.multisum) %>%
+    dplyr::summarise(Action_Obligation_OMB23_GDP21 = sum(Action_Obligation_OMB23_GDP21, na.rm = TRUE)) %>%
     mutate(Competition = factor(
       Competition.multisum,
       levels=c("2+ Offers" ,
@@ -118,12 +118,12 @@ sum((engine_contracts %>% filter(Competition.multisum == "Unlabeled"))$amount_OM
         substring(as.character(x), 3, 4)
       }
     ) +
-    geom_area(aes(y = amount_OMB19_19, x = Fiscal.Year), alpha = .9, stat = "identity") +
+    geom_area(aes(y = Action_Obligation_OMB23_GDP21, x = Fiscal_Year), alpha = .9, stat = "identity") +
     facet_wrap(~ Competition, nrow = 1) +
     chart_theme +
     ggtitle("DoD Aircraft Engine Contract Obligations\nby Extent of Competition") + 
     xlab("Fiscal Year") +
-    ylab("Constant 2019 $") +
+    ylab("Constant 2021 $") +
     scale_y_continuous(labels = money_labels) +
     scale_x_continuous(
       breaks = seq(2000, 2020, by = 2),
@@ -146,7 +146,7 @@ ggsave(
 
 
 write.csv(Competition$data,# %>%
-            # spread(key=Fiscal.Year, value=amount_OMB19_19),
+            # spread(key=Fiscal_Year, value=Action_Obligation_OMB23_GDP21),
           file="contracts/charts/amount_competition.csv",row.names = FALSE)
 
 
@@ -156,13 +156,13 @@ write.csv(Competition$data,# %>%
 (
   Competition_Share <- engine_contracts %>%
     # filter(Competition.multisum != "Unlabeled") %>%
-    # group_by(Fiscal.Year, Competition.multisum,SimpleArea) %>%
-    group_by(Fiscal.Year, Competition.multisum) %>%
-    dplyr::summarise(amount_OMB19_19 = sum(amount_OMB19_19, na.rm = TRUE)) %>%
-    # group_by(Fiscal.Year, SimpleArea) %>%#Competition.multisum,
-    group_by(Fiscal.Year) %>%#Competition.multisum,
+    # group_by(Fiscal_Year, Competition.multisum,SimpleArea) %>%
+    group_by(Fiscal_Year, Competition.multisum) %>%
+    dplyr::summarise(Action_Obligation_OMB23_GDP21 = sum(Action_Obligation_OMB23_GDP21, na.rm = TRUE)) %>%
+    # group_by(Fiscal_Year, SimpleArea) %>%#Competition.multisum,
+    group_by(Fiscal_Year) %>%#Competition.multisum,
     mutate(
-      amount_share = amount_OMB19_19/ sum(amount_OMB19_19, na.rm = TRUE),
+      amount_share = Action_Obligation_OMB23_GDP21/ sum(Action_Obligation_OMB23_GDP21, na.rm = TRUE),
       Competition = factor(
       Competition.multisum,
       levels=c("No Comp.",
@@ -184,7 +184,7 @@ write.csv(Competition$data,# %>%
       }
     ) +
     geom_line(aes(y = amount_share, 
-                  x = Fiscal.Year,
+                  x = Fiscal_Year,
                   linetype=Competition)) +#, alpha = .9, stat = "identity"
     # facet_wrap(~ SimpleArea, nrow = 1) +#Competition
     chart_theme +
@@ -214,20 +214,113 @@ ggsave(
 )
 
 write.csv(Competition_Share$data,# %>%
-            # spread(key=Fiscal.Year, value=amount_share),
+            # spread(key=Fiscal_Year, value=amount_share),
           file="contracts/charts/share_competition.csv",row.names = FALSE)
+
+
+#----------------------------------------------
+#Simple Area
+labels_and_colors<-prepare_labels_and_colors(engine_contracts %>% select(-PricingMechanism))
+column_key<-get_column_key(engine_contracts)
+(
+  SimpleArea<-build_plot(
+    data=engine_contracts ,
+    chart_geom = "Bar Chart",
+    share = FALSE,
+    labels_and_colors=labels_and_colors,
+    # NA, #VAR.ncol
+    x_var="Fiscal_Year", #x_var
+    y_var="Action_Obligation_OMB23_GDP21", #VAR.y.variable
+    color_var="SimpleArea", #color_var
+    facet_var="SimpleArea", #facet_var
+    column_key=column_key,
+    format=TRUE,
+    ytextposition=FALSE
+  )+
+    # theme(strip.text.y = element_text(angle=0))+
+    # theme(axis.text.x = element_text(angle=90))+
+    #    scale_y_continuous("Percent of Obligations", labels = percent_format(accuracy=1))+
+    #      facet_grid(.~Competition.sum ,scales="free_x", space="free_x"
+    #             )+labs(title=NULL,
+    # x="Fiscal Year",
+    # y="Percent of Obligations",
+    # color="Competition")+
+    theme(legend.position = "right")+
+    labs(y="Obligations (Constant 2021 $s), Variable Scale")+
+    facet_grid(SimpleArea~.,scales="free_y")
+)
+
+ggsave600dpi(SimpleArea,file="contracts/charts/SimpleArea.png",width=5,height=6,size = 11)
+
+#-----------------------------------------------------------------------
+# R&D phase
+
+
+
+(
+  RnDphase<-build_plot(
+    data=engine_contracts %>% filter(SimpleArea=="R&D"),
+    chart_geom = "Bar Chart",
+    share = FALSE,
+    labels_and_colors=labels_and_colors,
+    # NA, #VAR.ncol
+    x_var="Fiscal_Year", #x_var
+    y_var="Action_Obligation_OMB23_GDP21", #VAR.y.variable
+    color_var="ProductServiceOrRnDarea", #color_var
+    # facet_var="Competition.sum", #facet_var
+    column_key=column_key,
+    format=TRUE,
+    ytextposition=FALSE
+  )+
+    # theme(strip.text.y = element_text(angle=0))+
+    # theme(axis.text.x = element_text(angle=90))+
+    #    scale_y_continuous("Percent of Obligations", labels = percent_format(accuracy=1))+
+    #      facet_grid(.~Competition.sum ,scales="free_x", space="free_x"
+    #             )+labs(title=NULL,
+    # x="Fiscal Year",
+    # y="Percent of Obligations",
+    # color="Competition")+
+    theme(legend.position = "right")+
+    labs(y="Obligations (Constant 2021 $s)")
+)
+
+ggsave600dpi("..//Output//psr_RnDPhase.png", RnDphase, 
+             width=12, height= 6, units="in",size=12, lineheight=1.2
+)
+
+
+write.csv(file="..//Output//psr_RnDPhase.csv",row.names = FALSE, na = "",
+          pivot_wider(RnDphase$data,id_cols=c(ProductServiceOrRnDarea),
+                      names_from=Fiscal_Year,values_from=Action_Obligation_OMB23_GDP21)%>%
+            arrange(ProductServiceOrRnDarea))
+
+
+output_TY<-full_data %>% filter(SimpleArea=="R&D") %>%
+  format_data_for_plot(fy_var="Fiscal_Year",y_var="Action_Obligation_Then_Year",color_var = "ProductServiceOrRnDarea",
+                       labels_and_colors=labels_and_colors) %>%
+  pivot_wider(id_cols=c(ProductServiceOrRnDarea),
+              names_from=Fiscal_Year,values_from=Action_Obligation_Then_Year)%>%
+  arrange(ProductServiceOrRnDarea)
+
+write.csv(file="..//Output//psr_RnDPhase_current.csv",row.names = FALSE, na = "",
+          output_TY)
+
+wb <- loadWorkbook("..//Output//DoD_Acq_Trends_Contracts.xlsx", create = TRUE)
+createSheet(wb, name = "R&D")
+writeWorksheet(wb, output_TY, sheet = "R&D", startRow = 15, startCol = 13)
+saveWorkbook(wb)
 
 
 # --------------------------------------------------------------------------------
 # engine contracts by Contract Type 
-levels(factor(engine_contracts$Pricing.Mechanism))
+levels(factor(engine_contracts$PricingMechanism))
 (
-  Pricing.Mechanism <- engine_contracts %>%
-    filter(Pricing.Mechanism != "Other") %>%
-    group_by(Fiscal.Year, Pricing.Mechanism) %>%
-    dplyr::summarise(amount_OMB19_19 = sum(amount_OMB19_19, na.rm = TRUE)) %>%
-    mutate(Pricing.Mechanism = factor(
-      Pricing.Mechanism,
+  PricingMechanism <- engine_contracts %>%
+    filter(PricingMechanism != "Other") %>%
+    group_by(Fiscal_Year, PricingMechanism) %>%
+    dplyr::summarise(Action_Obligation_OMB23_GDP21 = sum(Action_Obligation_OMB23_GDP21, na.rm = TRUE)) %>%
+    mutate(PricingMechanism = factor(
+      PricingMechanism,
       levels = c(
         "Cost+",
         "Combination",
@@ -250,12 +343,12 @@ levels(factor(engine_contracts$Pricing.Mechanism))
         substring(as.character(x), 3, 4)
       }
     ) +
-    geom_area(aes(y = amount_OMB19_19, x = Fiscal.Year), alpha = .9, stat = "identity") +
-    facet_wrap(~ Pricing.Mechanism, nrow = 1) +
+    geom_area(aes(y = Action_Obligation_OMB23_GDP21, x = Fiscal_Year), alpha = .9, stat = "identity") +
+    facet_wrap(~ PricingMechanism, nrow = 1) +
     chart_theme +
     ggtitle("DoD Aircraft Engine Contract Obligations by Contract Type") +
     xlab("Fiscal Year") +
-    ylab("Constant 2019 $") +
+    ylab("Constant 2021 $") +
     scale_y_continuous(labels = money_labels) +
     scale_x_continuous(
       breaks = seq(2000, 2020, by = 2),
@@ -267,15 +360,15 @@ levels(factor(engine_contracts$Pricing.Mechanism))
 
 ggsave(
   "contracts/charts/amount_contract_type.svg",
-  Pricing.Mechanism,
+  PricingMechanism,
   device = "svg",
   width = 12,
   height = 4,
   units = "in"
 )
 
-write.csv(Pricing.Mechanism$data,# %>%
-            # spread(key=Fiscal.Year, value=amount_OMB19_19),
+write.csv(PricingMechanism$data,# %>%
+            # spread(key=Fiscal_Year, value=Action_Obligation_OMB23_GDP21),
           file="contracts/charts/amount_contract_type.csv",row.names = FALSE)
 
 
@@ -285,14 +378,14 @@ write.csv(Pricing.Mechanism$data,# %>%
 #This could be done in fewer steps but on skimming it seems to check out.
 
 total <- engine_contracts %>%
-  group_by(Fiscal.Year) %>%
-  dplyr::summarise(amount_OMB19_19 = sum(amount_OMB19_19, na.rm = TRUE)) %>%
+  group_by(Fiscal_Year) %>%
+  dplyr::summarise(Action_Obligation_OMB23_GDP21 = sum(Action_Obligation_OMB23_GDP21, na.rm = TRUE)) %>%
   mutate(SimpleArea = "Total") %>%
   as.data.frame(.)
 
 total_category <- engine_contracts %>%
-  group_by(Fiscal.Year, SimpleArea) %>%
-  dplyr::summarise(amount_OMB19_19 = sum(amount_OMB19_19, na.rm = TRUE)) %>%
+  group_by(Fiscal_Year, SimpleArea) %>%
+  dplyr::summarise(Action_Obligation_OMB23_GDP21 = sum(Action_Obligation_OMB23_GDP21, na.rm = TRUE)) %>%
   as.data.frame(.)
 
 total <- total %>%
@@ -301,15 +394,15 @@ total <- total %>%
 
 army <- engine_contracts %>%
   filter(SubCustomer == "Army") %>%
-  group_by(Fiscal.Year) %>%
-  dplyr::summarise(amount_OMB19_19 = sum(amount_OMB19_19, na.rm = TRUE)) %>%
+  group_by(Fiscal_Year) %>%
+  dplyr::summarise(Action_Obligation_OMB23_GDP21 = sum(Action_Obligation_OMB23_GDP21, na.rm = TRUE)) %>%
   mutate(SimpleArea = "Total") %>%
   as.data.frame(.)
 
 army_category <- engine_contracts %>%
   filter(SubCustomer == "Army") %>%
-  group_by(Fiscal.Year, SimpleArea) %>%
-  dplyr::summarise(amount_OMB19_19 = sum(amount_OMB19_19, na.rm = TRUE)) %>%
+  group_by(Fiscal_Year, SimpleArea) %>%
+  dplyr::summarise(Action_Obligation_OMB23_GDP21 = sum(Action_Obligation_OMB23_GDP21, na.rm = TRUE)) %>%
   as.data.frame(.)
 
 army <- army %>%
@@ -317,17 +410,17 @@ army <- army %>%
   mutate(SubCustomer = "Army")
 
 navy <- engine_contracts %>%
-  group_by(Fiscal.Year) %>%
+  group_by(Fiscal_Year) %>%
   filter(SubCustomer == "Navy") %>%
-  dplyr::summarise(amount_OMB19_19 = sum(amount_OMB19_19, na.rm = TRUE)) %>%
+  dplyr::summarise(Action_Obligation_OMB23_GDP21 = sum(Action_Obligation_OMB23_GDP21, na.rm = TRUE)) %>%
   mutate(SimpleArea = "Total") %>%
   mutate(SimpleArea = as.factor(SimpleArea)) %>%
   as.data.frame(.)
 
 navy_category <- engine_contracts %>%
   filter(SubCustomer == "Navy") %>%
-  group_by(Fiscal.Year, SimpleArea) %>%
-  dplyr::summarise(amount_OMB19_19 = sum(amount_OMB19_19, na.rm = TRUE)) %>%
+  group_by(Fiscal_Year, SimpleArea) %>%
+  dplyr::summarise(Action_Obligation_OMB23_GDP21 = sum(Action_Obligation_OMB23_GDP21, na.rm = TRUE)) %>%
   as.data.frame(.)
 
 navy <- navy %>%
@@ -335,17 +428,17 @@ navy <- navy %>%
   mutate(SubCustomer = "Navy")
 
 air_force <- engine_contracts %>%
-  group_by(Fiscal.Year) %>%
+  group_by(Fiscal_Year) %>%
   filter(SubCustomer == "Air Force") %>%
-  dplyr::summarise(amount_OMB19_19 = sum(amount_OMB19_19, na.rm = TRUE)) %>%
+  dplyr::summarise(Action_Obligation_OMB23_GDP21 = sum(Action_Obligation_OMB23_GDP21, na.rm = TRUE)) %>%
   mutate(SimpleArea = "Total") %>%
   mutate(SimpleArea = as.factor(SimpleArea)) %>%
   as.data.frame(.)
 
 air_force_category <- engine_contracts %>%
   filter(SubCustomer == "Air Force") %>%
-  group_by(Fiscal.Year, SimpleArea) %>%
-  dplyr::summarise(amount_OMB19_19 = sum(amount_OMB19_19, na.rm = TRUE)) %>%
+  group_by(Fiscal_Year, SimpleArea) %>%
+  dplyr::summarise(Action_Obligation_OMB23_GDP21 = sum(Action_Obligation_OMB23_GDP21, na.rm = TRUE)) %>%
   as.data.frame(.)
 
 air_force <- air_force %>%
@@ -353,17 +446,17 @@ air_force <- air_force %>%
   mutate(SubCustomer = "Air Force")
 
 dla <- engine_contracts %>%
-  group_by(Fiscal.Year) %>%
+  group_by(Fiscal_Year) %>%
   filter(SubCustomer == "DLA") %>%
-  dplyr::summarise(amount_OMB19_19 = sum(amount_OMB19_19, na.rm = TRUE)) %>%
+  dplyr::summarise(Action_Obligation_OMB23_GDP21 = sum(Action_Obligation_OMB23_GDP21, na.rm = TRUE)) %>%
   mutate(SimpleArea = "Total") %>%
   mutate(SimpleArea = as.factor(SimpleArea)) %>%
   as.data.frame(.)
 
 dla_category <- engine_contracts %>%
   filter(SubCustomer == "DLA") %>%
-  group_by(Fiscal.Year, SimpleArea) %>%
-  dplyr::summarise(amount_OMB19_19 = sum(amount_OMB19_19, na.rm = TRUE)) %>%
+  group_by(Fiscal_Year, SimpleArea) %>%
+  dplyr::summarise(Action_Obligation_OMB23_GDP21 = sum(Action_Obligation_OMB23_GDP21, na.rm = TRUE)) %>%
   as.data.frame(.)
 
 dla <- dla %>%
@@ -392,11 +485,11 @@ dla <- dla %>%
         substring(as.character(x), 3, 4)
       }
     ) +
-    geom_area(aes(x = Fiscal.Year, y = amount_OMB19_19), alpha = .9) +
+    geom_area(aes(x = Fiscal_Year, y = Action_Obligation_OMB23_GDP21), alpha = .9) +
     facet_grid(SubCustomer ~ SimpleArea) +
     chart_theme +
     xlab("Fiscal Year") +
-    ylab("Constant 2019 $") +
+    ylab("Constant 2021 $") +
     ggtitle("DoD Aircraft Engine Contract Obligations by service and SimpleArea") +
     scale_y_continuous(labels = money_labels) +
     scale_x_continuous(
@@ -419,7 +512,7 @@ ggsave(
 )
 
 write.csv(super_facet$data %>%
-            spread(key=Fiscal.Year, value=amount_OMB19_19),
+            spread(key=Fiscal_Year, value=Action_Obligation_OMB23_GDP21),
           file="contracts/charts/amount_customer_category.csv",row.names = FALSE)
 
 
@@ -433,44 +526,44 @@ engine_contracts <- engine_contracts %>%
 
 topline_contracts <- topline_contracts %>%
   mutate(type = "Topline")
-colnames(topline_contracts)[colnames(topline_contracts)=="Customer"]<-"SubCustomer"
+
 # engine_contracts <- engine_contracts %>%
-#   select(Fiscal.Year, SubCustomer, SimpleArea, amount_OMB19_19, type)
+#   select(Fiscal_Year, SubCustomer, SimpleArea, Action_Obligation_OMB23_GDP21, type)
 
 comparison_contracts <- engine_contracts %>%
-  select(Fiscal.Year, SubCustomer, SimpleArea, amount_OMB19_19, type) %>%
+  select(Fiscal_Year, SubCustomer, SimpleArea, Action_Obligation_OMB23_GDP21, type) %>%
   rbind(topline_contracts %>%
-          select(Fiscal.Year, SubCustomer, SimpleArea, amount_OMB19_19, type)) %>%
-  group_by(Fiscal.Year, SubCustomer, SimpleArea, type) %>%
-  dplyr::summarise(amount_OMB19_19 = sum(amount_OMB19_19, na.rm = TRUE))
+          select(Fiscal_Year, SubCustomer, SimpleArea, Action_Obligation_OMB23_GDP21, type)) %>%
+  group_by(Fiscal_Year, SubCustomer, SimpleArea, type) %>%
+  dplyr::summarise(Action_Obligation_OMB23_GDP21 = sum(Action_Obligation_OMB23_GDP21, na.rm = TRUE))
 
 dyear <- comparison_contracts %>%
   group_by() %>%
-  dplyr::rename(amount_OMB19_19.lagged = amount_OMB19_19) %>%
-  mutate(Fiscal.Year = Fiscal.Year + 1) # %>%
+  dplyr::rename(Action_Obligation_OMB23_GDP21.lagged = Action_Obligation_OMB23_GDP21) %>%
+  mutate(Fiscal_Year = Fiscal_Year + 1) # %>%
 # select(-fyb)
 
-# comparison_contracts <- comparison_contracts %>% filter(Fiscal.Year >= 2001)
+# comparison_contracts <- comparison_contracts %>% filter(Fiscal_Year >= 2001)
 #Add lagged year
-sumcheck<-sum(comparison_contracts$amount_OMB19_19,na.rm=TRUE)
+sumcheck<-sum(comparison_contracts$Action_Obligation_OMB23_GDP21,na.rm=TRUE)
 comparison_contracts <- comparison_contracts %>%
-  left_join(dyear, by = c("Fiscal.Year", "SubCustomer", "SimpleArea", "type"))# %>%
-if(sumcheck!=sum(comparison_contracts$amount_OMB19_19,na.rm=TRUE)) stop("Sum Check Error")
+  left_join(dyear, by = c("Fiscal_Year", "SubCustomer", "SimpleArea", "type"))# %>%
+if(sumcheck!=sum(comparison_contracts$Action_Obligation_OMB23_GDP21,na.rm=TRUE)) stop("Sum Check Error")
 
 
 dyear <- comparison_contracts %>%
-  filter(Fiscal.Year==2000) %>%
-  dplyr::rename(amount_OMB19_19.2000 = amount_OMB19_19) %>%
+  filter(Fiscal_Year==2000) %>%
+  dplyr::rename(Action_Obligation_OMB23_GDP21.2000 = Action_Obligation_OMB23_GDP21) %>%
   group_by()%>%
-  select(-amount_OMB19_19.lagged,-Fiscal.Year)
+  select(-Action_Obligation_OMB23_GDP21.lagged,-Fiscal_Year)
 
 #Add 2000
-sumcheck<-sum(comparison_contracts$amount_OMB19_19,na.rm=TRUE)
+sumcheck<-sum(comparison_contracts$Action_Obligation_OMB23_GDP21,na.rm=TRUE)
 comparison_contracts <- comparison_contracts %>%
   left_join(dyear, by = c("SubCustomer", "SimpleArea", "type")) %>%
-  mutate(amount_change = amount_OMB19_19 - amount_OMB19_19.lagged,
-         baseline_change = amount_OMB19_19 - amount_OMB19_19.2000) #%>% 
-if(sumcheck!=sum(comparison_contracts$amount_OMB19_19,na.rm=TRUE)) stop("Sum Check Error")
+  mutate(amount_change = Action_Obligation_OMB23_GDP21 - Action_Obligation_OMB23_GDP21.lagged,
+         baseline_change = Action_Obligation_OMB23_GDP21 - Action_Obligation_OMB23_GDP21.2000) #%>% 
+if(sumcheck!=sum(comparison_contracts$Action_Obligation_OMB23_GDP21,na.rm=TRUE)) stop("Sum Check Error")
 
 
 
@@ -480,20 +573,20 @@ rm(dyear)
 
 (
   comparison_contracts_overall <- comparison_contracts %>%
-    group_by(Fiscal.Year, type) %>%
-    dplyr::summarise(amount_OMB19_19 = sum(amount_OMB19_19, na.rm = TRUE),
-                     amount_OMB19_19.lagged = sum(amount_OMB19_19.lagged, na.rm = TRUE),
+    group_by(Fiscal_Year, type) %>%
+    dplyr::summarise(Action_Obligation_OMB23_GDP21 = sum(Action_Obligation_OMB23_GDP21, na.rm = TRUE),
+                     Action_Obligation_OMB23_GDP21.lagged = sum(Action_Obligation_OMB23_GDP21.lagged, na.rm = TRUE),
                      amount_change = sum(amount_change, na.rm = TRUE),
-                     amount_OMB19_19.2000 = sum(amount_OMB19_19.2000, na.rm = TRUE),
+                     Action_Obligation_OMB23_GDP21.2000 = sum(Action_Obligation_OMB23_GDP21.2000, na.rm = TRUE),
                      baseline_change = sum(baseline_change, na.rm = TRUE)) %>%
-    mutate(amount_percent_change = (amount_change) / amount_OMB19_19.lagged,
-           baseline_percent_change = (baseline_change) / amount_OMB19_19.2000) #%>%
-  # dplyr::rename(amount_OMB19_19 = amount_OMB19_19) %>%
-  # select(Fiscal.Year, amount_OMB19_19, amount_change, amount_percent_change, type) #%>%
+    mutate(amount_percent_change = (amount_change) / Action_Obligation_OMB23_GDP21.lagged,
+           baseline_percent_change = (baseline_change) / Action_Obligation_OMB23_GDP21.2000) #%>%
+  # dplyr::rename(Action_Obligation_OMB23_GDP21 = Action_Obligation_OMB23_GDP21) %>%
+  # select(Fiscal_Year, Action_Obligation_OMB23_GDP21, amount_change, amount_percent_change, type) #%>%
   # This has already been done, which is good, as I don't htink it makes sense to sum percent changes like that.
-  # group_by(Fiscal.Year, type) %>%
+  # group_by(Fiscal_Year, type) %>%
   # dplyr::summarise(
-  #   amount_OMB19_19 = sum(amount_OMB19_19, na.rm = TRUE),
+  #   Action_Obligation_OMB23_GDP21 = sum(Action_Obligation_OMB23_GDP21, na.rm = TRUE),
   #   amount_change = sum(amount_change, na.rm = TRUE),
   #   amount_percent_change = sum(amount_percent_change, na.rm = TRUE)
   # )
@@ -508,7 +601,7 @@ rm(dyear)
     mutate(type = factor(type, levels = c("Topline", "Engines"))) %>%
     ggplot() +
     geom_line(
-      aes(x = Fiscal.Year, y = baseline_percent_change),
+      aes(x = Fiscal_Year, y = baseline_percent_change),
       alpha = .9,
       color = "#554449",
       size = 1
@@ -544,7 +637,7 @@ ggsave(
 )
 
 write.csv(graph_contracts_overall$data,# %>%
-            # spread(key=Fiscal.Year, value=amount_OMB19_19),
+            # spread(key=Fiscal_Year, value=Action_Obligation_OMB23_GDP21),
           file="contracts/charts/percent_change_total.csv",row.names = FALSE)
 
 
@@ -556,20 +649,20 @@ write.csv(graph_contracts_overall$data,# %>%
 
 (
   comparison_contracts_subcustomer <- comparison_contracts %>%
-    group_by(Fiscal.Year, SubCustomer, type) %>%
-    dplyr::summarise(amount_OMB19_19 = sum(amount_OMB19_19, na.rm = TRUE),
-                     amount_OMB19_19.lagged = sum(amount_OMB19_19.lagged, na.rm = TRUE),
+    group_by(Fiscal_Year, SubCustomer, type) %>%
+    dplyr::summarise(Action_Obligation_OMB23_GDP21 = sum(Action_Obligation_OMB23_GDP21, na.rm = TRUE),
+                     Action_Obligation_OMB23_GDP21.lagged = sum(Action_Obligation_OMB23_GDP21.lagged, na.rm = TRUE),
                      amount_change = sum(amount_change, na.rm = TRUE),
-                     amount_OMB19_19.2000 = sum(amount_OMB19_19.2000, na.rm = TRUE),
+                     Action_Obligation_OMB23_GDP21.2000 = sum(Action_Obligation_OMB23_GDP21.2000, na.rm = TRUE),
                      baseline_change = sum(baseline_change, na.rm = TRUE)) %>%
-    mutate(amount_percent_change = (amount_change) / amount_OMB19_19.lagged,
-           baseline_percent_change = (baseline_change) / amount_OMB19_19.2000) #%>%
+    mutate(amount_percent_change = (amount_change) / Action_Obligation_OMB23_GDP21.lagged,
+           baseline_percent_change = (baseline_change) / Action_Obligation_OMB23_GDP21.2000) #%>%
 )
 
 levels(factor(comparison_contracts_subcustomer$type))
 max((comparison_contracts_subcustomer %>% 
        filter(SubCustomer=="Other DoD" &
-                type =="Engines"))$amount_OMB19_19
+                type =="Engines"))$Action_Obligation_OMB23_GDP21
 )
 
 (
@@ -591,7 +684,7 @@ max((comparison_contracts_subcustomer %>%
     mutate(type = factor(type, levels = c("Topline", "Engines"))) %>%
     ggplot() +
     geom_line(
-      aes(x = Fiscal.Year, y = baseline_percent_change),
+      aes(x = Fiscal_Year, y = baseline_percent_change),
       alpha = .9,
       color = "#554449",
       size = 1
@@ -632,7 +725,7 @@ ggsave(
 )
 
 write.csv(graph_contracts_subcustomer$data,# %>%
-            # spread(key=Fiscal.Year, value=amount_OMB19_19),
+            # spread(key=Fiscal_Year, value=Action_Obligation_OMB23_GDP21),
           file="contracts/charts/percent_change_customer.csv",row.names = FALSE)
 
 
@@ -643,14 +736,14 @@ write.csv(graph_contracts_subcustomer$data,# %>%
 
 (
   comparison_contracts_area <- comparison_contracts %>%
-    group_by(Fiscal.Year, SimpleArea, type) %>%
-    dplyr::summarise(amount_OMB19_19 = sum(amount_OMB19_19, na.rm = TRUE),
-                     amount_OMB19_19.lagged = sum(amount_OMB19_19.lagged, na.rm = TRUE),
+    group_by(Fiscal_Year, SimpleArea, type) %>%
+    dplyr::summarise(Action_Obligation_OMB23_GDP21 = sum(Action_Obligation_OMB23_GDP21, na.rm = TRUE),
+                     Action_Obligation_OMB23_GDP21.lagged = sum(Action_Obligation_OMB23_GDP21.lagged, na.rm = TRUE),
                      amount_change = sum(amount_change, na.rm = TRUE),
-                     amount_OMB19_19.2000 = sum(amount_OMB19_19.2000, na.rm = TRUE),
+                     Action_Obligation_OMB23_GDP21.2000 = sum(Action_Obligation_OMB23_GDP21.2000, na.rm = TRUE),
                      baseline_change = sum(baseline_change, na.rm = TRUE)) %>%
-    mutate(amount_percent_change = (amount_change) / amount_OMB19_19.lagged,
-           baseline_percent_change = (baseline_change) / amount_OMB19_19.2000) #%>%
+    mutate(amount_percent_change = (amount_change) / Action_Obligation_OMB23_GDP21.lagged,
+           baseline_percent_change = (baseline_change) / Action_Obligation_OMB23_GDP21.2000) #%>%
 )
 
 (
@@ -662,7 +755,7 @@ write.csv(graph_contracts_subcustomer$data,# %>%
     mutate(type = factor(type, levels = c("Topline", "Engines"))) %>%
     ggplot() +
     geom_line(
-      aes(x = Fiscal.Year, y = baseline_percent_change),
+      aes(x = Fiscal_Year, y = baseline_percent_change),
       alpha = .9,
       color = "#554449",
       size = 1
@@ -701,7 +794,7 @@ ggsave(
 )
 
 write.csv(graph_contracts_area$data, #%>%
-            # spread(key=Fiscal.Year, value=amount_OMB19_19),
+            # spread(key=Fiscal_Year, value=Action_Obligation_OMB23_GDP21),
           file="contracts/charts/percent_change_category.csv",row.names = FALSE)
 
 
@@ -712,14 +805,14 @@ write.csv(graph_contracts_area$data, #%>%
 
   comparison_contracts_total <-
     comparison_contracts %>%
-    group_by(Fiscal.Year, type) %>%
-    dplyr::summarise(amount_OMB19_19 = sum(amount_OMB19_19, na.rm = TRUE),
-                     amount_OMB19_19.lagged = sum(amount_OMB19_19.lagged, na.rm = TRUE),
+    group_by(Fiscal_Year, type) %>%
+    dplyr::summarise(Action_Obligation_OMB23_GDP21 = sum(Action_Obligation_OMB23_GDP21, na.rm = TRUE),
+                     Action_Obligation_OMB23_GDP21.lagged = sum(Action_Obligation_OMB23_GDP21.lagged, na.rm = TRUE),
                      amount_change = sum(amount_change, na.rm = TRUE),
-                     amount_OMB19_19.2000 = sum(amount_OMB19_19.2000, na.rm = TRUE),
+                     Action_Obligation_OMB23_GDP21.2000 = sum(Action_Obligation_OMB23_GDP21.2000, na.rm = TRUE),
                      baseline_change = sum(baseline_change, na.rm = TRUE)) %>%
-    mutate(amount_percent_change = (amount_change) / amount_OMB19_19.lagged,
-           baseline_percent_change = (baseline_change) / amount_OMB19_19.2000) #%>%
+    mutate(amount_percent_change = (amount_change) / Action_Obligation_OMB23_GDP21.lagged,
+           baseline_percent_change = (baseline_change) / Action_Obligation_OMB23_GDP21.2000) #%>%
 comparison_contracts_total$SimpleArea<-"Total"
 (comparison_contracts_area_total<-rbind(comparison_contracts_total,
                                        comparison_contracts_area)
@@ -734,7 +827,7 @@ summary(comparison_contracts_area_total$SimpleArea)
     mutate(type = factor(type, levels = c("Topline", "Engines"))) %>%
     ggplot() +
     geom_line(
-      aes(x = Fiscal.Year, 
+      aes(x = Fiscal_Year, 
           y = baseline_percent_change,
           linetype=SimpleArea),
       alpha = .9,
@@ -774,6 +867,6 @@ ggsave(
 )
 
 write.csv(graph_contracts_overall_area$data, #%>%
-            # spread(key=Fiscal.Year, value=amount_OMB19_19),
+            # spread(key=Fiscal_Year, value=Action_Obligation_OMB23_GDP21),
           file="contracts/charts/percent_change_total_area.csv",row.names = FALSE)
 
