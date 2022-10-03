@@ -187,18 +187,20 @@ engine_vendor <- read.delim("contracts/data/Project.SP_EngineAllVendorHistoryCom
 engine_vendor<-remove_bom(engine_vendor)
 engine_vendor<-standardize_variable_names(engine_vendor)
 
+engine_vendor$ParentContractor<-engine_vendor$ParentID
+engine_vendor$ParentContractor[is.na(engine_vendor$ParentContractor)]<-engine_vendor$ContractorDisplayName[is.na(engine_vendor$ParentContractor)]
 
 engine_vendor<-engine_vendor%>% 
-  group_by(Fiscal_Year,ParentID, ContractorDisplayName) %>% # group_by(Fiscal_Year,IsDefense,PlatformPortfolioUAV) %>%
-  summarise(numberOfActions=sum(numberOfActions,na.rm=TRUE),
+  group_by(Fiscal_Year,ParentContractor) %>% # group_by(Fiscal_Year,IsDefense,PlatformPortfolioUAV) %>%
+  summarise(NumberOfActions=sum(NumberOfActions,na.rm=TRUE),
             Action_Obligation=sum(Action_Obligation,na.rm=TRUE)) %>%
   group_by(Fiscal_Year) %>%
   dplyr::mutate(pos=rank(-Action_Obligation))%>%
   arrange(Fiscal_Year,pos)
 
 engine_vendor_overall<-engine_vendor%>% 
-  group_by(ParentID, ContractorDisplayName) %>% # group_by(Fiscal_Year,IsDefense,PlatformPortfolioUAV) %>%
-  summarise(numberOfActions=sum(numberOfActions,na.rm=TRUE),
+  group_by(ParentContractor) %>% # group_by(Fiscal_Year,IsDefense,PlatformPortfolioUAV) %>%
+  summarise(NumberOfActions=sum(NumberOfActions,na.rm=TRUE),
             Action_Obligation=sum(Action_Obligation,na.rm=TRUE),
             MinOfFiscalYear=min(Fiscal_Year),
             MaxOfFiscalYear=max(Fiscal_Year),
