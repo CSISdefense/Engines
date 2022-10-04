@@ -256,59 +256,59 @@ ggsave600dpi(SimpleArea,file="contracts/charts/SimpleArea.png",width=5,height=6,
 # R&D phase
 
 
+# 
+# (
+#   RnDphase<-build_plot(
+#     data=engine_contracts %>% filter(SimpleArea=="R&D"),
+#     chart_geom = "Bar Chart",
+#     share = FALSE,
+#     labels_and_colors=labels_and_colors,
+#     # NA, #VAR.ncol
+#     x_var="Fiscal_Year", #x_var
+#     y_var="Action_Obligation_OMB23_GDP21", #VAR.y.variable
+#     color_var="ProductServiceOrRnDarea", #color_var
+#     # facet_var="Competition.sum", #facet_var
+#     column_key=column_key,
+#     format=TRUE,
+#     ytextposition=FALSE
+#   )+
+#     # theme(strip.text.y = element_text(angle=0))+
+#     # theme(axis.text.x = element_text(angle=90))+
+#     #    scale_y_continuous("Percent of Obligations", labels = percent_format(accuracy=1))+
+#     #      facet_grid(.~Competition.sum ,scales="free_x", space="free_x"
+#     #             )+labs(title=NULL,
+#     # x="Fiscal Year",
+#     # y="Percent of Obligations",
+#     # color="Competition")+
+#     theme(legend.position = "right")+
+#     labs(y="Obligations (Constant 2021 $s)")
+# )
+# 
+# ggsave600dpi("..//Output//psr_RnDPhase.png", RnDphase, 
+#              width=12, height= 6, units="in",size=12, lineheight=1.2
+# )
+# 
+# 
+# write.csv(file="..//Output//psr_RnDPhase.csv",row.names = FALSE, na = "",
+#           pivot_wider(RnDphase$data,id_cols=c(ProductServiceOrRnDarea),
+#                       names_from=Fiscal_Year,values_from=Action_Obligation_OMB23_GDP21)%>%
+#             arrange(ProductServiceOrRnDarea))
 
-(
-  RnDphase<-build_plot(
-    data=engine_contracts %>% filter(SimpleArea=="R&D"),
-    chart_geom = "Bar Chart",
-    share = FALSE,
-    labels_and_colors=labels_and_colors,
-    # NA, #VAR.ncol
-    x_var="Fiscal_Year", #x_var
-    y_var="Action_Obligation_OMB23_GDP21", #VAR.y.variable
-    color_var="ProductServiceOrRnDarea", #color_var
-    # facet_var="Competition.sum", #facet_var
-    column_key=column_key,
-    format=TRUE,
-    ytextposition=FALSE
-  )+
-    # theme(strip.text.y = element_text(angle=0))+
-    # theme(axis.text.x = element_text(angle=90))+
-    #    scale_y_continuous("Percent of Obligations", labels = percent_format(accuracy=1))+
-    #      facet_grid(.~Competition.sum ,scales="free_x", space="free_x"
-    #             )+labs(title=NULL,
-    # x="Fiscal Year",
-    # y="Percent of Obligations",
-    # color="Competition")+
-    theme(legend.position = "right")+
-    labs(y="Obligations (Constant 2021 $s)")
-)
-
-ggsave600dpi("..//Output//psr_RnDPhase.png", RnDphase, 
-             width=12, height= 6, units="in",size=12, lineheight=1.2
-)
-
-
-write.csv(file="..//Output//psr_RnDPhase.csv",row.names = FALSE, na = "",
-          pivot_wider(RnDphase$data,id_cols=c(ProductServiceOrRnDarea),
-                      names_from=Fiscal_Year,values_from=Action_Obligation_OMB23_GDP21)%>%
-            arrange(ProductServiceOrRnDarea))
-
-
-output_TY<-full_data %>% filter(SimpleArea=="R&D") %>%
-  format_data_for_plot(fy_var="Fiscal_Year",y_var="Action_Obligation_Then_Year",color_var = "ProductServiceOrRnDarea",
-                       labels_and_colors=labels_and_colors) %>%
-  pivot_wider(id_cols=c(ProductServiceOrRnDarea),
-              names_from=Fiscal_Year,values_from=Action_Obligation_Then_Year)%>%
-  arrange(ProductServiceOrRnDarea)
-
-write.csv(file="..//Output//psr_RnDPhase_current.csv",row.names = FALSE, na = "",
-          output_TY)
-
-wb <- loadWorkbook("..//Output//DoD_Acq_Trends_Contracts.xlsx", create = TRUE)
-createSheet(wb, name = "R&D")
-writeWorksheet(wb, output_TY, sheet = "R&D", startRow = 15, startCol = 13)
-saveWorkbook(wb)
+# 
+# output_TY<-engine_contracts %>% filter(SimpleArea=="R&D") %>%
+#   format_data_for_plot(fy_var="Fiscal_Year",y_var="Action_Obligation_Then_Year",color_var = "ProductServiceOrRnDarea",
+#                        labels_and_colors=labels_and_colors) %>%
+#   pivot_wider(id_cols=c(ProductServiceOrRnDarea),
+#               names_from=Fiscal_Year,values_from=Action_Obligation_Then_Year)%>%
+#   arrange(ProductServiceOrRnDarea)
+# 
+# write.csv(file="..//Output//psr_RnDPhase_current.csv",row.names = FALSE, na = "",
+#           output_TY)
+# 
+# wb <- loadWorkbook("..//Output//DoD_Acq_Trends_Contracts.xlsx", create = TRUE)
+# createSheet(wb, name = "R&D")
+# writeWorksheet(wb, output_TY, sheet = "R&D", startRow = 15, startCol = 13)
+# saveWorkbook(wb)
 
 
 # --------------------------------------------------------------------------------
@@ -526,6 +526,7 @@ engine_contracts <- engine_contracts %>%
 
 topline_contracts <- topline_contracts %>%
   mutate(type = "Topline")
+colnames(topline_contracts)[colnames(topline_contracts)=="ContractingSubCustomer"]<-"SubCustomer"
 
 # engine_contracts <- engine_contracts %>%
 #   select(Fiscal_Year, SubCustomer, SimpleArea, Action_Obligation_OMB23_GDP21, type)
@@ -536,6 +537,16 @@ comparison_contracts <- engine_contracts %>%
           select(Fiscal_Year, SubCustomer, SimpleArea, Action_Obligation_OMB23_GDP21, type)) %>%
   group_by(Fiscal_Year, SubCustomer, SimpleArea, type) %>%
   dplyr::summarise(Action_Obligation_OMB23_GDP21 = sum(Action_Obligation_OMB23_GDP21, na.rm = TRUE))
+
+comparison_contracts$SimpleArea<-factor(comparison_contracts$SimpleArea)
+levels(comparison_contracts$SimpleArea)<-
+  list("Products"=c("Products","Products (All)"),
+       'Services'=c("Services","Services (Non-R&D)"),
+       "R&D"=c("R&D"),
+       "Total"="Total",
+       'Unlabeled'="Unlabeled"
+  )
+
 
 dyear <- comparison_contracts %>%
   group_by() %>%
@@ -819,8 +830,7 @@ comparison_contracts_total$SimpleArea<-"Total"
 
 )
 
-
-summary(comparison_contracts_area_total$SimpleArea)
+summary(factor(comparison_contracts_area_total$SimpleArea))
 (
   graph_contracts_overall_area <- comparison_contracts_area_total %>%
     filter(!is.na(SimpleArea) & !SimpleArea %in% c("Services","Unlabeled")) %>%

@@ -29,13 +29,13 @@ source("contracts/theme/money_labels.R")
 # read engine contract data
 
 engine_contracts <-
-  read.delim("contracts/data/Project.SP_EngineAllVendorHistoryCompetitionFundingMechanismVendorSizeProdServAreaSubCustomer.txt",
-           na.strings=c("NA","NULL"),sep="\t")
+  read_delim("contracts/data/Project.SP_EngineAllVendorHistoryCompetitionFundingMechanismVendorSizeProdServAreaSubCustomer.txt",
+             na =c("NA","NULL"),delim="\t")
+
 
 while(engine_contracts[nrow(engine_contracts),1] %in% c("0","Return Value"))
   engine_contracts<-engine_contracts[1:nrow(engine_contracts)-1,]
 
-engine_contracts<-csis360::standardize_variable_names(engine_contracts)
 engine_contracts<-apply_standard_lookups(engine_contracts)
 
 # --------------------------------------------------------------------------------
@@ -43,8 +43,7 @@ engine_contracts<-apply_standard_lookups(engine_contracts)
 
 read_topline_contracts <- read.delim("contracts/data/Summary.SP_CompetitionVendorSizeHistoryBucketPlatformSubCustomer.txt",
                                      na.strings=c("NA","NULL"),sep="\t")
-topline_contracts<-csis360::standardize_variable_names(read_topline_contracts)
-topline_contracts<-apply_standard_lookups(topline_contracts)
+topline_contracts<-apply_standard_lookups(read_topline_contracts)
 
 # --------------------------------------------------------------------------------
 
@@ -168,7 +167,8 @@ biz_engine_contracts<-engine_contracts %>% dplyr::rename(
   competition = Competition.multisum,
   contract_type = PricingMechanism,
   vendor_size = VendorSize,
-  parent = ParentID,
+  # parent = ParentID,
+  AllContractor = AllContractor,
   project = ProjectName
 )
 
@@ -187,36 +187,36 @@ library(csis360)
 library(readr)
 
 
-engine_vendor <- read.delim("contracts/data/Project.SP_EngineAllVendorHistoryCompetitionFundingMechanismVendorSizeProdServAreaSubCustomer.txt",
-                                     na.strings=c("NA","NULL"),sep="\t")
+# engine_vendor <-   read_delim("contracts/data/Project.SP_EngineAllVendorHistoryCompetitionFundingMechanismVendorSizeProdServAreaSubCustomer.txt",
+                              # na =c("NA","NULL"),delim="\t")
+  # read.delim("contracts/data/Project.SP_EngineAllVendorHistoryCompetitionFundingMechanismVendorSizeProdServAreaSubCustomer.txt",
+  #                                    na.strings=c("NA","NULL"),sep="\t")
 
-engine_vendor<-remove_bom(engine_vendor)
-engine_vendor<-standardize_variable_names(engine_vendor)
-
-engine_vendor$ParentContractor<-engine_vendor$ParentID
-engine_vendor$ParentContractor[is.na(engine_vendor$ParentContractor)]<-engine_vendor$ContractorDisplayName[is.na(engine_vendor$ParentContractor)]
+# engine_vendor<-remove_bom(engine_vendor)
+# engine_vendor<-standardize_variable_names(engine_vendor)
+engine_vendor<-engine_contracts
 
 engine_vendor<-engine_vendor%>% 
-  group_by(Fiscal_Year,ParentContractor) %>% # group_by(Fiscal_Year,IsDefense,PlatformPortfolioUAV) %>%
+  group_by(Fiscal_Year,AllContractor) %>% # group_by(Fiscal_Year,IsDefense,PlatformPortfolioUAV) %>%
   summarise(NumberOfActions=sum(NumberOfActions,na.rm=TRUE),
-            Action_Obligation=sum(Action_Obligation,na.rm=TRUE)) %>%
+            Action_Obligation_OMB23_GDP21=sum(Action_Obligation_OMB23_GDP21,na.rm=TRUE)) %>%
   group_by(Fiscal_Year) %>%
-  dplyr::mutate(pos=rank(-Action_Obligation))%>%
+  dplyr::mutate(pos=rank(-Action_Obligation_OMB23_GDP21))%>%
   arrange(Fiscal_Year,pos)
 
 engine_vendor_overall<-engine_vendor%>% 
-  group_by(ParentContractor) %>% # group_by(Fiscal_Year,IsDefense,PlatformPortfolioUAV) %>%
+  group_by(AllContractor) %>% # group_by(Fiscal_Year,IsDefense,PlatformPortfolioUAV) %>%
   summarise(NumberOfActions=sum(NumberOfActions,na.rm=TRUE),
-            Action_Obligation=sum(Action_Obligation,na.rm=TRUE),
+            Action_Obligation_OMB23_GDP21=sum(Action_Obligation_OMB23_GDP21,na.rm=TRUE),
             MinOfFiscalYear=min(Fiscal_Year),
             MaxOfFiscalYear=max(Fiscal_Year),
             ) %>%
   group_by() %>%
-  dplyr::mutate(pos=rank(-Action_Obligation))%>%
+  dplyr::mutate(pos=rank(-Action_Obligation_OMB23_GDP21))%>%
   arrange(pos)
 
 write.csv(engine_vendor_overall, file="contracts/data/TopEngineVendors.csv")
-save(file="data/clean/TopVendorUAVHistoryPlatformCustomer.rda",engine_vendor)
+save(file="contracts/data/engine_vendor.rda",engine_vendor)
 colnames(engine_vendor)
 
 
