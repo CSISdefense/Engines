@@ -228,22 +228,14 @@ label_engine<-function(x,col="Description_of_Requirement"){
   # grep("UAS|Unmanned|Uninhabited|Uncrewed|Remotely Crewed",x$Description_of_Requirement)
   # x$UAS[grep("RPA",x[,col],ignore.case = TRUE)]<-TRUE Doesn't seem to be any.
   x$Engine<-NA
-  x$Engine[grep("engine",x[,col],ignore.case = TRUE)]<-TRUE
+  x$Engine[grep("engine[^e]",x[,col],ignore.case = TRUE)]<-TRUE
   sum(x$Engine,na.rm=TRUE)
   
   # x$Engine[grep("QUASAR",x[,col])]<-NA
-  # x$Engine[grep("QUASI",x[,col])]<-NA
-  # x$Engine[grep("EXHUAST",x[,col])]<-NA
   # sum(x$Engine,na.rm=TRUE)
   # x$Engine[grep("UAV",x[,col])]<-TRUE
   # sum(x$Engine,na.rm=TRUE)
   # x$Engine[grep("Unmanned",x[,col],ignore.case = TRUE)]<-TRUE
-  # sum(x$Engine,na.rm=TRUE)
-  # x$Engine[grep("Remotely Crewed",x[,col],ignore.case = TRUE)]<-TRUE
-  # sum(x$Engine,na.rm=TRUE)
-  # x$Engine[grep("Remotely Piloted",x[,col],ignore.case = TRUE)]<-TRUE
-  # sum(x$Engine,na.rm=TRUE)
-  # x$Engine[grep("Uninhabited",x[,col],ignore.case = TRUE)]<-TRUE
   # sum(x$Engine,na.rm=TRUE)
   # 
   # x$Engine[grep("Uncrewed",x[,col],ignore.case = TRUE)]<-TRUE
@@ -254,8 +246,6 @@ label_engine<-function(x,col="Description_of_Requirement"){
   # sum(x$CUAS,na.rm=TRUE)
   # x$CUAS[grep("C-UAS",x[,col],ignore.case = TRUE)]<-TRUE
   # x$CUAS[grep("CSUAS",x[,col],ignore.case = TRUE)]<-TRUE
-  # x$CUAS[grep("Counter UAS",x[,col],ignore.case = TRUE)]<-TRUE
-  # x$CUAS[grep("Counter-UAS",x[,col],ignore.case = TRUE)]<-TRUE
   # 
   # x$CUAS[grep("Counter-Unmanned",x[,col],ignore.case = TRUE)]<-TRUE
   # sum(x$CUAS,na.rm=TRUE)
@@ -313,7 +303,7 @@ OTA_data_current <- read_delim(
 
 OTA_data_current<-apply_standard_lookups(OTA_data_current)
 
-debug(label_engine)
+# debug(label_engine)
 OTA_data_current<-label_engine(OTA_data_current,
                                col="Description_of_Requirement")
 sum(OTA_data_current$Engine,na.rm=TRUE)
