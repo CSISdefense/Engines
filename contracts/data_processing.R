@@ -18,7 +18,7 @@ library(extrafontdb)
 library(svglite)
 library(scales)
 library(csis360)
-
+library(readr)
 # --------------------------------------------------------------------------------
 # add theme
 
@@ -26,7 +26,7 @@ source("contracts/theme/chart_theme.R")
 source("contracts/theme/money_labels.R")
 
 # --------------------------------------------------------------------------------
-# read engine contract data
+# Read engine contract data ####
 
 engine_contracts <-
   read_delim("contracts/data/Project.SP_EngineAllVendorHistoryCompetitionFundingMechanismVendorSizeProdServAreaSubCustomer.txt",
@@ -178,9 +178,9 @@ save(topline_contracts ,engine_contracts,file="contracts/app/engine_contract.Rda
 
 #-----------------------------------------------------------------------
 # Top 10 Data processing
-###############################################################
-# Get Top 10 rows of aggregated Amount and # of action
-################################################################
+##############################################################
+# Get Top 10 rows of aggregated Amount and # of action ####
+##############################################################
 library(dplyr)
 library(tidyr)
 library(csis360)
@@ -220,5 +220,97 @@ save(file="contracts/data/engine_vendor.rda",engine_vendor)
 colnames(engine_vendor)
 
 
+# OTA ####
 
 
+label_engine<-function(x,col="Description_of_Requirement"){
+  x<-as.data.frame(x)
+  # grep("UAS|Unmanned|Uninhabited|Uncrewed|Remotely Crewed",x$Description_of_Requirement)
+  # x$UAS[grep("RPA",x[,col],ignore.case = TRUE)]<-TRUE Doesn't seem to be any.
+  x$Engine<-NA
+  x$Engine[grep("engine[^e]",x[,col],ignore.case = TRUE)]<-TRUE
+  sum(x$Engine,na.rm=TRUE)
+  
+  # x$Engine[grep("QUASAR",x[,col])]<-NA
+  # sum(x$Engine,na.rm=TRUE)
+  # x$Engine[grep("UAV",x[,col])]<-TRUE
+  # sum(x$Engine,na.rm=TRUE)
+  # x$Engine[grep("Unmanned",x[,col],ignore.case = TRUE)]<-TRUE
+  # sum(x$Engine,na.rm=TRUE)
+  # 
+  # x$Engine[grep("Uncrewed",x[,col],ignore.case = TRUE)]<-TRUE
+  # sum(x$Engine,na.rm=TRUE)
+  # 
+  # # Excluding Counter UAS
+  # x$CUAS[grep("Counter Unmanned",x[,col],ignore.case = TRUE)]<-TRUE
+  # sum(x$CUAS,na.rm=TRUE)
+  # x$CUAS[grep("C-UAS",x[,col],ignore.case = TRUE)]<-TRUE
+  # x$CUAS[grep("CSUAS",x[,col],ignore.case = TRUE)]<-TRUE
+  # 
+  # x$CUAS[grep("Counter-Unmanned",x[,col],ignore.case = TRUE)]<-TRUE
+  # sum(x$CUAS,na.rm=TRUE)
+  # 
+  # x$UGS[grep("Unmanned Ground",x[,col],ignore.case = TRUE)]<-TRUE
+  # 
+  # x$Maritime[grep("Unmanned Surface",x[,col],ignore.case = TRUE)]<-TRUE
+  # x$Maritime[grep("Unmanned Maritime",x[,col],ignore.case = TRUE)]<-TRUE
+  # 
+  # x$Maritime[grep("UNDERWATER UNMANNED",x[,col],ignore.case = TRUE)]<-TRUE
+  # x$Maritime[grep("UNMANNED UNDERWATER",x[,col],ignore.case = TRUE)]<-TRUE
+  # 
+  # x$Maritime[grep("UNMANNED UNDERSEA",x[,col],ignore.case = TRUE)]<-TRUE
+  # sum(x$CUAS,na.rm=TRUE)
+  # 
+  # 
+  # x$Engine[x$CUAS==TRUE]<-NA
+  # 
+  # x$Engine[x$Maritime==TRUE]<-NA
+  # x$Engine[x$UGS==TRUE]<-NA
+  # sum(x$Engine,na.rm=TRUE)
+  
+  
+  # 
+  # x$mq[grep("MQ-",x[,col],ignore.case = TRUE)]<-TRUE
+  # # x$mq[grep("MQT",x[,col],ignore.case = TRUE)]<-NA
+  # # x$mq[grep("MQSA",x[,col],ignore.case = TRUE)]<-NA
+  # # x$mq[grep("MESSAGE QUEUE",x[,col],ignore.case = TRUE)]<-NA
+  # # x$mq[grep("WEBSPHERE MQ",x[,col],ignore.case = TRUE)]<-NA
+  # # x$mq[grep("CMQA",x[,col],ignore.case = TRUE)]<-NA
+  # # x$mq[grep("NMQ",x[,col],ignore.case = TRUE)]<-NA
+  # # x$mq[grep("MQU",x[,col],ignore.case = TRUE)]<-NA #Covers most proper words
+  # # x$mq[grep("OFMQ",x[,col],ignore.case = TRUE)]<-NA
+  # sum(x$mq,na.rm = TRUE)
+  # x$rq[grep("RQ-",x[,col],ignore.case = TRUE)]<-TRUE
+  # # x$rq[grep("RQU",x[,col],ignore.case = TRUE)]<-NA #Covers most proper words
+  # # x$rq[grep("RQMT",x[,col],ignore.case = TRUE)]<-NA
+  # x$rq[grep("AN/SRQ-",x[,col],ignore.case = TRUE)]<-NA
+  # x$rq[grep("AN/ARQ-",x[,col],ignore.case = TRUE)]<-NA
+  # # x$rq[grep("TRQ",x[,col],ignore.case = TRUE)]<-NA
+  # # x$rq[grep("SRQ",x[,col],ignore.case = TRUE)]<-NA
+  # # x$rq[grep("AHRQ",x[,col],ignore.case = TRUE)]<-NA
+  # sum(x$rq,na.rm=TRUE)
+  # 
+  # x$any_uas<-NA
+  # x$any_uas<-x$Engine|x$mq|x$rq
+  x
+}
+
+
+
+OTA_data_current <- read_delim(
+  "contracts//data//OTA_All_Fields.csv",delim = ",",
+  col_names = TRUE, guess_max = 500000,na=c("NA","NULL"),skip = 2)
+
+OTA_data_current<-apply_standard_lookups(OTA_data_current)
+
+# debug(label_engine)
+OTA_data_current<-label_engine(OTA_data_current,
+                               col="Description_of_Requirement")
+sum(OTA_data_current$Engine,na.rm=TRUE)
+summary(factor(OTA_data_current$Engine))
+OTA_engine<-OTA_data_current %>% filter(ProductServiceOrRnDarea == "Engines & Power Plants"  |
+                                          Engine==TRUE|
+  ProductOrServiceCode %in% c(
+  'J028','J029','H128','H129','H228','H229','H328','H329','H928','H929',
+  'K028','K029','L028','L029','N028','N029','W028','W029'))
+write_csv(file="contracts//data//OTA_engine.csv",OTA_engine)
