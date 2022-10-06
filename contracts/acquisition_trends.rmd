@@ -62,7 +62,8 @@ toa<-pivot_longer(toa,  cols=-Series, names_to="Fiscal_Year", values_to="Total_O
 toa$Total_Obligation_Authority<-toa$Total_Obligation_Authority*1000000
 toa<-deflate(toa,money_var = "Total_Obligation_Authority",deflator_var="OMB20_GDP20")
 toa$dFYear<-as.Date(paste(toa$Fiscal_Year,1,1,sep="-"))
-labels_and_colors<-prepare_labels_and_colors(engine_contracts)
+labels_and_colors<-prepare_labels_and_colors(engine_contracts  %>% select(-PricingMechanism ))
+column_key<-get_column_key(engine_contracts  %>% select(-PricingMechanism ))
 
 
 
