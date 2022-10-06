@@ -254,7 +254,8 @@ write.csv(file="..//Output//unlabeled_competition.csv",row.names = FALSE, na = "
 
 (
 ToplineVendor<-build_plot(
-  data=engine_contracts %>% filter(Fiscal_Year<=2020),
+  data=engine_contracts %>% filter(Fiscal_Year<=2020 &
+                                     SubCustomer.JPO %in% c("Army","Navy","Air Force","DLA","F-35 JPO")),
   chart_geom = "Bar Chart",
   share = FALSE,
   labels_and_colors=labels_and_colors,
@@ -262,7 +263,7 @@ ToplineVendor<-build_plot(
   x_var="dFYear", #x_var
   y_var="Action_Obligation_OMB23_GDP21", #VAR.y.variable
   color_var="Shiny.VendorSize", #color_var
-  # facet_var="Competition.sum", #facet_var
+  facet_var="SubCustomer.JPO", #facet_var
   column_key=column_key,
   format=TRUE,
   ytextposition=FALSE
@@ -1405,15 +1406,17 @@ summary(engine_contracts$ContractingSubCustomer)
 
 (
 SubCustomerPSR<-build_plot(
-  data=engine_contracts,
+  data=engine_contracts %>% filter(
+    SubCustomer.JPO %in% c("Army","Navy","Air Force","DLA","F-35 JPO")),
   chart_geom = "Bar Chart",
   share = FALSE,
   labels_and_colors=labels_and_colors,
   # NA, #VAR.ncol
   x_var="Fiscal_Year", #x_var
   y_var="Action_Obligation_OMB23_GDP21", #VAR.y.variable
-  color_var="SimpleArea", #color_var
-  facet_var="SubCustomer.JPO", #facet_var
+  color_var="SimpleArea", #facet_var
+  facet_var="SimpleArea", #color_var
+  second_var="SubCustomer.JPO",
   column_key=column_key,
   format=TRUE,
   ytextposition=FALSE
@@ -1427,14 +1430,15 @@ SubCustomerPSR<-build_plot(
   # y="Percent of Obligations",
   # color="Competition")+
   theme(legend.position = "bottom")+
-  labs(y="Obligations (Constant 2021 $s)")
+  labs(y="Obligations (Constant 2021 $s)")#+
+  # facet_grid(SimpleArea~SubCustomer.JPO, scales = "free_y",space="free_y")
 )
 
 # ggsave600dpi("..//Output//subcustomer_PSR.png", SubCustomerPSR, 
 #              width=6.5, height= 4, units="in",size=11
 #              )
-ggsave600dpi("..//Output//subcustomer_PSR.png", SubCustomerPSR, 
-             width=12, height= 6, units="in",size=12,lineheight = 1.2
+ggsave600dpi("Charts//subcustomer_PSR.png", SubCustomerPSR, 
+             width=9, height= 6, units="in",size=12,lineheight = 1.2
              )
 ```
 
