@@ -680,13 +680,7 @@ write.csv(file="..//Output//topline_pricing.csv",row.names = FALSE, na = "",
 
 ## Topline Commercial
 ```{r Commercial}
-def_data$AnyCommercialText<-factor(def_data$AnyCommercial)
-levels(def_data$AnyCommercialText)<-list(
-  "Not Classified\nas Commercial"="N",
-  "Non-Development\nor Commercial Similar"= "NonDev",
-  "Any Commercial\nClassification"="Y"
-  
-)
+
 
 (
 Commercial<-build_plot(

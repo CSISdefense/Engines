@@ -11,6 +11,8 @@ source("contracts/theme/chart_theme.R")
 source("contracts/theme/money_labels.R")
 
 load(file="contracts/app/engine_contract.Rdata")
+load(file="contracts/data/just_engine_contract.Rdata")
+
 # ================================================================================
 # charting engines 
 # --------------------------------------------------------------------------------
