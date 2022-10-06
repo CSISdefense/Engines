@@ -1439,7 +1439,7 @@ SubCustomerPSR<-build_plot(
   x_var="Fiscal_Year", #x_var
   y_var="Action_Obligation_OMB23_GDP21", #VAR.y.variable
   color_var="SimpleArea", #color_var
-  facet_var="SubCustomer.sum", #facet_var
+  facet_var="SubCustomer.JPO", #facet_var
   column_key=column_key,
   format=TRUE,
   ytextposition=FALSE
