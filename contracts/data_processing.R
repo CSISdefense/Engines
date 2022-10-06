@@ -32,8 +32,8 @@ engine_contracts <-
   read_delim("contracts/data/Project.SP_EngineAllVendorHistoryCompetitionFundingMechanismVendorSizeProdServAreaSubCustomer.txt",
              na =c("NA","NULL"),delim="\t")
 
-
-while(engine_contracts[nrow(engine_contracts),1] %in% c("0","Return Value"))
+# engine_contracts[nrow(engine_contracts),1]
+while(engine_contracts[nrow(engine_contracts),1] %in% c("0","Return Value","0\r" ,"Return Value\r"))
   engine_contracts<-engine_contracts[1:nrow(engine_contracts)-1,]
 
 engine_contracts<-apply_standard_lookups(engine_contracts)
@@ -174,6 +174,17 @@ biz_engine_contracts<-engine_contracts %>% dplyr::rename(
 
 write.csv(biz_engine_contracts, "contracts/app/power_bi.csv")
 save(topline_contracts ,engine_contracts,file="contracts/app/engine_contract.Rdata")
+
+save(engine_contracts,file="contracts/data/just_engine_contract.Rdata")
+
+load(file="contracts/app/engine_contract.Rdata")
+
+
+if ("SubCustomer.platform" %in% names(engine_contracts) & "ProjectName" %in% names(engine_contracts)){
+  engine_contracts$SubCustomer.JPO<-as.character(engine_contracts$SubCustomer.platform)
+  engine_contracts$SubCustomer.JPO[engine_contracts$ProjectName %in% c("JSF (F-35) ","JSF (F-35)") & !is.na(engine_contracts$ProjectName)&engine_contracts$SubCustomer.platform=="Navy"]<-"F-35 JPO"
+  engine_contracts$SubCustomer.JPO<-factor(engine_contracts$SubCustomer.JPO)
+}
 
 
 #-----------------------------------------------------------------------
