@@ -11,6 +11,8 @@ source("contracts/theme/chart_theme.R")
 source("contracts/theme/money_labels.R")
 
 load(file="contracts/app/engine_contract.Rdata")
+load(file="contracts/data/just_engine_contract.Rdata")
+
 # ================================================================================
 # charting engines 
 # --------------------------------------------------------------------------------
@@ -608,7 +610,7 @@ rm(dyear)
 # percent change comparison 
 # 
 (
-  graph_contracts_overall <- comparison_contracts_overall %>%
+  graph_contracts_overall <- comparison_contracts_overall %>% filter(Fiscal_Year>=2000) %>%
     mutate(type = factor(type, levels = c("Topline", "Engines"))) %>%
     ggplot() +
     geom_line(
@@ -628,7 +630,7 @@ rm(dyear)
     chart_theme +
     ggtitle("Change in Aircraft Engine Contract Obligations") +
     xlab("Fiscal Year") +
-    ylab("Cumulative Percent Change, Inflation Adjusted (2000=0%)") +
+    ylab("Cumulative Percent Change (2000=0%), Inflation Adjusted") +
     scale_y_continuous(labels = scales::percent) +
     scale_x_continuous(
       breaks = seq(2000, 2020, by = 2),
@@ -683,6 +685,7 @@ max((comparison_contracts_subcustomer %>%
                                                     "Navy",
                                                     "Air Force",
                                                     "DLA")) %>%
+     filter(Fiscal_Year>=2000) %>%
     group_by() %>%
     mutate(SubCustomer = factor(
       SubCustomer, levels = c("Total",
@@ -715,7 +718,7 @@ max((comparison_contracts_subcustomer %>%
     #scale_y_continuous(limits = c(0:750)) +
     ggtitle("Change in Aircraft Engine Contract Obligations") +
     xlab("Fiscal Year") +
-    ylab("Cumulative Percent Change, Inflation Adjusted (2000=0%)") +
+    ylab("Cumulative Percent Change (2000=0%), Inflation Adjusted") +
     scale_y_continuous(labels = scales::percent) +
     scale_x_continuous(
       breaks = seq(2000, 2020, by = 2),
@@ -760,6 +763,7 @@ write.csv(graph_contracts_subcustomer$data,# %>%
 (
   graph_contracts_area <- comparison_contracts_area %>%
     filter(!is.na(SimpleArea) & !SimpleArea %in% c("Services","Unlabeled")) %>%
+     filter(Fiscal_Year>=2000) %>%
     # mutate(SimpleArea = factor(SimpleArea, levels = c("Products",
     #                                               # "Services",
     #                                               "R&D"))) %>%
@@ -782,7 +786,7 @@ write.csv(graph_contracts_subcustomer$data,# %>%
     chart_theme +
     ggtitle("Change in Aircraft Engine Contract Obligations") +
     xlab("Fiscal Year") +
-    ylab("Cumulative Percent Change, Inflation Adjusted (2000=0%)") +
+    ylab("Cumulative Percent Change (2000=0%), Inflation Adjusted") +
     scale_y_continuous(labels = scales::percent) +
     scale_x_continuous(
       breaks = seq(2000, 2020, by = 2),
@@ -834,10 +838,12 @@ summary(factor(comparison_contracts_area_total$SimpleArea))
 (
   graph_contracts_overall_area <- comparison_contracts_area_total %>%
     filter(!is.na(SimpleArea) & !SimpleArea %in% c("Services","Unlabeled")) %>%
+    filter(!is.na(SimpleArea) & !SimpleArea %in% c("Services","Unlabeled")&
+             Fiscal.Year>=2000) %>%
     mutate(type = factor(type, levels = c("Topline", "Engines"))) %>%
     ggplot() +
     geom_line(
-      aes(x = Fiscal_Year, 
+      aes(x = Fiscal.Year, 
           y = baseline_percent_change,
           linetype=SimpleArea),
       alpha = .9,
