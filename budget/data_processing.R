@@ -144,7 +144,7 @@ engine_budget <- rbind(
 
 # --------------------------------------------------------------------------------
 # add F135 
-#   (note: separate because F135 funding is embeded into the broader F-35 line)
+#   (note: separate because F135 funding is embedded into the broader F-35 line)
 
 service_ratio <- read_csv("budget/data/service_ratio.csv")
 service_ratio$checksum<-service_ratio$navy_ratio+service_ratio$air_force_ratio
@@ -282,49 +282,49 @@ if(nrow(engine_budget %>% filter(Program.Name %in% c("F135","F136") |
     rbind(f135_f136)
 }
 # --------------------------------------------------------------------------------
-# deflate data
-#   (note: used Table 10.1 - GDP and deflators used in OMB historical tables:
-#   ...1940 - 2023, FY19 = 1)
+# # deflate data
+# #   (note: used Table 10.1 - GDP and deflators used in OMB historical tables:
+# #   ...1940 - 2023, FY19 = 1)
+# 
+# deflator <-
+#   c(
+#     0.68389032,
+#     0.69811482,
+#     0.71482434,
+#     0.72639246,
+#     0.74027421,
+#     0.75861183,
+#     0.78243359,
+#     0.80788346,
+#     0.82982005,
+#     0.84704370,
+#     0.85689803,
+#     0.86443873,
+#     0.88200514,
+#     0.89811482,
+#     0.91328192,
+#     0.92990574,
+#     0.94113111,
+#     0.95201371,
+#     0.96838046,
+#     0.98354756,
+#     1.00000000,
+#     1.01850900,
+#     1.03864610,
+#     1.05946872,
+#     1.08080548
+#   )
+# 
+# fy <- c(1999:2023)
 
-deflator <-
-  c(
-    0.68389032,
-    0.69811482,
-    0.71482434,
-    0.72639246,
-    0.74027421,
-    0.75861183,
-    0.78243359,
-    0.80788346,
-    0.82982005,
-    0.84704370,
-    0.85689803,
-    0.86443873,
-    0.88200514,
-    0.89811482,
-    0.91328192,
-    0.92990574,
-    0.94113111,
-    0.95201371,
-    0.96838046,
-    0.98354756,
-    1.00000000,
-    1.01850900,
-    1.03864610,
-    1.05946872,
-    1.08080548
-  )
-
-fy <- c(1999:2023)
-
-deflate_year <- as.data.frame(cbind(fy, deflator))
-engine_budget_alternate<- engine_budget %>%
-  separate(FY, into = c("X", "FY"), sep = 1) 
-engine_budget_alternate<-csis360::deflate(data=engine_budget_alternate,
-                 money_var= "Amount",
-                 fy_var="FY",
-                 deflator_var="OMB.2019"
-                 )
+# deflate_year <- as.data.frame(cbind(fy, deflator))
+# engine_budget_alternate<- engine_budget %>%
+#   separate(FY, into = c("X", "FY"), sep = 1) 
+# engine_budget_alternate<-csis360::deflate(data=engine_budget_alternate,
+#                  money_var= "Amount",
+#                  fy_var="FY",
+#                  deflator_var="OMB23_GDP21"
+#                  )
 
 # --------------------------------------------------------------------------------
 # clean and summarize data
@@ -345,13 +345,20 @@ engine_budget <- engine_budget %>%
     amount = Amount,
     fy = FY
   ) %>%
-  mutate(fy = as.numeric(fy)) %>%
-  dplyr::left_join(deflate_year, by = "fy") %>%
-  mutate(amount_19 = amount / deflator) %>%
+  mutate(fy = as.numeric(fy))
+
+engine_budget<-csis360::deflate(
+  engine_budget,
+  money_var= "amount",
+  fy_var="fy",
+  deflator_var="OMB23_GDP21"
+) %>%
+  # dplyr::left_join(deflate_year, by = "fy") %>%
+  # mutate(amount_OMB23_GDP21 = amount / deflator) %>%
   dplyr::mutate(fydp_year = as.factor(fydp_year)) %>%
   dplyr::mutate(fydp = "FYDP") %>%
   unite(fydp_year, fydp_year, fydp, sep = " ") %>%
-  select(fydp_year:project_name, fy, amount, amount_19) %>%
+  select(fydp_year:project_name, fy, amount_Then_Year, amount_OMB23_GDP21) %>%
   dplyr::mutate(
     project_name = recode(
       project_name,
@@ -381,9 +388,9 @@ engine_budget <- engine_budget %>%
       'Propulsion' = 'Advanced Aerospace Propulsion';
       'Aerospace Fuel Technology' = 'Combustion and Mechanical Systems'"
     )
-    )
-if(sum(engine_budget$amount,na.rm=TRUE) - sum(engine_budget_alternate$Amount.Then.Year,na.rm=TRUE) > 0.001 |
-   sum(engine_budget$amount_19,na.rm=TRUE) - sum(engine_budget_alternate$Amount.OMB.2019,na.rm=TRUE)> 0.001) stop("Deflation checksum failure")
+  )
+# if(sum(engine_budget$amount,na.rm=TRUE) - sum(engine_budget_alternate$Amount.Then.Year,na.rm=TRUE) > 0.001 |
+#    sum(engine_budget$amount_OMB23_GDP21,na.rm=TRUE) - sum(engine_budget_alternate$Amount.OMB.2019,na.rm=TRUE)> 0.001) stop("Deflation checksum failure")
 
 # --------------------------------------------------------------------------------
 # join stages 
@@ -409,15 +416,15 @@ stages <- stages %>%
 if(any(duplicated(stages$project_name))) stop("Duplicate Project Name")
 engine_budget <- engine_budget %>%
   left_join(stages, by = "project_name") %>%
-  mutate(amount = amount * 1000000,
-         amount_19 = amount_19 * 1000000)
+  mutate(amount_Then_Year = amount_Then_Year * 1000000,
+         amount_OMB23_GDP21 = amount_OMB23_GDP21 * 1000000)
 
 # --------------------------------------------------------------------------------
 
 engine_budget_wide <-
-  spread(engine_budget, key = "fy", value = "amount") # to view discrepancies
+  spread(engine_budget, key = "fy", value = "amount_Then_Year") # to view discrepancies
 
-engine_budget %>% group_by(project_name) %>% dplyr::summarise(amount=sum(amount,na.rm=TRUE))
+engine_budget %>% group_by(project_name) %>% dplyr::summarise(amount_Then_Year=sum(amount_Then_Year,na.rm=TRUE))
 
 #I'm not sure why you're filtering these.
 engine_budget <- engine_budget %>%
@@ -458,829 +465,5 @@ engine_budget <- engine_budget %>%
   filter(fydp_year != "1999 FYDP")
 
 engine_budget_wide <-
-  spread(engine_budget, key = "fy", value = "amount") # to view discrepancies
+  spread(engine_budget, key = "fy", value = "amount_Then_Year") # to view discrepancies
 
-# ================================================================================
-# charting engines - future  
-# --------------------------------------------------------------------------------
-# engine spending (by FYDP year)
-
-engine_budget_future <- engine_budget %>%
-  mutate(fy = as.numeric(fy)) %>%
-  group_by(fydp_year, fy) %>%
-  filter(amount != 0) %>%
-  dplyr::summarize(amount = sum(amount, na.rm = TRUE),
-                   amount_19 = sum(amount_19, na.rm = TRUE))
-
-#Quick examination of variance in number of years tracked by each budget
-engine_budget_future_wide <-
-  spread(engine_budget_future, key = "fy", value = "amount")
-# View(engine_budget_future)
-engine_budget_future %>% group_by(fydp_year) %>%
-  dplyr::summarise(fy_count=length(fy),
-                   min_fy=min(fy),
-                   max_fy=max(fy))
-
-
-(
-  plot_ebf <- ggplot(engine_budget_future) +
-    geom_line(aes(
-      x = fy,
-      y = amount_19,
-      group = fydp_year,
-      alpha = fydp_year
-    ), color = "#554449", size = 1) +
-    ggtitle("DoD RDT&E Aircraft Engine Spending Projections") +
-    chart_theme +
-    scale_y_continuous(label = unit_format(unit = "M", scale = 1e-6)) +
-
-    xlab("Fiscal Year") + 
-    ylab("Constant 2019 $") 
-)
-
-ggsave(
-  "budget/charts/amount_total.svg",
-  plot_ebf,
-  device = "svg",
-  width = 8,
-  height = 6,
-  units = "in"
-)
-
-# --------------------------------------------------------------------------------
-# engine spending by Service
-
-engine_budget_organization_future <- engine_budget %>%
-  mutate(fy = as.numeric(fy)) %>%
-  group_by(fydp_year, fy, organization) %>%
-  filter(amount != 0) %>%
-  dplyr::summarize(amount = sum(amount, na.rm = TRUE),
-                   amount_19 = sum(amount_19, na.rm = TRUE))
-
-engine_budget_organization_future_wide <-
-  spread(engine_budget_organization_future, key = "fy", value = "amount")
-
-(
-  plot_ebf <- ggplot(engine_budget_organization_future) +
-    geom_line(
-      aes(
-        x = fy,
-        y = amount_19,
-        group = fydp_year,
-        alpha = fydp_year
-      ),
-      color = "#554449",
-      size = 1
-    ) +
-    facet_wrap(~ organization) +
-    scale_y_continuous(label = unit_format(unit = "M", scale = 1e-6)) +
-    scale_x_continuous(
-      breaks = seq(2000, 2025, by = 5),
-      labels = function(x) {
-        substring(as.character(x), 3, 4)
-      }
-    ) +
-    ggtitle("DoD RDT&E Aircraft Engine Spending Projections by Service") +
-    chart_theme +
-    xlab("Fiscal Year") + 
-    ylab("Constant 2019 $") 
-)
-
-ggsave(
-  "budget/charts/amount_service.svg",
-  plot_ebf,
-  device = "svg",
-  width = 12,
-  height = 6,
-  units = "in"
-)
-
-# --------------------------------------------------------------------------------
-# engine spending by project name
-
-engine_budget_project_future <- engine_budget %>%
-  mutate(fy = as.numeric(fy)) %>%
-  group_by(fydp_year, fy, project_name) %>%
-  filter(amount != 0) %>%
-  dplyr::summarize(amount = sum(amount, na.rm = TRUE),
-                   amount_19 = sum(amount_19, na.rm = TRUE))
-
-engine_budget_project_future_wide <-
-  spread(engine_budget_project_future, key = "fy", value = "amount")
-
-(
-  plot_ebf <- ggplot(engine_budget_project_future) +
-    geom_line(
-      aes(
-        x = fy,
-        y = amount_19,
-        group = fydp_year,
-        alpha = fydp_year
-      ),
-      color = "#554449",
-      size = 1
-    ) +
-    facet_wrap(~ project_name) +
-    scale_y_continuous(label = unit_format(unit = "M", scale = 1e-6)) +
-    scale_x_continuous(
-      breaks = seq(2000, 2025, by = 5),
-      labels = function(x) {
-        substring(as.character(x), 3, 4)
-      }
-    ) +
-    ggtitle("DoD RDT&E Aircraft Engine Spending Projections by project") +
-    chart_theme +
-    xlab("Fiscal Year") + 
-    ylab("Constant 2019 $") 
-)
-
-# --------------------------------------------------------------------------------
-# engine spending by Stage
-
-engine_budget_stage_future <- engine_budget %>%
-  mutate(fy = as.numeric(fy)) %>%
-  filter(stage != "NA") %>%
-  group_by(fydp_year, fy, stage) %>%
-  filter(amount != 0) %>%
-  dplyr::summarize(amount = sum(amount, na.rm = TRUE),
-                   amount_19 = sum(amount_19, na.rm = TRUE))
-
-engine_budget_stage_future_wide <-
-  spread(engine_budget_stage_future, key = "fy", value = "amount")
-
-(
-  plot_ebf <- ggplot(engine_budget_stage_future) +
-    geom_line(
-      aes(
-        x = fy,
-        y = amount_19,
-        group = fydp_year,
-        alpha = fydp_year
-      ),
-      color = "#554449",
-      size = 1
-    ) +
-    facet_wrap(~ stage) +
-    scale_y_continuous(label = unit_format(unit = "M", scale = 1e-6)) +
-    scale_x_continuous(
-      breaks = seq(2000, 2025, by = 5),
-      labels = function(x) {
-        substring(as.character(x), 3, 4)
-      }
-    ) +
-    ggtitle("DoD RDT&E Aircraft Engine Spending Projections by Stage") +
-    chart_theme +
-    xlab("Fiscal Year") + 
-    ylab("Constant 2019 $")  
-)
-
-ggsave(
-  "budget/charts/amount_stage.svg",
-  plot_ebf,
-  device = "svg",
-  width = 10,
-  height = 8,
-  units = "in"
-)
-
-# --------------------------------------------------------------------------------
-# engine spending by Service and stage
-
-engine_budget_stage_service_future <- engine_budget %>%
-  mutate(fy = as.numeric(fy)) %>%
-  mutate(
-    stage = recode(
-      stage,
-      "'(6.1) Basic Research' = '6.1';
-      '(6.2) Applied Research' = '6.2';
-      '(6.3) Advanced Technology Development' = '6.3';
-      '(6.4) Advanced Component Development & Prototypes' = '6.4';
-      '(6.5) System Development & Demonstration' = '6.5';
-      '(6.7) Operational Systems Development' = '6.7'"
-    )
-  ) %>% 
-  mutate(organization = factor(organization,
-                               levels = c("Army",
-                                          "Navy",
-                                          "Air Force"))) %>%
-  filter(stage != "NA") %>%
-  group_by(fydp_year, fy, organization, stage) %>%
-  filter(amount != 0) %>%
-  dplyr::summarize(amount = sum(amount, na.rm = TRUE),
-                   amount_19 = sum(amount_19, na.rm = TRUE))
-
-engine_budget_stage_service_future_wide <-
-  spread(engine_budget_stage_service_future, key = "fy", value = "amount")
-
-(
-  plot_ebf <- ggplot(engine_budget_stage_service_future) +
-    geom_line(
-      aes(
-        x = fy,
-        y = amount_19,
-        group = fydp_year,
-        alpha = fydp_year
-      ),
-      color = "#554449",
-      size = 1
-    ) +
-    facet_grid(organization ~ stage) +
-    scale_y_continuous(label = unit_format(unit = "M", scale = 1e-6)) +
-    scale_x_continuous(
-      breaks = seq(2000, 2025, by = 5),
-      labels = function(x) {
-        substring(as.character(x), 3, 4)
-      }
-    ) +
-    ggtitle("DoD RDT&E Aircraft Engine Spending Projections by Stage and Service") +
-    chart_theme +
-    theme(strip.text.x = element_text(size = 10)) +
-    theme(strip.text.y = element_text(size = 10)) +
-    xlab("Fiscal Year") +
-    ylab("Constant 2019 $") 
-)
-
-# ggsave(
-#   "budget/charts/amount_service_stage.svg",
-#   plot_ebf,
-#   device = "svg",
-#   width = 14,
-#   height = 8,
-#   units = "in"
-# )
-
-# ================================================================================
-# charting engines - actual  
-# --------------------------------------------------------------------------------
-# clean data 
-#   (note: this filtering section creates a dataset for only actual values in the 
-#   ...budget line, in addition to enacted and projected for the most recent FYDP
-
-engine_actual <- engine_budget %>%
-  filter(
-    fydp_year == "2000 FYDP" & fy == "1998" |
-      fydp_year == "2001 FYDP" & fy == "1999" |
-      fydp_year == "2002 FYDP" & fy == "2000" |
-      fydp_year == "2003 FYDP" & fy == "2001" |
-      fydp_year == "2004 FYDP" & fy == "2002" |
-      fydp_year == "2005 FYDP" & fy == "2003" |
-      fydp_year == "2006 FYDP" & fy == "2004" |
-      fydp_year == "2007 FYDP" & fy == "2005" |
-      fydp_year == "2008 FYDP" & fy == "2006" |
-      fydp_year == "2009 FYDP" & fy == "2007" |
-      fydp_year == "2010 FYDP" & fy == "2008" |
-      fydp_year == "2011 FYDP" & fy == "2009" |
-      fydp_year == "2012 FYDP" & fy == "2010" |
-      fydp_year == "2013 FYDP" & fy == "2011" |
-      fydp_year == "2014 FYDP" & fy == "2012" |
-      fydp_year == "2015 FYDP" & fy == "2013" |
-      fydp_year == "2016 FYDP" & fy == "2014" |
-      fydp_year == "2017 FYDP" & fy == "2015" |
-      fydp_year == "2018 FYDP" & fy == "2016" |
-      fydp_year == "2019 FYDP" & fy == "2017" |
-      fydp_year == "2019 FYDP" & fy == "2018" |
-      fydp_year == "2019 FYDP" & fy == "2019" |
-      fydp_year == "2019 FYDP" & fy == "2020" |
-      fydp_year == "2019 FYDP" & fy == "2021" |
-      fydp_year == "2019 FYDP" & fy == "2022" |
-      fydp_year == "2019 FYDP" & fy == "2023"
-  ) %>%
-  mutate(
-    stage = recode(
-      stage,
-      "'(6.1) Basic Research' = '6.1';
-      '(6.2) Applied Research' = '6.2';
-      '(6.3) Advanced Technology Development' = '6.3';
-      '(6.4) Advanced Component Development & Prototypes' = '6.4';
-      '(6.5) System Development & Demonstration' = '6.5';
-      '(6.7) Operational Systems Development' = '6.7'"
-    )
-  ) %>% 
-  filter(amount != 0) %>%
-  group_by(fy, organization, stage, project_name) %>%
-  dplyr::summarize(amount = sum(amount, na.rm = TRUE),
-                   amount_19 = sum(amount_19, na.rm = TRUE))
-
-engine_actual_wide <-
-  spread(engine_actual, key = "fy", value = "amount")
-
-engine_actual$fy <- as.numeric(engine_actual$fy)
-
-# facet --------------------------------------------------------------------------
-
-engine_actual_1 <- engine_actual %>%
-  filter(amount != 0) %>%
-  group_by(fy, project_name) %>%
-  dplyr::summarize(amount = sum(amount, na.rm = TRUE),
-                   amount_19 = sum(amount_19, na.rm = TRUE))
-
-(
-  facet <-
-    ggplot() + geom_area(aes(y = amount_19, x = fy),
-                         data = engine_actual_1,
-                         stat = "identity") +
-    geom_rect(
-      aes(
-        xmin = 2017,
-        xmax = Inf,
-        ymin = 0,
-        ymax = Inf
-      ),
-      alpha = .02,
-      fill = "grey",
-      data = engine_actual_1
-    ) +
-    facet_wrap(~ project_name) +
-    chart_theme +
-    theme(strip.text.x = element_text(size = 8)) +
-    theme(strip.text.y = element_text(size = 8)) +
-    scale_y_continuous(label = unit_format(unit = "M", scale = 1e-6)) +
-    scale_x_continuous(
-      breaks = seq(2000, 2023, by = 2),
-      labels = function(x) {
-        substring(as.character(x), 3, 4)
-      }
-    ) +
-    ggtitle("DoD RDT&E Aircraft Engine Spending By Project") +
-    xlab("Fiscal Year") +
-    ylab("Constant 2019 $") + 
-    geom_vline(
-      xintercept = 2017,
-      color = "#554449",
-      alpha = .5,
-      linetype = "solid"
-    ) +
-    geom_vline(
-      xintercept = 2019,
-      color = "#554449",
-      linetype = "dotted"
-    )
-)
-
-ggsave(
-  "budget/charts/actual_amount_project.svg",
-  facet,
-  device = "svg",
-  width = 20,
-  height = 8,
-  units = "in"
-)
-
-# facet 2 ------------------------------------------------------------------------
-
-total <- engine_actual %>%
-  group_by(fy) %>%
-  dplyr::summarize(amount = sum(amount, na.rm = TRUE),
-                   amount_19 = sum(amount_19, na.rm = TRUE)) %>% 
-  mutate(organization = "Total") %>% 
-  as.data.frame(.)
-
-total_organization <- engine_actual %>%
-  group_by(fy, organization) %>%
-  dplyr::summarize(amount = sum(amount, na.rm = TRUE),
-                   amount_19 = sum(amount_19, na.rm = TRUE)) %>% 
-  as.data.frame(.)
-
-total <- total %>%
-  rbind(total_organization) %>%
-  mutate(stage = "Total")
-
-rd6.1 <-  engine_actual %>%
-  filter(stage == "6.1") %>% 
-  group_by(fy) %>%
-  dplyr::summarize(amount = sum(amount, na.rm = TRUE),
-                   amount_19 = sum(amount_19, na.rm = TRUE)) %>% 
-  mutate(organization = "Total") %>% 
-  as.data.frame(.)
-
-rd6.1_organization <-  engine_actual %>%
-  filter(stage == "6.1") %>% 
-  group_by(fy, organization) %>%
-  dplyr::summarize(amount = sum(amount, na.rm = TRUE),
-                   amount_19 = sum(amount_19, na.rm = TRUE)) %>% 
-  as.data.frame(.)
-
-rd6.1 <- rd6.1 %>%
-  rbind(rd6.1_organization) %>%
-  mutate(stage = "6.1")
-
-rd6.2 <-  engine_actual %>%
-  filter(stage == "6.2") %>% 
-  group_by(fy) %>%
-  dplyr::summarize(amount = sum(amount, na.rm = TRUE),
-                   amount_19 = sum(amount_19, na.rm = TRUE)) %>% 
-  mutate(organization = "Total") %>% 
-  as.data.frame(.)  
-
-rd6.2_organization <-  engine_actual %>%
-  filter(stage == "6.2") %>% 
-  group_by(fy, organization) %>%
-  dplyr::summarize(amount = sum(amount, na.rm = TRUE),
-                   amount_19 = sum(amount_19, na.rm = TRUE)) %>% 
-  as.data.frame(.)
-
-rd6.2 <- rd6.2 %>%
-  rbind(rd6.2_organization) %>%
-  mutate(stage = "6.2")
-
-rd6.3 <-  engine_actual %>%
-  filter(stage == "6.3") %>% 
-  group_by(fy) %>%
-  dplyr::summarize(amount = sum(amount, na.rm = TRUE),
-                   amount_19 = sum(amount_19, na.rm = TRUE)) %>% 
-  mutate(organization = "Total") %>% 
-  as.data.frame(.)  
-
-rd6.3_organization <-  engine_actual %>%
-  filter(stage == "6.3") %>% 
-  group_by(fy, organization) %>%
-  dplyr::summarize(amount = sum(amount, na.rm = TRUE),
-                   amount_19 = sum(amount_19, na.rm = TRUE)) %>% 
-  as.data.frame(.)
-
-rd6.3 <- rd6.3 %>%
-  rbind(rd6.3_organization) %>%
-  mutate(stage = "6.3")
-
-rd6.4 <-  engine_actual %>%
-  filter(stage == "6.4") %>% 
-  group_by(fy) %>%
-  dplyr::summarize(amount = sum(amount, na.rm = TRUE),
-                   amount_19 = sum(amount_19, na.rm = TRUE)) %>% 
-  mutate(organization = "Total") %>% 
-  as.data.frame(.)  
-
-rd6.4_organization <-  engine_actual %>%
-  filter(stage == "6.4") %>% 
-  group_by(fy, organization) %>%
-  dplyr::summarize(amount = sum(amount, na.rm = TRUE),
-                   amount_19 = sum(amount_19, na.rm = TRUE)) %>% 
-  as.data.frame(.)
-
-rd6.4 <- rd6.4 %>%
-  rbind(rd6.4_organization) %>%
-  mutate(stage = "6.4")
-
-rd6.5 <-  engine_actual %>%
-  filter(stage == "6.5") %>% 
-  group_by(fy) %>%
-  dplyr::summarize(amount = sum(amount, na.rm = TRUE),
-                   amount_19 = sum(amount_19, na.rm = TRUE)) %>% 
-  mutate(organization = "Total") %>% 
-  as.data.frame(.)  
-
-rd6.5_organization <-  engine_actual %>%
-  filter(stage == "6.5") %>% 
-  group_by(fy, organization) %>%
-  dplyr::summarize(amount = sum(amount, na.rm = TRUE),
-                   amount_19 = sum(amount_19, na.rm = TRUE)) %>% 
-  as.data.frame(.)
-
-rd6.5 <- rd6.5 %>%
-  rbind(rd6.5_organization) %>%
-  mutate(stage = "6.5")
-
-rd6.7 <-  engine_actual %>%
-  filter(stage == "6.7") %>% 
-  group_by(fy) %>%
-  dplyr::summarize(amount = sum(amount, na.rm = TRUE),
-                   amount_19 = sum(amount_19, na.rm = TRUE)) %>% 
-  mutate(organization = "Total") %>% 
-  as.data.frame(.)  
-
-rd6.7_organization <-  engine_actual %>%
-  filter(stage == "6.7") %>% 
-  group_by(fy, organization) %>%
-  dplyr::summarize(amount = sum(amount, na.rm = TRUE),
-                   amount_19 = sum(amount_19, na.rm = TRUE)) %>% 
-  as.data.frame(.)
-
-rd6.7 <- rd6.7 %>%
-  rbind(rd6.7_organization) %>%
-  mutate(stage = "6.7")
-
-engine_actual_organization <- engine_actual %>%
-  group_by(fy, organization) %>%
-  dplyr::summarize(amount = sum(amount, na.rm = TRUE),
-                   amount_19 = sum(amount_19, na.rm = TRUE)) 
-  
-total <- total %>%
-  rbind(rd6.1, rd6.2, rd6.3, rd6.4, rd6.5, rd6.7) %>%
-  mutate(
-    stage = factor(stage, levels = c("6.1",
-                                     "6.2",
-                                     "6.3",
-                                     "6.4",
-                                     "6.5",
-                                     "6.7",
-                                     "Total")),
-    organization = factor(organization, levels = c("Army",
-                                                   "Navy",
-                                                   "Air Force",
-                                                   "Total"))
-  )
-
-summary( total$stage)
-
-
-empty<-expand.grid(
-  stage = c("6.1",
-            "6.2",
-            "6.3",
-            "6.4",
-            "6.5",
-            "6.7",
-            "Total"),
-  organization = c("Army",
-                   "Navy",
-                   "Air Force",
-                   "Total"),
-  fy=seq(from=2017,to=2023))
-
-empty$amount<-0
-empty$amount_19<-0
-
-
-(
-  super_facet <- total %>%
-    
-    ggplot() +
-    
-    geom_area(aes(y = amount_19, x = fy),
-                         # data = engine_actual_project,
-                         stat = "identity") +
-    facet_grid(organization ~ stage) +
-    geom_rect(
-      # aes(
-        xmin = 2017,
-        xmax = Inf,
-        ymin = 0,
-        ymax = Inf,
-        alpha = 0.05,
-        fill = "grey",
-      # ),
-      
-      data = empty#engine_actual#engine_actual_project
-    ) +
-    chart_theme +
-    theme(strip.text.x = element_text(size = 8)) +
-    theme(strip.text.y = element_text(size = 8)) +
-    scale_y_continuous(label = unit_format(unit = "M", scale = 1e-6)) +
-    scale_x_continuous(
-      breaks = seq(2000, 2023, by = 2),
-      labels = function(x) {
-        substring(as.character(x), 3, 4)
-      }
-    ) +
-    ggtitle("DoD RDT&E Aircraft Engine Spending by Service and Stage") +
-    xlab("Fiscal Year") +
-    ylab("Constant 2019 $") + 
-    geom_vline(
-      xintercept = 2017,
-      color = "#554449",
-      alpha = .5,
-      linetype = "solid"
-    ) +
-    geom_vline(
-      xintercept = 2019,
-      color = "#554449",
-      linetype = "dotted"
-    )
-)
-
-ggsave(
-  "budget/charts/actual_amount_service_stage.svg",
-  super_facet,
-  device = "svg",
-  width = 20,
-  height = 8,
-  units = "in"
-)
-
-## Greg stops reviewing here!
-
-# # ================================================================================
-# # chart engine comparison 
-# # --------------------------------------------------------------------------------
-# # read topline data 
-# 
-# read_topline <- read_delim("budget/data/topline.csv",delim="\t")
-# 
-# topline <- read_topline %>%
-#   select(fy, army, navy, air_force, dod_total, us_total) %>%
-#   gather(army:us_total, key = "project_name", value = "amount")
-# #mutate(amount_19 = amount / deflator)
-# 
-# 
-# 
-# # --------------------------------------------------------------------------------
-# # clean and combine data
-# # --------------------------------------------------------------------------------
-# 
-# # engine_actual <- filter(
-# #   engine_budget,
-# #   fydp_year == "2000 FYDP" & fy == "1998" |
-# #     fydp_year == "2001 FYDP" & fy == "1999" |
-# #     fydp_year == "2002 FYDP" & fy == "2000" |
-# #     fydp_year == "2003 FYDP" & fy == "2001" |
-# #     fydp_year == "2004 FYDP" & fy == "2002" |
-# #     fydp_year == "2005 FYDP" & fy == "2003" |
-# #     fydp_year == "2006 FYDP" & fy == "2004" |
-# #     fydp_year == "2007 FYDP" & fy == "2005" |
-# #     fydp_year == "2008 FYDP" & fy == "2006" |
-# #     fydp_year == "2009 FYDP" & fy == "2007" |
-# #     fydp_year == "2010 FYDP" & fy == "2008" |
-# #     fydp_year == "2011 FYDP" & fy == "2009" |
-# #     fydp_year == "2012 FYDP" & fy == "2010" |
-# #     fydp_year == "2013 FYDP" & fy == "2011" |
-# #     fydp_year == "2014 FYDP" & fy == "2012" |
-# #     fydp_year == "2015 FYDP" & fy == "2013" |
-# #     fydp_year == "2016 FYDP" & fy == "2014" |
-# #     fydp_year == "2017 FYDP" & fy == "2015" |
-# #     fydp_year == "2018 FYDP" & fy == "2016" |
-# #     fydp_year == "2018 FYDP" & fy == "2017" |
-# #     fydp_year == "2018 FYDP" & fy == "2018"
-# # )
-# 
-# 
-# 
-# engine_actual_project  <- engine_actual %>%
-#   group_by(project_name, fy) %>%
-#   summarise(amount = sum(amount, na.rm = TRUE)) %>%
-#   filter(amount != 0 & fy<2018) %>%
-#   dplyr::left_join(deflate_year, by = "fy") %>%
-#   mutate(amount_19 = amount / deflator) %>%
-#   select(-deflator)
-#   
-# #I don't see the point of this, spreading and then gathering just counteracts itself.
-# # engine_actual_wide <-
-# #   spread(engine_actual_project, key = "project_name", value = "amount")
-# # 
-# # engine_actual_wide[is.na(engine_actual_wide)] <- 0
-# # 
-# # colnames(engine_actual_wide)
-# # engine_actual_wide <-
-# #   gather(
-# #     engine_actual_wide,
-# #     "ACFT Demo Engines":"Veh Prop & Struct Tech",
-# #     key = "project_name",
-# #     value = "amount"
-#   # )
-# 
-# #I don't see the point of any of this either
-# # data_fy <- select(engine_actual_wide, fy)
-# # 
-# # engine_actual_wide <- select(engine_actual_wide,-fy)
-# # 
-# # engine_actual_wide <- cbind(data_fy, engine_actual_wide)
-# 
-# # engine_actual_wide$fy <- as.numeric(engine_actual_wide$fy)
-# 
-# 
-# 
-# engine_actual_project <- rbind(engine_actual_project, topline)
-# data_year <- engine_actual_project
-# data_year <- mutate(data_year, fy2 = fy + 1)
-# data_year <- select(data_year,-fy)
-# colnames(data_year)[colnames(data_year) == "fy2"] <- "fy"
-# 
-# engine_comparison <-
-#   left_join(engine_actual_project, data_year, by = c("project_name", "fy"))
-# engine_comparison <- filter(engine_comparison, fy != 1998 |
-#                               fy != 1997)
-# engine_comparison <-
-#   select(engine_comparison, fy, project_name, amount.x, amount.y)
-# engine_comparison_topline <- filter(
-#   engine_comparison,
-#   project_name == "us_total" |
-#     project_name == "dod_total" |
-#     project_name == "army" |
-#     project_name == "navy" |
-#     project_name == "air_force"
-# )
-# engine_comparison <- engine_comparison %>%
-#   filter(project_name != "us_total") %>%
-#   filter(project_name != "dod_total") %>%
-#   filter(project_name != "army") %>%
-#   filter(project_name != "navy") %>%
-#   filter(project_name != "air_force")
-# 
-# engine_comparison <- engine_comparison %>%
-#   group_by(fy) %>%
-#   summarise(
-#     amount.x = sum(amount.x, na.rm = TRUE),
-#     amount.y = sum(amount.y, na.rm = TRUE)
-#   ) %>%
-#   mutate(project_name = "Engines") %>%
-#   select(fy, project_name, amount.x, amount.y) %>%
-#   rbind(engine_comparison_topline)
-# 
-# engine_comparison <-
-#   mutate(engine_comparison, amount_change = amount.x - amount.y)
-# engine_comparison <-
-#   mutate(engine_comparison,
-#          amount_percent_Change = (amount.x - amount.y) / amount.y * 100)
-# colnames(engine_comparison)[colnames(engine_comparison) == "amount.x"] <-
-#   "amount"
-# 
-# engine_comparison <-
-#   select(engine_comparison,
-#          fy,
-#          project_name,
-#          amount,
-#          amount_change,
-#          amount_percent_Change)
-# 
-# engine_comparison$fy <- as.character(engine_comparison$fy)
-# engine_comparison$fy <- as.factor(engine_comparison$fy)
-# 
-# engine_comparison2 <-
-#   filter(engine_comparison, project_name == "Aerospace Fuels")
-# 
-# engine_comparison <- engine_comparison %>%
-#   filter()
-# 
-# # --------------------------------------------------------------------------------
-# # chart comparison 
-# 
-# engines_DOD_US <- engine_comparison %>%
-#   filter(project_name == "dod_total" |
-#            project_name == "Engines" | project_name == "us_total")
-# 
-# engines_DOD_US$fy = as.character(engines_DOD_US$fy)
-# 
-# engines <- engines_DOD_US %>%
-#   filter(project_name == "Engines")
-# 
-# eng.baseyear <- engines$amount[engines$fy == 2000]
-# 
-# DOD <- engines_DOD_US %>%
-#   filter(project_name == "dod_total")
-# 
-# dod.baseyear <- DOD$amount[DOD$fy == 2000]
-# 
-# US <- engines_DOD_US %>%
-#   filter(project_name == "us_total")
-# 
-# US.baseyear <- US$amount[US$fy == 2000]
-# 
-# base_year.eng <- engines %>%
-#   filter(fy >= 2000) %>%
-#   mutate(amount_change = amount - eng.baseyear) %>%
-#   mutate(amount_percent_change = (amount_change) / eng.baseyear * 100) %>%
-#   mutate(base = 100) %>%
-#   mutate(amount = base + amount_percent_change)
-# 
-# base_year.DOD <- DOD %>%
-#   filter(fy >= 2000) %>%
-#   mutate(amount_change = amount - dod.baseyear) %>%
-#   mutate(amount_percent_change = (amount_change) / dod.baseyear * 100) %>%
-#   mutate(base = 100) %>%
-#   mutate(amount = base + amount_percent_change)
-# 
-# base_year.US <- US %>%
-#   filter(fy >= 2000) %>%
-#   mutate(amount_change = amount - US.baseyear) %>%
-#   mutate(amount_percent_change = (amount_change) / US.baseyear * 100) %>%
-#   mutate(base = 100) %>%
-#   mutate(amount = base + amount_percent_change)
-# 
-# eng.all <- rbind(base_year.eng, base_year.DOD, base_year.US)
-# 
-# eng.all$project_name[eng.all$project_name == "dod_total"] = "Total DOD"
-# eng.all$project_name[eng.all$project_name == "us_total"] = "Total US"
-# 
-# eng.all <- eng.all %>%
-#   group_by(fy, project_name) %>%
-#   dplyr::summarise(amount = sum(amount, na.rm = TRUE))
-# 
-# eng.all$fy <- as.factor(eng.all$fy)
-# 
-# (
-#   eng_US_DOD.comp <- eng.all %>%
-#     ggplot() +
-#     geom_line(aes(
-#       x = fy, y = amount, group = 1
-#     ), size = 1) +
-#     geom_hline(yintercept = 100, color = "#554449") +
-#     facet_wrap(~ project_name) +
-#     chart_theme +
-#     scale_y_continuous(label = unit_format(unit = "M", scale = 1e-6)) +
-#     scale_x_discrete(
-#       breaks = seq(2000, 2018, by = 2),
-#       labels = function(x) {
-#         substring(as.character(x), 3, 4)
-#       }
-#     ) +
-#     xlab("Fiscal Year")
-# )
-# 
-# # ggsave(
-# #   "budget/charts/engine_DoD_US_comparison.svg",
-# #   eng_US_DOD.comp,
-# #   device = "svg",
-# #   width = 10,
-# #   height = 6,
-# #   units = "in"
-# # )
-# 
