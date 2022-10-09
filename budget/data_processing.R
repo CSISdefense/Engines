@@ -1,6 +1,6 @@
 # ================================================================================
 # The Future of Military Engines
-# By Gabriel Coll
+# By Gabriel Coll and Gregory Sanders
 # --------------------------------------------------------------------------------
 # engine-related budget numbers from the Future Years Defense Program
 # ================================================================================
@@ -17,15 +17,14 @@ library(car)
 library(extrafont)
 library(csis360)
 library(scales)
-# --------------------------------------------------------------------------------
-# add theme
-
-source("budget/theme/chart_theme.R")
-source("budget/theme/money_labels.R")
-
+library(readr)
 # --------------------------------------------------------------------------------
 # read data (each President's budget has a separate data table)
 
+d23 <- read_csv("budget/data/23.csv")
+d22 <- read_csv("budget/data/22.csv")
+d21 <- read_csv("budget/data/21.csv")
+d20 <- read_csv("budget/data/20.csv")
 d19 <- read.csv("budget/data/19.csv")
 d18 <- read.csv("budget/data/18.csv")
 d17 <- read.csv("budget/data/17.csv")
@@ -70,7 +69,14 @@ stages <- read.csv("budget/data/stages_join.csv")
 
 # --------------------------------------------------------------------------------
 # make the data long
-
+d23 <- d23 %>%
+  gather(`Prior Years`:`FY 2027`, key = "FY", value = "Amount")
+d22 <- d22 %>%
+  gather(`Prior Years`:`FY 2026`, key = "FY", value = "Amount")
+d21 <- d21 %>%
+  gather(`Prior Years`:`FY 2025`, key = "FY", value = "Amount")
+d20 <- d20 %>%
+  gather(`Prior Years`:`FY 2024`, key = "FY", value = "Amount")
 d19 <- d19 %>%
   gather(`X2017`:`X2023`, key = "FY", value = "Amount")
 d18 <- d18 %>%
@@ -117,6 +123,56 @@ d99 <- d99 %>%
 # --------------------------------------------------------------------------------
 # combine data 
 #   (notes: the data tables for each President's budget have to be combined)
+
+label_r1d<-function(x,PByear){
+  if(!"Notes" %in% colnames(x)) x$Notes<-NA
+  x$FYDP.Year<-PByear
+  x<-standardize_variable_names(x,replace_special = TRUE)
+  x
+}
+
+d20<-label_r1d(d20,2020)
+d21<-label_r1d(d21,2021)
+d22<-label_r1d(d22,2022)
+d23<-label_r1d(d23,2023)
+engine_r1d<-rbind(d20,d21,d22,d23)
+engine_r1d<-standardize_variable_names(engine_r1d,path="..\\Lookup-Tables\\style\\")
+
+engine_r1d$row<-row.names(engine_r1d)
+engine_r1d$TypeCol<-engine_r1d$Type
+engine_r1d<-engine_r1d %>% pivot_wider(names_from="TypeCol",values_from="PE.Project.Accomplishments.Planned.Programs.Title") %>% 
+  select(-row)
+engine_r1d$ProgramElementTitle[!is.na(engine_r1d$PE)]<-engine_r1d$PE[!is.na(engine_r1d$PE)]
+engine_r1d<-engine_r1d %>% select(-PE)
+colnames(engine_r1d)[colnames(engine_r1d)=="Project"]<-"ProjectName"
+colnames(engine_r1d)[colnames(engine_r1d)=="A/PP"]<-"SubProjectName"
+engine_r1d$ProgramElementTitle[!is.na(engine_r1d$CA)]<-engine_r1d$CA[!is.na(engine_r1d$CA)]
+engine_r1d<-engine_r1d %>% select(-CA)
+
+#Drop prior years and base/oco breakouts
+engine_r1d<-engine_r1d%>%  filter(FY!="Prior Years") %>% 
+  mutate(FY=sub("FY ","",FY))%>%
+  filter(!substr(FY,5,999)  %in% c(" Base"," OCO"))  %>% 
+  mutate(FY=as.numeric(sub(" Total","",FY)))
+  
+#PB 2022 no FYDP fix
+engine_r1d<-engine_r1d %>% filter(PByear!=2022 | FY <=2022)
+engine_r1d$Organization[engine_r1d$Organization=="USAF"]<-"Air Force"
+
+#---- Chosing what subprojects to keep. Only AETP in PB2020 is significant spending. See also F-135/F-136 handled for back years below.
+# This is necessary b/c A/PP and CA do not extend past the President's Budget and this can't be summed with the FYDP
+# Fortunately the AETP program is in PBY2020 is being transitioned to another.
+engine_r1d%>%group_by(Type,PByear) %>%  filter(Type %in% c("A/PP","CA") & SubProjectName!="Adaptive Engine Transition Program (AETP)") %>%
+  summarise(Amount=sum(Amount,na.rm = TRUE))
+View(engine_r1d %>% filter(!is.na(Amount)&Type %in% c("A/PP","CA")))
+engine_r1d<-engine_r1d %>% filter(Type=="Project"|SubProjectName=="Adaptive Engine Transition Program (AETP)" )
+engine_r1d$ProjectName[is.na(engine_r1d$ProjectName)]<-engine_r1d$SubProjectName[is.na(engine_r1d$ProjectName)]
+engine_r1d <- engine_r1d   %>% select(-SubProjectName)
+
+
+
+
+engine_budget<-standardize_variable_names(engine_budget)
 
 engine_budget <- rbind(
   d99,
@@ -315,9 +371,9 @@ if(nrow(engine_budget %>% filter(Program.Name %in% c("F135","F136") |
 #     1.08080548
 #   )
 # 
-# fy <- c(1999:2023)
+# FY <- c(1999:2023)
 
-# deflate_year <- as.data.frame(cbind(fy, deflator))
+# deflate_year <- as.data.frame(cbind(FY, deflator))
 # engine_budget_alternate<- engine_budget %>%
 #   separate(FY, into = c("X", "FY"), sep = 1) 
 # engine_budget_alternate<-csis360::deflate(data=engine_budget_alternate,
@@ -334,34 +390,48 @@ if(nrow(engine_budget %>% filter(Program.Name %in% c("F135","F136") |
 
 engine_budget <- engine_budget %>%
   separate(FY, into = c("X", "FY"), sep = 1) %>%
+  select(-X)%>%
   dplyr::rename(
-    fydp_year = FYDP.Year,
-    account = Type,
-    organization = Force,
-    program_number = Program.Number,
-    program_name = Program.Name,
-    project_number = Project.Number,
-    project_name = Project.Name,
-    amount = Amount,
-    fy = FY
+    PByear = FYDP.Year,
+    AccountTitle = Type,
+    Organization = Force,
+    ProgramElement = Program.Number,
+    ProgramElementTitle = Program.Name,
+    ProjectNumber    = Project.Number,
+    ProjectName = Project.Name,
+    Amount = Amount,
+    FY = FY
   ) %>%
-  mutate(fy = as.numeric(fy))
+  mutate(FY = as.numeric(FY))
+
+engine_budget$Description<-NA
+engine_budget$BudgetActivity<-NA
+engine_budget$Notes<-NA
+engine_budget$Type<-NA
+engine_r1d <- engine_r1d  %>% select(-LineNumber)
+engine_r1d$AccountTitle<-"RDT&E"
+colnames(engine_budget)[!colnames(engine_budget) %in% colnames(engine_r1d)]
+colnames(engine_r1d)[!colnames(engine_r1d) %in% colnames(engine_budget)]
+
+engine_budget<-rbind(engine_budget,engine_r1d)
+rm(engine_r1d)
+
 
 engine_budget<-csis360::deflate(
   engine_budget,
-  money_var= "amount",
-  fy_var="fy",
+  money_var= "Amount",
+  fy_var="FY",
   deflator_var="OMB23_GDP21"
 ) %>%
-  # dplyr::left_join(deflate_year, by = "fy") %>%
-  # mutate(amount_OMB23_GDP21 = amount / deflator) %>%
-  dplyr::mutate(fydp_year = as.factor(fydp_year)) %>%
+  # dplyr::left_join(deflate_year, by = "FY") %>%
+  # mutate(Amount_OMB23_GDP21 = Amount / deflator) %>%
+  dplyr::mutate(PByear = as.factor(PByear)) %>%
   dplyr::mutate(fydp = "FYDP") %>%
-  unite(fydp_year, fydp_year, fydp, sep = " ") %>%
-  select(fydp_year:project_name, fy, amount_Then_Year, amount_OMB23_GDP21) %>%
+  unite(PByear, PByear, fydp, sep = " ") %>%
+  select(PByear:ProjectName, FY, Amount_Then_Year, Amount_OMB23_GDP21) %>%
   dplyr::mutate(
-    project_name = recode(
-      project_name,
+    ProjectName = recode(
+      ProjectName,
       "'Acft Demo Engines' = 'ACFT Demo Engines';
       'ACFT Demo Engines ' = 'ACFT Demo Engines';
       'Aircraft Demonstration Engine' = 'ACFT Demo Engines';
@@ -389,8 +459,8 @@ engine_budget<-csis360::deflate(
       'Aerospace Fuel Technology' = 'Combustion and Mechanical Systems'"
     )
   )
-# if(sum(engine_budget$amount,na.rm=TRUE) - sum(engine_budget_alternate$Amount.Then.Year,na.rm=TRUE) > 0.001 |
-#    sum(engine_budget$amount_OMB23_GDP21,na.rm=TRUE) - sum(engine_budget_alternate$Amount.OMB.2019,na.rm=TRUE)> 0.001) stop("Deflation checksum failure")
+# if(sum(engine_budget$Amount,na.rm=TRUE) - sum(engine_budget_alternate$Amount.Then.Year,na.rm=TRUE) > 0.001 |
+#    sum(engine_budget$Amount_OMB23_GDP21,na.rm=TRUE) - sum(engine_budget_alternate$Amount.OMB.2019,na.rm=TRUE)> 0.001) stop("Deflation checksum failure")
 
 # --------------------------------------------------------------------------------
 # join stages 
@@ -400,7 +470,7 @@ stages<-csis360::remove_bom(stages)
 
 stages <- stages %>%
   dplyr::rename(stage = "Stage") %>% #remove-bom covers this
-  dplyr::rename(project_name = "Project.Name") %>% 
+  dplyr::rename(ProjectName = "Project.Name") %>% 
   dplyr::mutate(
     stage = recode(
       stage,
@@ -413,23 +483,23 @@ stages <- stages %>%
     )
     )
 
-if(any(duplicated(stages$project_name))) stop("Duplicate Project Name")
+if(any(duplicated(stages$ProjectName))) stop("Duplicate Project Name")
 engine_budget <- engine_budget %>%
-  left_join(stages, by = "project_name") %>%
-  mutate(amount_Then_Year = amount_Then_Year * 1000000,
-         amount_OMB23_GDP21 = amount_OMB23_GDP21 * 1000000)
+  left_join(stages, by = "ProjectName") %>%
+  mutate(Amount_Then_Year = Amount_Then_Year * 1000000,
+         Amount_OMB23_GDP21 = Amount_OMB23_GDP21 * 1000000)
 
 # --------------------------------------------------------------------------------
 
 engine_budget_wide <-
-  spread(engine_budget, key = "fy", value = "amount_Then_Year") # to view discrepancies
+  spread(engine_budget, key = "FY", value = "Amount_Then_Year") # to view discrepancies
 
-engine_budget %>% group_by(project_name) %>% dplyr::summarise(amount_Then_Year=sum(amount_Then_Year,na.rm=TRUE))
+engine_budget %>% group_by(ProjectName) %>% dplyr::summarise(Amount_Then_Year=sum(Amount_Then_Year,na.rm=TRUE))
 
 #I'm not sure why you're filtering these.
 engine_budget <- engine_budget %>%
   filter(
-    project_name %in% c(
+    ProjectName %in% c(
       "ACFT Demo Engines",
       # "Adv Propulsion",
       "Advanced Aerospace Propulsion",
@@ -462,8 +532,9 @@ engine_budget <- engine_budget %>%
       "Advanced Engine Development/Transition Prioritization"
     )
   ) %>%
-  filter(fydp_year != "1999 FYDP")
+  filter(PByear != "1999 FYDP")
 
 engine_budget_wide <-
-  spread(engine_budget, key = "fy", value = "amount_Then_Year") # to view discrepancies
+  spread(engine_budget, key = "FY", value = "Amount_Then_Year") # to view discrepancies
 
+save(engine_budget, engine_budget_wide, file="budget/engine_budget.rda")
