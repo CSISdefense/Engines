@@ -172,7 +172,6 @@ engine_r1d <- engine_r1d   %>% select(-SubProjectName)
 
 
 
-engine_budget<-standardize_variable_names(engine_budget)
 
 engine_budget <- rbind(
   d99,
@@ -197,6 +196,9 @@ engine_budget <- rbind(
   d18,
   d19
 )
+
+
+engine_budget<-standardize_variable_names(engine_budget)
 
 # --------------------------------------------------------------------------------
 # add F135 
@@ -334,6 +336,9 @@ if(nrow(engine_budget %>% filter(Program.Name %in% c("F135","F136") |
                                  Project.Number %in% unique(f135_f136$Project.Number)))>0){
   stop("Adding redundant data!")
 } else {
+  # colnames(engine_budget)[!colnames(engine_budget) %in% colnames(f135_f136)]
+  # colnames(f135_f136)[!colnames(f135_f136) %in% colnames(engine_budget)]
+  f135_f136<-standardize_variable_names(f135_f136)
   engine_budget <- engine_budget %>%
     rbind(f135_f136)
 }
@@ -392,7 +397,7 @@ engine_budget <- engine_budget %>%
   separate(FY, into = c("X", "FY"), sep = 1) %>%
   select(-X)%>%
   dplyr::rename(
-    PByear = FYDP.Year,
+    # PByear = FYDP.Year,
     AccountTitle = Type,
     Organization = Force,
     ProgramElement = Program.Number,
@@ -441,12 +446,13 @@ engine_budget<-csis360::deflate(
       'Aerospace Fuels and Atmospheric Propulsion' = 'Aerospace Fuels';
       'Aircraft Engine Component Improvement Program (CIP) (USN)' = 'Aircraft Engine Component Improvement Program (USN)';
       'Aircraft Engine Component Improvement Program (CIP) (USA)' = 'Aircraft Engine Component Improvement Program (USA)';
+       'A/C Component Improv Prog' = 'Aircraft Engine Component Improvement Program (USA)';
       'Aircraft Engine Component Improvement Program' = 'Aircraft Engine Component Improvement Program (USAF)';
       'Aircraft Engine CIP' = 'Aircraft Engine Component Improvement Program (USN)';
       'Aircraft Component Improvement Program (CIP)' = 'Aircraft Engine Component Improvement Program (USA)';
       'A/C Eng Comp Imp (CIP)' = 'Aircraft Engine Component Improvement Program (USN)';
       'Acft Engines Comp Imp Prog' = 'Aircraft Engine Component Improvement Program (USN)';
-      'F-35' = 'F135 Aircraft Engine Component Improvement Program';
+      'F-35' = 'Aircraft Engine Component Improvement Program (F135)';
       'Aircraft Propulsion Subsystem Integration' = 'Aircraft Propulsion Subsystems Int';
       'Vehicle Propulsion and Structures Technology' = 'Veh Prop & Struct Tech';
       'Propulsion and Power Component Improvement Program' = 'Aircraft Engine Component Improvement Program (USN)';
@@ -456,7 +462,9 @@ engine_budget<-csis360::deflate(
       'Materials for Structures, Propulsion and Subsystems' = 'Materials for Structures, Propulsion, and Subsystems';
       'Fuels and Lubrication' = 'Combustion and Mechanical Systems';
       'Propulsion' = 'Advanced Aerospace Propulsion';
-      'Aerospace Fuel Technology' = 'Combustion and Mechanical Systems'"
+      'Aerospace Fuel Technology' = 'Combustion and Mechanical Systems';
+      'Adaptive Engine Transition Program (AETP)'='Advanced Engine Development/Transition Prioritization';
+      'Propulsion '='Propulsion'"
     )
   )
 # if(sum(engine_budget$Amount,na.rm=TRUE) - sum(engine_budget_alternate$Amount.Then.Year,na.rm=TRUE) > 0.001 |
@@ -498,43 +506,55 @@ engine_budget %>% group_by(ProjectName) %>% dplyr::summarise(Amount_Then_Year=su
 
 #I'm not sure why you're filtering these.
 engine_budget <- engine_budget %>%
-  filter(
-    ProjectName %in% c(
-      "ACFT Demo Engines",
-      # "Adv Propulsion",
-      "Advanced Aerospace Propulsion",
-      "Advanced Propulsion Research",
-      "Advanced Propulsion Technology",
-      "Advanced Turbine Engine Gas Generator",
-      # "Aerospace Fuel Technology",
-      "Aerospace Fuels",
-      "Aircraft Engine Component Improvement Program (F135)",
-      "Aircraft Engine Component Improvement Program (USA)",
-      "Aircraft Engine Component Improvement Program (USAF)",
-      "Aircraft Engine Component Improvement Program (USN)",
-      "Aircraft Propulsion Subsystems Int",
-      "AV-8B",
-      # "Aviation Advanced Technology Initiatives",
-      "Combustion and Mechanical Systems",
-      # "Fuels and Lubrication",
-      "Improved Turbine Engine Program",
-      # "Materials",
-      "Materials for Structures, Propulsion, and Subsystems",
-      # "Materials Technology for Sustainment",
-      # "Materials Transition",
-      # "Propulsion",
-      # "Propulsion ",
-      "Turbine Engine Technology",
-      # "Vectored Thrust Ducted Propeller (CA)",
-      "Veh Prop & Struct Tech",
-      "F135",
-      "F136",
-      "Advanced Engine Development/Transition Prioritization"
-    )
-  ) %>%
-  filter(PByear != "1999 FYDP")
+  filter(PByear != "1999 FYDP")# %>%
+  # filter(
+  #   !ProjectName %in% c(
+  #     # "ACFT Demo Engines",
+  #     # "Advanced Aerospace Propulsion",
+  #     # "Advanced Propulsion Research",
+  #     # "Advanced Propulsion Technology",
+  #     # "Advanced Turbine Engine Gas Generator",
+  #     # "Aerospace Fuels",
+  #     # "Aircraft Engine Component Improvement Program (F135)",
+  #     # "Aircraft Engine Component Improvement Program (USA)",
+  #     # "Aircraft Engine Component Improvement Program (USAF)",
+  #     # "Aircraft Engine Component Improvement Program (USN)",
+  #     # "Aircraft Propulsion Subsystems Int",
+  #     # "AV-8B",
+  #     "Aviation Advanced Technology Initiatives", #Overly broad, includes a lot of non-engine tech
+  #     # "Combustion and Mechanical Systems",
+  #     # "Improved Turbine Engine Program",
+  #     "Materials",#Mentions high temperature but not propulsion specific.
+  #     # "Materials for Structures, Propulsion, and Subsystems",
+  #       "Materials Technology for Sustainment", #This does not ppear relevant, removing from dt
+  #     "Materials Transition", #Mentions propulsion and has high temperature, but that's less than quarter of spend
+  #     "Propulsion", 
+  #     # "Turbine Engine Technology",
+  #     "Vectored Thrust Ducted Propeller (CA)", #Trusting prior call, seems more rotor/propeller than engine oriented
+  #     # "Veh Prop & Struct Tech",
+  #     # "F135",
+  #     # "F136",
+  #     # "Advanced Engine Development/Transition Prioritization"
+  #   )
+  # )
 
 engine_budget_wide <-
   spread(engine_budget, key = "FY", value = "Amount_Then_Year") # to view discrepancies
 
 save(engine_budget, engine_budget_wide, file="budget/engine_budget.rda")
+
+write.csv(
+  engine_budget %>%
+    group_by(ProgramElement,ProjectNumber,ProjectName) %>%
+    mutate(MinPByear=min(PByear),
+           MaxPByear=max(PByear)) %>%
+    group_by(FY, ProgramElement,ProjectNumber,ProjectName,MinPByear,MaxPByear) %>%
+    summarise(Amount_Then_Year=sum(Amount_Then_Year,na.rm=TRUE)) %>%
+    
+    pivot_wider(
+      names_from=FY,values_from=Amount_Then_Year) %>%
+    arrange(ProgramElement,ProjectNumber,ProjectName),
+  file="budget/charts/Amount_org_pe_pn_project.csv",
+  na = "",
+  row.names = FALSE
+)

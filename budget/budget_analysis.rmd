@@ -90,6 +90,23 @@ engine_actual_wide <-
 
 engine_actual$FY <- as.numeric(engine_actual$FY)
 
+empty<-expand.grid(
+  stage = c("6.1",
+            "6.2",
+            "6.3",
+            "6.4",
+            "6.5",
+            "6.7",
+            "Total"),
+  Organization = c("Army",
+                   "Navy",
+                   "Air Force",
+                   "Total"),
+  FY=seq(from=2017,to=2023))
+
+empty$Amount_Then_Year<-0
+empty$Amount_OMB23_GDP21<-0
+
 
 
 
@@ -151,13 +168,17 @@ ggsave(
   units = "in"
 )
 write.csv(
-  engine_budget_future %>% pivot_wider(
-    names_from=FY,values_from=c(Amount_Then_Year,Amount_OMB23_GDP21)),
+  engine_budget_future %>% 
+    pivot_longer(names_to="Metric",cols=c(Amount_Then_Year,Amount_OMB23_GDP21)) %>%
+    pivot_wider(
+    names_from=FY,values_from=value) %>%
+    arrange(Metric,PByear),
     file="charts/Amount_total.csv",
   na = "",
   row.names = FALSE
   )
   
+
 ```
 
 
@@ -561,6 +582,22 @@ write.csv(
   na = "",
   row.names = FALSE
   )
+# colnames(engine_actual) ProgramElement
+write.csv(
+  engine_actual %>%
+    group_by(FY, Organization, ProjectName) %>%
+    summarise(Amount_Then_Year=sum(Amount_Then_Year,na.rm=TRUE)) %>%
+    pivot_wider(
+    names_from=FY,values_from=Amount_Then_Year) %>%
+    arrange(Organization,ProjectName),
+    file="charts/actual_Amount_org_project.csv",
+  na = "",
+  row.names = FALSE
+  )
+
+colnames(engine_budget)
+
+
 
 ```
 
@@ -724,22 +761,6 @@ total <- total %>%
 summary( total$stage)
 
 
-empty<-expand.grid(
-  stage = c("6.1",
-            "6.2",
-            "6.3",
-            "6.4",
-            "6.5",
-            "6.7",
-            "Total"),
-  Organization = c("Army",
-                   "Navy",
-                   "Air Force",
-                   "Total"),
-  FY=seq(from=2017,to=2023))
-
-empty$Amount_Then_Year<-0
-empty$Amount_OMB23_GDP21<-0
 
 
 (
