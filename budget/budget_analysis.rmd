@@ -4,7 +4,7 @@ author: "Greg Sanders"
 date: "2022-10-09"
 output: html_document
 ---
-
+# Setup
 ```{r setup, include=FALSE}
 
 library(tidyverse)
@@ -25,7 +25,75 @@ knitr::opts_chunk$set(echo = TRUE)
 load("engine_budget.rda")
 ```
 
+## Actual
+## Actual setup
+```{r actual}
+# ================================================================================
+# charting engines - actual  
+# --------------------------------------------------------------------------------
+# clean data 
+#   (note: this filtering section creates a dataset for only actual values in the 
+#   ...budget line, in addition to enacted and projected for the most recent FYDP
 
+
+
+engine_just_actual <- engine_budget %>%
+  filter(
+    PByear == "2000 FYDP" & FY == "1998" |
+      PByear == "2001 FYDP" & FY == "1999" |
+      PByear == "2002 FYDP" & FY == "2000" |
+      PByear == "2003 FYDP" & FY == "2001" |
+      PByear == "2004 FYDP" & FY == "2002" |
+      PByear == "2005 FYDP" & FY == "2003" |
+      PByear == "2006 FYDP" & FY == "2004" |
+      PByear == "2007 FYDP" & FY == "2005" |
+      PByear == "2008 FYDP" & FY == "2006" |
+      PByear == "2009 FYDP" & FY == "2007" |
+      PByear == "2010 FYDP" & FY == "2008" |
+      PByear == "2011 FYDP" & FY == "2009" |
+      PByear == "2012 FYDP" & FY == "2010" |
+      PByear == "2013 FYDP" & FY == "2011" |
+      PByear == "2014 FYDP" & FY == "2012" |
+      PByear == "2015 FYDP" & FY == "2013" |
+      PByear == "2016 FYDP" & FY == "2014" |
+      PByear == "2017 FYDP" & FY == "2015" |
+      PByear == "2018 FYDP" & FY == "2016" |
+      PByear == "2019 FYDP" & FY == "2017" |
+      PByear == "2020 FYDP" & FY == "2018" |
+      PByear == "2021 FYDP" & FY == "2019" |
+      PByear == "2022 FYDP" & FY == "2020" |
+      PByear == "2023 FYDP" 
+  ) %>% mutate(PByear="Actual")
+
+engine_just_actual$Projection<-"Actual"
+engine_budget$Projection<-"Projection"
+
+engine_actual<-engine_just_actual %>%
+  mutate(
+    stage = recode(
+      stage,
+      "'(6.1) Basic Research' = '6.1';
+      '(6.2) Applied Research' = '6.2';
+      '(6.3) Advanced Technology Development' = '6.3';
+      '(6.4) Advanced Component Development & Prototypes' = '6.4';
+      '(6.5) System Development & Demonstration' = '6.5';
+      '(6.7) Operational Systems Development' = '6.7'"
+    )
+  ) %>% 
+  filter(Amount_Then_Year != 0) %>%
+  group_by(FY, Organization, stage, ProjectName) %>%
+  dplyr::summarize(Amount_Then_Year = sum(Amount_Then_Year, na.rm = TRUE),
+                   Amount_OMB23_GDP21 = sum(Amount_OMB23_GDP21, na.rm = TRUE))
+
+engine_actual_wide <-
+  spread(engine_actual, key = "FY", value = "Amount_Then_Year")
+
+engine_actual$FY <- as.numeric(engine_actual$FY)
+
+
+
+
+```
 
 #Future
 
@@ -37,9 +105,9 @@ load("engine_budget.rda")
 # --------------------------------------------------------------------------------
 # engine spending (by FYDP year)
 
-engine_budget_future <- engine_budget %>%
+engine_budget_future <- rbind(engine_budget,engine_just_actual %>% filter(FY<=2021)) %>%
   mutate(FY = as.numeric(FY)) %>%
-  group_by(PByear, FY) %>%
+  group_by(PByear, FY, Projection) %>%
   filter(Amount_Then_Year != 0) %>%
   dplyr::summarize(Amount_Then_Year = sum(Amount_Then_Year, na.rm = TRUE),
                    Amount_OMB23_GDP21 = sum(Amount_OMB23_GDP21, na.rm = TRUE))
@@ -59,14 +127,19 @@ engine_budget_future %>% group_by(PByear) %>%
       x = FY,
       y = Amount_OMB23_GDP21,
       group = PByear,
-      alpha = PByear
+      alpha = PByear,
+      linetype=Projection
     ), color = "#554449", size = 1) +
-    ggtitle("DoD RDT&E Aircraft Engine Spending Projections") +
-    chart_theme +
+    ggtitle("DoD RDT&E Aircraft Engine Spending Projections") + 
+    geom_point(aes(      x = FY,
+      y = Amount_OMB23_GDP21,
+      shape=Projection))+
+    chart_theme + 
     scale_y_continuous(label = unit_format(unit = "M", scale = 1e-6)) +
 
     xlab("Fiscal Year") + 
-    ylab("Constant 2021 $") 
+    ylab("Constant 2021 $") +
+    scale_shape_manual(values=c(16,20))
 )
 
 ggsave(
@@ -77,6 +150,14 @@ ggsave(
   height = 6,
   units = "in"
 )
+write.csv(
+  engine_budget_future %>% pivot_wider(
+    names_from=FY,values_from=c(Amount_Then_Year,Amount_OMB23_GDP21)),
+    file="charts/Amount_total.csv",
+  na = "",
+  row.names = FALSE
+  )
+  
 ```
 
 
@@ -297,62 +378,118 @@ engine_budget_stage_service_future_wide <-
 ```
 
 # Actual
-## Facet 1
-```{r actual}
+
+
+## FYDP year
+
+```{r esa}
 # ================================================================================
 # charting engines - actual  
 # --------------------------------------------------------------------------------
-# clean data 
-#   (note: this filtering section creates a dataset for only actual values in the 
-#   ...budget line, in addition to enacted and projected for the most recent FYDP
+# engine spending (by FYDP year)
 
-engine_actual <- engine_budget %>%
-  filter(
-    PByear == "2000 FYDP" & FY == "1998" |
-      PByear == "2001 FYDP" & FY == "1999" |
-      PByear == "2002 FYDP" & FY == "2000" |
-      PByear == "2003 FYDP" & FY == "2001" |
-      PByear == "2004 FYDP" & FY == "2002" |
-      PByear == "2005 FYDP" & FY == "2003" |
-      PByear == "2006 FYDP" & FY == "2004" |
-      PByear == "2007 FYDP" & FY == "2005" |
-      PByear == "2008 FYDP" & FY == "2006" |
-      PByear == "2009 FYDP" & FY == "2007" |
-      PByear == "2010 FYDP" & FY == "2008" |
-      PByear == "2011 FYDP" & FY == "2009" |
-      PByear == "2012 FYDP" & FY == "2010" |
-      PByear == "2013 FYDP" & FY == "2011" |
-      PByear == "2014 FYDP" & FY == "2012" |
-      PByear == "2015 FYDP" & FY == "2013" |
-      PByear == "2016 FYDP" & FY == "2014" |
-      PByear == "2017 FYDP" & FY == "2015" |
-      PByear == "2018 FYDP" & FY == "2016" |
-      PByear == "2019 FYDP" & FY == "2017" |
-      PByear == "2020 FYDP" & FY == "2018" |
-      PByear == "2021 FYDP" & FY == "2019" |
-      PByear == "2022 FYDP" & FY == "2020" |
-      PByear == "2023 FYDP" 
-  ) %>%
-  mutate(
-    stage = recode(
-      stage,
-      "'(6.1) Basic Research' = '6.1';
-      '(6.2) Applied Research' = '6.2';
-      '(6.3) Advanced Technology Development' = '6.3';
-      '(6.4) Advanced Component Development & Prototypes' = '6.4';
-      '(6.5) System Development & Demonstration' = '6.5';
-      '(6.7) Operational Systems Development' = '6.7'"
-    )
-  ) %>% 
-  filter(Amount_Then_Year != 0) %>%
-  group_by(FY, Organization, stage, ProjectName) %>%
-  dplyr::summarize(Amount_Then_Year = sum(Amount_Then_Year, na.rm = TRUE),
-                   Amount_OMB23_GDP21 = sum(Amount_OMB23_GDP21, na.rm = TRUE))
+(
+  plot_eba <- build_plot(engine_actual,
+                         chart_geom="Line Chart",
+                         share=FALSE,
+                         x_var="FY",
+                         y_var="Amount_OMB23_GDP21",
+                         format=TRUE
+                         ) +
+    ggtitle("DoD RDT&E Aircraft Engine Spending Projections") +
+    scale_y_continuous(label = unit_format(unit = "M", scale = 1e-6)) +
+    xlab("Fiscal Year") + 
+    ylab("Constant 2021 $") +geom_vline(
+      xintercept = 2021,
+      color = "#554449",
+      alpha = .5,
+      linetype = "solid"
+    ) +
+    geom_vline(
+      xintercept = 2023,
+      color = "#554449",
+      linetype = "dotted"
+    )+ 
+    geom_rect(
+      # aes(
+        xmin = 2021,
+        xmax = Inf,
+        ymin = 0,
+        ymax = Inf,
+        alpha = 0.01,
+        fill = "grey",
+      # ),
+      
+      data = empty#engine_actual#engine_actual_project
+    ) 
+)
 
-engine_actual_wide <-
-  spread(engine_actual, key = "FY", value = "Amount_Then_Year")
+# ggsave(
+#   "charts/Amount_total.svg",
+#   plot_ebf,
+#   device = "svg",
+#   width = 8,
+#   height = 6,
+#   units = "in"
+# )
+```
 
-engine_actual$FY <- as.numeric(engine_actual$FY)
+## Services
+```{r esa}
+# ================================================================================
+# charting engines - actual  
+# --------------------------------------------------------------------------------
+# engine spending (by FYDP year)
+
+(
+  plot_eba <- build_plot(engine_actual,
+                         chart_geom="Line Chart",
+                         share=FALSE,
+                         x_var="FY",
+                         y_var="Amount_OMB23_GDP21",
+                         facet="Organization",
+                         format=TRUE
+                         ) +
+    ggtitle("DoD RDT&E Aircraft Engine Spending Projections") +
+    scale_y_continuous(label = unit_format(unit = "M", scale = 1e-6)) +
+    xlab("Fiscal Year") + 
+    ylab("Constant 2021 $") +geom_vline(
+      xintercept = 2021,
+      color = "#554449",
+      alpha = .5,
+      linetype = "solid"
+    ) +
+    geom_vline(
+      xintercept = 2023,
+      color = "#554449",
+      linetype = "dotted"
+    )+ 
+    geom_rect(
+      # aes(
+        xmin = 2021,
+        xmax = Inf,
+        ymin = 0,
+        ymax = Inf,
+        alpha = 0.01,
+        fill = "grey",
+      # ),
+      
+      data = empty#engine_actual#engine_actual_project
+    ) 
+)
+
+# ggsave(
+#   "charts/Amount_total.svg",
+#   plot_ebf,
+#   device = "svg",
+#   width = 8,
+#   height = 6,
+#   units = "in"
+# )
+```
+
+## Facet 1
+```{r facet1}
 
 # facet --------------------------------------------------------------------------
 
@@ -413,6 +550,18 @@ ggsave(
   height = 8,
   units = "in"
 )
+
+write.csv(
+  engine_actual_1 %>% 
+    pivot_longer(names_to="Metric",cols=c(Amount_Then_Year,Amount_OMB23_GDP21)) %>%
+    pivot_wider(
+    names_from=FY,values_from=value) %>%
+    arrange(Metric,ProjectName),
+    file="charts/actual_Amount_project.csv",
+  na = "",
+  row.names = FALSE
+  )
+
 ```
 
 
