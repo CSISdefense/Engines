@@ -199,6 +199,10 @@ engine_budget <- rbind(
 
 
 engine_budget<-standardize_variable_names(engine_budget)
+if(any(is.na(engine_budget$ProjectName))){
+  stop("Missing ProjectName")
+  View(engine_budget %>% filter(is.na(ProjectName)))
+}
 
 # --------------------------------------------------------------------------------
 # add F135 
@@ -342,50 +346,6 @@ if(nrow(engine_budget %>% filter(Program.Name %in% c("F135","F136") |
   engine_budget <- engine_budget %>%
     rbind(f135_f136)
 }
-# --------------------------------------------------------------------------------
-# # deflate data
-# #   (note: used Table 10.1 - GDP and deflators used in OMB historical tables:
-# #   ...1940 - 2023, FY19 = 1)
-# 
-# deflator <-
-#   c(
-#     0.68389032,
-#     0.69811482,
-#     0.71482434,
-#     0.72639246,
-#     0.74027421,
-#     0.75861183,
-#     0.78243359,
-#     0.80788346,
-#     0.82982005,
-#     0.84704370,
-#     0.85689803,
-#     0.86443873,
-#     0.88200514,
-#     0.89811482,
-#     0.91328192,
-#     0.92990574,
-#     0.94113111,
-#     0.95201371,
-#     0.96838046,
-#     0.98354756,
-#     1.00000000,
-#     1.01850900,
-#     1.03864610,
-#     1.05946872,
-#     1.08080548
-#   )
-# 
-# FY <- c(1999:2023)
-
-# deflate_year <- as.data.frame(cbind(FY, deflator))
-# engine_budget_alternate<- engine_budget %>%
-#   separate(FY, into = c("X", "FY"), sep = 1) 
-# engine_budget_alternate<-csis360::deflate(data=engine_budget_alternate,
-#                  money_var= "Amount",
-#                  fy_var="FY",
-#                  deflator_var="OMB23_GDP21"
-#                  )
 
 # --------------------------------------------------------------------------------
 # clean and summarize data
@@ -433,7 +393,7 @@ engine_budget<-csis360::deflate(
   dplyr::mutate(PByear = as.factor(PByear)) %>%
   dplyr::mutate(fydp = "FYDP") %>%
   unite(PByear, PByear, fydp, sep = " ") %>%
-  select(PByear:ProjectName, FY, Amount_Then_Year, Amount_OMB23_GDP21) %>%
+  # select(PByear:ProjectName, FY, Amount_Then_Year, Amount_OMB23_GDP21) %>%
   dplyr::mutate(
     ProjectName = recode(
       ProjectName,
@@ -463,10 +423,16 @@ engine_budget<-csis360::deflate(
       'Fuels and Lubrication' = 'Combustion and Mechanical Systems';
       'Propulsion' = 'Advanced Aerospace Propulsion';
       'Aerospace Fuel Technology' = 'Combustion and Mechanical Systems';
-      'Adaptive Engine Transition Program (AETP)'='Advanced Engine Development/Transition Prioritization';
+        'Advanced Engine Development/Transition Prioritization'='Adaptive Engine Transition Program/Next Gen Adaptive Propulsion';
+      'Transition Prioritization'='Adaptive Engine Transition Program/Next Gen Adaptive Propulsion';
+      'Advanced Engine Development / Adaptive Engine Transition Program'='Adaptive Engine Transition Program/Next Gen Adaptive Propulsion';
+      'Prototyping / Adaptive Engine Transition Program'='Adaptive Engine Transition Program/Next Gen Adaptive Propulsion';
+      'Adaptive Engine Transition Program (AETP)'='Adaptive Engine Transition Program/Next Gen Adaptive Propulsion';
+      'Advanced Engine Dev'='Adaptive Engine Transition Program/Next Gen Adaptive Propulsion';
       'Propulsion '='Propulsion'"
     )
   )
+
 # if(sum(engine_budget$Amount,na.rm=TRUE) - sum(engine_budget_alternate$Amount.Then.Year,na.rm=TRUE) > 0.001 |
 #    sum(engine_budget$Amount_OMB23_GDP21,na.rm=TRUE) - sum(engine_budget_alternate$Amount.OMB.2019,na.rm=TRUE)> 0.001) stop("Deflation checksum failure")
 
@@ -497,6 +463,25 @@ engine_budget <- engine_budget %>%
   mutate(Amount_Then_Year = Amount_Then_Year * 1000000,
          Amount_OMB23_GDP21 = Amount_OMB23_GDP21 * 1000000)
 
+engine_budget$stage[is.na(engine_budget$stage)]<-engine_budget$BudgetActivity[is.na(engine_budget$stage)]
+engine_budget <- engine_budget %>%
+  dplyr::mutate(
+    stage = recode(
+      stage,
+      "'1' = '(6.1) Basic Research';
+      '2' = '(6.2) Applied Research';
+      '3' = '(6.3) Advanced Technology Development';
+      '4' = '(6.4) Advanced Component Development & Prototypes';
+      '5' = '(6.5) System Development & Demonstration';
+      '7' = '(6.7) Operational Systems Development'"
+    )
+  )
+
+if(any(is.na(engine_budget$stage))){
+  View(engine_budget %>% filter(is.na(stage)))
+  summary(factor(engine_budget$stage))
+  stop("Missing stage")
+}
 # --------------------------------------------------------------------------------
 
 engine_budget_wide <-
@@ -534,7 +519,7 @@ engine_budget <- engine_budget %>%
   #     # "Veh Prop & Struct Tech",
   #     # "F135",
   #     # "F136",
-  #     # "Advanced Engine Development/Transition Prioritization"
+  #     # "Advanced Engine Development/Transition Program"
   #   )
   # )
 

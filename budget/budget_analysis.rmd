@@ -25,7 +25,40 @@ knitr::opts_chunk$set(echo = TRUE)
 load("engine_budget.rda")
 ```
 
-## Actual
+## Top Projects
+```{r PreprocessPSC}
+
+
+
+topProject<-engine_budget %>% group_by (ProjectName) %>% #ProjectNumber
+  summarise(Amount_OMB23_GDP21=sum(Amount_OMB23_GDP21,na.rm=TRUE),
+            Amount_2021=sum(ifelse(FY==2021,Amount_OMB23_GDP21,0),na.rm=TRUE))%>%
+              # group_by (Organization) %>%
+    mutate(rank_total=rank(desc(Amount_OMB23_GDP21)),
+                        rank_2021=rank(desc(Amount_2021)))
+topProject %>% arrange(desc(Amount_OMB23_GDP21))
+
+# topProject$topProjectID<-
+#   ifelse(topProject$rank_2021<=7 | topProject$rank_total<=12,topProject$ProjectNumber,NA)
+topProject$topProjectText<-
+  ifelse(topProject$rank_2021<=9 | topProject$rank_total<=9,topProject$ProjectName,NA)
+
+engine_budget<-engine_budget[,!colnames(engine_budget) %in% c("topProjectText","rank_total","rank_2021")]
+
+engine_budget<-left_join(engine_budget,topProject %>% select(-Amount_OMB23_GDP21,-Amount_2021),
+          by=c("ProjectName"))
+
+engine_budget$topProjectText[is.na(engine_budget$topProjectText) & !is.na(engine_budget$ProjectName)]<-
+  paste("Other",engine_budget$Organization[is.na(engine_budget$topProjectText) & !is.na(engine_budget$ProjectName)],"projects")
+
+engine_budget$topProjectText<-factor_wrap(factor(engine_budget$topProjectText))
+
+summary(engine_budget$topProjectText)
+
+
+```
+
+
 ## Actual setup
 ```{r actual}
 # ================================================================================
@@ -67,9 +100,10 @@ engine_just_actual <- engine_budget %>%
 
 engine_just_actual$Projection<-"Actual"
 engine_budget$Projection<-"Projection"
-
+summary(factor(engine_just_actual$stage))
 engine_actual<-engine_just_actual %>%
   mutate(
+    stagename=factor_wrap(stage,nwrap=14),
     stage = recode(
       stage,
       "'(6.1) Basic Research' = '6.1';
@@ -81,10 +115,11 @@ engine_actual<-engine_just_actual %>%
     )
   ) %>% 
   filter(Amount_Then_Year != 0) %>%
-  group_by(FY, Organization, stage, ProjectName) %>%
+  group_by(FY, Organization, stage, stagename,topProjectText) %>%
   dplyr::summarize(Amount_Then_Year = sum(Amount_Then_Year, na.rm = TRUE),
                    Amount_OMB23_GDP21 = sum(Amount_OMB23_GDP21, na.rm = TRUE))
 
+summary(factor(engine_actual$stage))
 engine_actual_wide <-
   spread(engine_actual, key = "FY", value = "Amount_Then_Year")
 
@@ -111,6 +146,8 @@ empty$Amount_OMB23_GDP21<-0
 
 
 ```
+
+
 
 #Future
 
@@ -214,7 +251,7 @@ engine_budget_organization_future_wide <-
     scale_x_continuous(
       breaks = seq(2000, 2025, by = 5),
       labels = function(x) {
-        substring(as.character(x), 3, 4)
+        paste("'",substring(as.character(x), 3, 4),sep="")
       }
     ) +
     ggtitle("DoD RDT&E Aircraft Engine Spending Projections by Service") +
@@ -241,7 +278,7 @@ ggsave(
 
 engine_budget_project_future <- engine_budget %>%
   mutate(FY = as.numeric(FY)) %>%
-  group_by(PByear, FY, ProjectName) %>%
+  group_by(PByear, FY, topProjectText) %>%
   filter(Amount_Then_Year != 0) %>%
   dplyr::summarize(Amount_Then_Year = sum(Amount_Then_Year, na.rm = TRUE),
                    Amount_OMB23_GDP21 = sum(Amount_OMB23_GDP21, na.rm = TRUE))
@@ -261,12 +298,12 @@ engine_budget_project_future_wide <-
       color = "#554449",
       size = 1
     ) +
-    facet_wrap(~ ProjectName) +
+    facet_wrap(~ topProjectText) +
     scale_y_continuous(label = unit_format(unit = "M", scale = 1e-6)) +
     scale_x_continuous(
       breaks = seq(2000, 2025, by = 5),
       labels = function(x) {
-        substring(as.character(x), 3, 4)
+        paste("'",substring(as.character(x), 3, 4),sep="")
       }
     ) +
     ggtitle("DoD RDT&E Aircraft Engine Spending Projections by project") +
@@ -310,7 +347,7 @@ engine_budget_stage_future_wide <-
     scale_x_continuous(
       breaks = seq(2000, 2025, by = 5),
       labels = function(x) {
-        substring(as.character(x), 3, 4)
+        paste("'",substring(as.character(x), 3, 4),sep="")
       }
     ) +
     ggtitle("DoD RDT&E Aircraft Engine Spending Projections by Stage") +
@@ -377,7 +414,7 @@ engine_budget_stage_service_future_wide <-
     scale_x_continuous(
       breaks = seq(2000, 2025, by = 5),
       labels = function(x) {
-        substring(as.character(x), 3, 4)
+        paste("'",substring(as.character(x), 3, 4),sep="")
       }
     ) +
     ggtitle("DoD RDT&E Aircraft Engine Spending Projections by Stage and Service") +
@@ -431,6 +468,12 @@ engine_budget_stage_service_future_wide <-
       color = "#554449",
       linetype = "dotted"
     )+ 
+    scale_x_continuous(
+      breaks = seq(2000, 2027, by = 10),
+      labels = function(x) {
+      paste("'",substring(as.character(x), 3, 4),sep="")
+      }
+    ) +
     geom_rect(
       # aes(
         xmin = 2021,
@@ -463,13 +506,14 @@ engine_budget_stage_service_future_wide <-
 # engine spending (by FYDP year)
 
 (
-  plot_eba <- build_plot(engine_actual,
+  plot_eorgact <- build_plot(engine_actual,
                          chart_geom="Line Chart",
                          share=FALSE,
                          x_var="FY",
                          y_var="Amount_OMB23_GDP21",
                          facet="Organization",
-                         format=TRUE
+                         format=TRUE,
+                         caption="Budget Documents for Army, Navy, and Air Force; CSIS Analysis."
                          ) +
     ggtitle("DoD RDT&E Aircraft Engine Spending Projections") +
     scale_y_continuous(label = unit_format(unit = "M", scale = 1e-6)) +
@@ -495,35 +539,82 @@ engine_budget_stage_service_future_wide <-
         fill = "grey",
       # ),
       
-      data = empty#engine_actual#engine_actual_project
+      # data = empty#engine_actual#engine_actual_project
     ) 
 )
 
-# ggsave(
-#   "charts/Amount_total.svg",
-#   plot_ebf,
-#   device = "svg",
-#   width = 8,
-#   height = 6,
-#   units = "in"
-# )
+ggsave(
+  "charts/actual_amount_service.svg",
+  plot_eorgact+labs(title=NULL),
+  # device = "svg",
+  width = 6.5,
+  height = 3.5,
+  units = "in"
+)
+
+write.csv(
+  engine_actual %>% 
+        group_by(FY,Organization) %>%
+    summarise(
+    Amount_Then_Year = sum(Amount_Then_Year, na.rm = TRUE),
+    Amount_OMB23_GDP21 = sum(Amount_OMB23_GDP21, na.rm = TRUE)
+    ) %>%
+    pivot_longer(names_to="Metric",cols=c(Amount_Then_Year,Amount_OMB23_GDP21)) %>%
+    pivot_wider(
+    names_from=FY,values_from=value) %>%
+    arrange(Metric,Organization),
+    file="charts/actual_amount_service.csv",
+  na = "",
+  row.names = FALSE
+  )
+  
+
+colnames(engine_budget)
+
+
 ```
 
-## Facet 1
+## Project Facet
 ```{r facet1}
 
 # facet --------------------------------------------------------------------------
 
+
 engine_actual_1 <- engine_actual %>%
   filter(Amount_Then_Year != 0) %>%
-  group_by(FY, ProjectName) %>%
+  group_by(FY, topProjectText,Organization) %>%
   dplyr::summarize(Amount_Then_Year = sum(Amount_Then_Year, na.rm = TRUE),
                    Amount_OMB23_GDP21 = sum(Amount_OMB23_GDP21, na.rm = TRUE))
 
+
+# project_order<-distinct(engine_budget %>% select(topProjectText,rank_total) %>% arrange(rank_total)) %>%
+#   filter(!topProjectText %in% c("Other Army projects","Other Navy projects","Other Air Force\nprojects"))
+# write.csv(project_order,file="project_order.csv")
+
+engine_actual_1$topProjectText<-factor(engine_actual_1$topProjectText,
+levels=c("F135",
+"F136",
+"Aircraft Engine\nComponent\nImprovement Program\n(USAF)",
+	"Adaptive Engine\nTransition\nProgram/Next Gen\nAdaptive Propulsion",
+	"Aircraft Engine\nComponent\nImprovement Program\n(USN)",
+	"Materials for\nStructures,\nPropulsion, and\nSubsystems",
+	"Turbine Engine\nTechnology",
+	"Improved Turbine\nEngine Program",
+	"Aircraft Propulsion\nSubsystems Int",
+	"Advanced Turbine\nEngine Gas\nGenerator",
+	"Advanced Propulsion\nTechnology",
+	"AV-8B",
+	"Combustion and\nMechanical Systems",
+	"Other Army projects",
+	"Other Navy projects",
+	"Other Air Force\nprojects")
+)
+# distinct(engine_actual_1 %>%group_by()%>% select(topProjectText,topProjectText2))
 (
   facet <-
-    ggplot() + geom_area(aes(y = Amount_OMB23_GDP21, x = FY),
+    ggplot() + geom_area(aes(y = Amount_OMB23_GDP21, x = FY, fill= Organization),
                          data = engine_actual_1,
+                         
                          stat = "identity") +
     geom_rect(
       aes(
@@ -536,17 +627,18 @@ engine_actual_1 <- engine_actual %>%
       fill = "grey",
       data = engine_actual_1
     ) +
-    facet_wrap(~ ProjectName) +
+    facet_wrap(~ topProjectText) +
     chart_theme +
     theme(strip.text.x = element_text(size = 8)) +
     theme(strip.text.y = element_text(size = 8)) +
     scale_y_continuous(label = unit_format(unit = "M", scale = 1e-6)) +
     scale_x_continuous(
-      breaks = seq(2000, 2027, by = 4),
+      breaks = seq(2000, 2027, by = 5),
       labels = function(x) {
-        substring(as.character(x), 3, 4)
+        paste("'",substring(as.character(x), 3, 4),sep="")
       }
     ) +
+    scale_fill_manual(values=c("#72a0c1","#32602F","#1d2d5c"))+
     ggtitle("DoD RDT&E Aircraft Engine Spending By Project") +
     xlab("Fiscal Year") +
     ylab("Constant 2021 $") + 
@@ -565,10 +657,10 @@ engine_actual_1 <- engine_actual %>%
 
 ggsave(
   "charts/actual_Amount_project.svg",
-  facet,
+  facet+theme(legend.position="bottom")+labs(title=NULL),
   device = "svg",
-  width = 20,
-  height = 8,
+  width = 6.5,
+  height = 6,
   units = "in"
 )
 
@@ -577,23 +669,12 @@ write.csv(
     pivot_longer(names_to="Metric",cols=c(Amount_Then_Year,Amount_OMB23_GDP21)) %>%
     pivot_wider(
     names_from=FY,values_from=value) %>%
-    arrange(Metric,ProjectName),
+    arrange(Metric,topProjectText),
     file="charts/actual_Amount_project.csv",
   na = "",
   row.names = FALSE
   )
 # colnames(engine_actual) ProgramElement
-write.csv(
-  engine_actual %>%
-    group_by(FY, Organization, ProjectName) %>%
-    summarise(Amount_Then_Year=sum(Amount_Then_Year,na.rm=TRUE)) %>%
-    pivot_wider(
-    names_from=FY,values_from=Amount_Then_Year) %>%
-    arrange(Organization,ProjectName),
-    file="charts/actual_Amount_org_project.csv",
-  na = "",
-  row.names = FALSE
-  )
 
 colnames(engine_budget)
 
@@ -602,9 +683,81 @@ colnames(engine_budget)
 ```
 
 
-## Facet 2
+## Stage Facet
 ```{r Facet2}
 # facet 2 ------------------------------------------------------------------------
+summary(factor(engine_actual$stagename))
+summary(factor_wrap(engine_budget$stage,nwrap=2))
+
+  (
+    plot_eorgstageact <- build_plot(engine_actual,
+                           chart_geom="Line Chart",
+                           share=FALSE,
+                           x_var="FY",
+                           y_var="Amount_OMB23_GDP21",
+                           facet_var="Organization",
+                           second_var='stagename',
+                           format=TRUE,
+                           caption="Budget Documents for Army, Navy, and Air Force; CSIS Analysis."
+                           ) +
+      ggtitle("DoD RDT&E Aircraft Engine Spending Projections") +
+      scale_y_continuous(label = unit_format(unit = "M", scale = 1e-6)) +
+         scale_x_continuous(
+        breaks = seq(2000, 2027, by = 10),
+        labels = function(x) {
+        paste("'",substring(as.character(x), 3, 4),sep="")
+        }
+      ) +
+      xlab("Fiscal Year") + 
+      ylab("Constant 2021 $") +geom_vline(
+        xintercept = 2021,
+        color = "#554449",
+        alpha = .5,
+        linetype = "solid"
+      ) +
+      geom_vline(
+        xintercept = 2023,
+        color = "#554449",
+        linetype = "dotted"
+      )+ 
+      geom_rect(
+        # aes(
+          xmin = 2021,
+          xmax = Inf,
+          ymin = 0,
+          ymax = Inf,
+          alpha = 0.01,
+          fill = "grey",
+        # ),
+        
+        # data = empty#engine_actual#engine_actual_project
+      ) 
+  )
+  
+  ggsave(
+    "charts/actual_amount_service_stage_nocrosstab.svg",
+    plot_eorgstageact+theme(legend.position="non")+labs(title=NULL),
+    device = "svg",
+    width = 8,
+    height = 4,
+    units = "in"
+  )
+
+write.csv(
+  engine_actual %>% 
+    group_by(FY, stage,Organization) %>%
+  dplyr::summarize(Amount_Then_Year = sum(Amount_Then_Year, na.rm = TRUE),
+                   Amount_OMB23_GDP21 = sum(Amount_OMB23_GDP21, na.rm = TRUE)) %>%
+    pivot_longer(names_to="Metric",cols=c(Amount_Then_Year,Amount_OMB23_GDP21)) %>%
+    pivot_wider(
+    names_from=FY,values_from=value) %>%
+    arrange(Metric,Organization,stage),
+    file="charts/actual_amount_service_stage.csv",
+  na = "",
+  row.names = FALSE
+  )
+# colnames(engine_actual) ProgramElement
+
 
 total <- engine_actual %>%
   group_by(FY) %>%
@@ -791,7 +944,7 @@ summary( total$stage)
     scale_x_continuous(
       breaks = seq(2000, 2027, by = 4),
       labels = function(x) {
-        substring(as.character(x), 3, 4)
+        paste("'",substring(as.character(x), 3, 4),sep="")
       }
     ) +
     ggtitle("DoD RDT&E Aircraft Engine Spending by Service and Stage") +
@@ -1035,7 +1188,7 @@ ggsave(
 #     scale_x_discrete(
 #       breaks = seq(2000, 2018, by = 2),
 #       labels = function(x) {
-#         substring(as.character(x), 3, 4)
+#         paste("'",substring(as.character(x), 3, 4),sep="")
 #       }
 #     ) +
 #     xlab("Fiscal Year")
