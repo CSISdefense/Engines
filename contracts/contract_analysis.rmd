@@ -1,23 +1,34 @@
+---
+title: "The Future of Military Engines: Contract Analysis"
+output:
+  html_document:
+    keep_md: yes
+    toc: yes
+date: "Wednesday, October 6, 2021"
+---
+
+
 # ================================================================================
 # The Future of Military Engines
 # Created by Gabriel Coll 
 # Maintained by Greg Sanders
-# --------------------------------------------------------------------------------
-# contract analysis
 # ================================================================================
+
+# Setup
+First we load the data. The dataset used is a U.S. Defense Contracting dataset derived from FPDS.
+```{r Setup}
 library(tidyverse)
 library(csis360)
-source("contracts/theme/chart_theme.R")
-source("contracts/theme/money_labels.R")
+source("theme/chart_theme.R")
+source("theme/money_labels.R")
 
-load(file="contracts/app/engine_contract.Rdata")
-load(file="contracts/data/just_engine_contract.Rdata")
-
+load(file="app/engine_contract.Rdata")
+load(file="data/just_engine_contract.Rdata")
+```
 # ================================================================================
 # charting engines 
-# --------------------------------------------------------------------------------
-# engine contracts 
-
+## engine contracts 
+```{r ec}
 (
   total <- engine_contracts %>%
     group_by(Fiscal_Year) %>%
@@ -38,7 +49,7 @@ load(file="contracts/data/just_engine_contract.Rdata")
 )
 
 ggsave(
-  "contracts/charts/amount_total.svg",
+  "charts/amount_total.svg",
   total,
   device = "svg",
   width = 8,
@@ -50,12 +61,11 @@ ggsave(
 
 write.csv(total$data %>%
             spread(key=Fiscal_Year, value=Action_Obligation_OMB23_GDP21),
-          file="contracts/charts/amount_total.csv",row.names = FALSE)
+          file="charts/amount_total.csv",row.names = FALSE)
+```
 
-
-# --------------------------------------------------------------------------------
-# engine contracts by Vendor Size 
-
+## engine contracts by Vendor Size 
+```{r vsize}
 (
   Shiny.VendorSize <- engine_contracts %>%
     filter(Shiny.VendorSize != "Unlabeled") %>%
@@ -81,7 +91,7 @@ write.csv(total$data %>%
 
 
 ggsave(
-  "contracts/charts/amount_vendor_size.svg",
+  "charts/amount_vendor_size.svg",
   Shiny.VendorSize,
   device = "svg",
   width = 8,
@@ -91,12 +101,15 @@ ggsave(
 
 write.csv(Shiny.VendorSize$data,# %>%
             # spread(key=Fiscal_Year, value=Action_Obligation_OMB23_GDP21),
-          file="contracts/charts/amount_vendor_size.csv",row.names = FALSE)
+          file="charts/amount_vendor_size.csv",row.names = FALSE)
 
 # --------------------------------------------------------------------------------
 sum((engine_contracts %>% filter(Competition.multisum == "Unlabeled"))$Action_Obligation_OMB23_GDP21 )
+```
 
-# engine contracts by CompetitionClassification  
+
+## engine contracts by CompetitionClassification  
+```{r Competition}
 (
   Competition <- engine_contracts %>%
     filter(Competition.multisum != "Unlabeled") %>%
@@ -136,7 +149,7 @@ sum((engine_contracts %>% filter(Competition.multisum == "Unlabeled"))$Action_Ob
 )
 
 ggsave(
-  "contracts/charts/amount_competition.svg",
+  "charts/amount_competition.svg",
   Competition,
   device = "svg",
   width = 8,
@@ -149,7 +162,7 @@ ggsave(
 
 write.csv(Competition$data,# %>%
             # spread(key=Fiscal_Year, value=Action_Obligation_OMB23_GDP21),
-          file="contracts/charts/amount_competition.csv",row.names = FALSE)
+          file="charts/amount_competition.csv",row.names = FALSE)
 
 
 
@@ -207,7 +220,7 @@ write.csv(Competition$data,# %>%
 
 
 ggsave(
-  "contracts/charts/share_competition.svg",
+  "charts/share_competition.svg",
   Competition_Share,
   device = "svg",
   width = 5.5,
@@ -217,11 +230,12 @@ ggsave(
 
 write.csv(Competition_Share$data,# %>%
             # spread(key=Fiscal_Year, value=amount_share),
-          file="contracts/charts/share_competition.csv",row.names = FALSE)
+          file="charts/share_competition.csv",row.names = FALSE)
+```
 
+##Simple Area
 
-#----------------------------------------------
-#Simple Area
+```{r SimpleArea}
 labels_and_colors<-prepare_labels_and_colors(engine_contracts %>% select(-PricingMechanism))
 column_key<-get_column_key(engine_contracts)
 (
@@ -252,12 +266,13 @@ column_key<-get_column_key(engine_contracts)
     facet_grid(SimpleArea~.,scales="free_y")
 )
 
-ggsave600dpi(SimpleArea,file="contracts/charts/SimpleArea.png",width=5,height=6,size = 11)
-
-#-----------------------------------------------------------------------
-# R&D phase
+ggsave600dpi(SimpleArea,file="charts/SimpleArea.png",width=5,height=6,size = 11)
+```
 
 
+## R&D phase
+
+````{r RnDphase}
 # 
 # (
 #   RnDphase<-build_plot(
@@ -312,9 +327,10 @@ ggsave600dpi(SimpleArea,file="contracts/charts/SimpleArea.png",width=5,height=6,
 # writeWorksheet(wb, output_TY, sheet = "R&D", startRow = 15, startCol = 13)
 # saveWorkbook(wb)
 
+```
 
-# --------------------------------------------------------------------------------
-# engine contracts by Contract Type 
+## engine contracts by Contract Type 
+```{r Pricing}
 levels(factor(engine_contracts$PricingMechanism))
 (
   PricingMechanism <- engine_contracts %>%
@@ -361,7 +377,7 @@ levels(factor(engine_contracts$PricingMechanism))
 )
 
 ggsave(
-  "contracts/charts/amount_contract_type.svg",
+  "charts/amount_contract_type.svg",
   PricingMechanism,
   device = "svg",
   width = 12,
@@ -371,12 +387,13 @@ ggsave(
 
 write.csv(PricingMechanism$data,# %>%
             # spread(key=Fiscal_Year, value=Action_Obligation_OMB23_GDP21),
-          file="contracts/charts/amount_contract_type.csv",row.names = FALSE)
+          file="charts/amount_contract_type.csv",row.names = FALSE)
+
+```
 
 
-# --------------------------------------------------------------------------------
-# super facet: engine contracts by service and SimpleArea
-
+## super facet: engine contracts by service and SimpleArea
+```{r ServiceArea}
 #This could be done in fewer steps but on skimming it seems to check out.
 
 total <- engine_contracts %>%
@@ -505,7 +522,7 @@ dla <- dla %>%
 
 
 ggsave(
-  "contracts/charts/amount_customer_category.svg",
+  "charts/amount_customer_category.svg",
   super_facet,
   device = "svg",
   width = 10,
@@ -515,14 +532,14 @@ ggsave(
 
 write.csv(super_facet$data %>%
             spread(key=Fiscal_Year, value=Action_Obligation_OMB23_GDP21),
-          file="contracts/charts/amount_customer_category.csv",row.names = FALSE)
-
+          file="charts/amount_customer_category.csv",row.names = FALSE)
+```
 
 # ================================================================================
 # charting engines and topline 
-# --------------------------------------------------------------------------------
-# join engines and topline 
 
+## join engines and topline 
+```{r JoinEngineTopline}
 engine_contracts <- engine_contracts %>%
   mutate(type = "Engines")
 
@@ -604,10 +621,12 @@ rm(dyear)
   #   amount_percent_change = sum(amount_percent_change, na.rm = TRUE)
   # )
 )
+```
 
+## percent change comparison 
 
-# --------------------------------------------------------------------------------
-# percent change comparison 
+```{r pChange}
+
 # 
 (
   graph_contracts_overall <- comparison_contracts_overall %>% filter(Fiscal_Year>=2000) %>%
@@ -641,7 +660,7 @@ rm(dyear)
 )
 
 ggsave(
-  "contracts/charts/percent_change_total.svg",
+  "charts/percent_change_total.svg",
   graph_contracts_overall,
   width = 9,
   height = 6,
@@ -651,7 +670,7 @@ ggsave(
 
 write.csv(graph_contracts_overall$data,# %>%
             # spread(key=Fiscal_Year, value=Action_Obligation_OMB23_GDP21),
-          file="contracts/charts/percent_change_total.csv",row.names = FALSE)
+          file="charts/percent_change_total.csv",row.names = FALSE)
 
 
 
@@ -730,7 +749,7 @@ max((comparison_contracts_subcustomer %>%
 )
 
 ggsave(
-  "contracts/charts/percent_change_customer.svg",
+  "charts/percent_change_customer.svg",
   graph_contracts_subcustomer,
   width = 9,
   height = 6,
@@ -740,13 +759,14 @@ ggsave(
 
 write.csv(graph_contracts_subcustomer$data,# %>%
             # spread(key=Fiscal_Year, value=Action_Obligation_OMB23_GDP21),
-          file="contracts/charts/percent_change_customer.csv",row.names = FALSE)
+          file="charts/percent_change_customer.csv",row.names = FALSE)
+```
 
 
-# --------------------------------------------------------------------------------
-# percent change comparison by SimpleArea 
-# 
+## percent change comparison by SimpleArea 
 
+
+```{r pArea}
 
 (
   comparison_contracts_area <- comparison_contracts %>%
@@ -800,7 +820,7 @@ write.csv(graph_contracts_subcustomer$data,# %>%
 
 
 ggsave(
-  "contracts/charts/percent_change_category.svg",
+  "charts/percent_change_category.svg",
   graph_contracts_area,
   width = 9,
   height = 6,
@@ -810,11 +830,13 @@ ggsave(
 
 write.csv(graph_contracts_area$data, #%>%
             # spread(key=Fiscal_Year, value=Action_Obligation_OMB23_GDP21),
-          file="contracts/charts/percent_change_category.csv",row.names = FALSE)
+          file="charts/percent_change_category.csv",row.names = FALSE)
+```
 
 
-# -----------------------------------------------------------------------------------
-# Product / R&D and topline.
+## Product / R&D and topline.
+
+```{r areatopline}
 
 
 
@@ -874,7 +896,7 @@ summary(factor(comparison_contracts_area_total$SimpleArea))
 )
 
 ggsave(
-  "contracts/charts/percent_change_total_area.svg",
+  "charts/percent_change_total_area.svg",
   graph_contracts_overall_area,
   width = 9,
   height = 6,
@@ -884,5 +906,6 @@ ggsave(
 
 write.csv(graph_contracts_overall_area$data, #%>%
             # spread(key=Fiscal_Year, value=Action_Obligation_OMB23_GDP21),
-          file="contracts/charts/percent_change_total_area.csv",row.names = FALSE)
+          file="charts/percent_change_total_area.csv",row.names = FALSE)
 
+```
