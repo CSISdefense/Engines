@@ -1406,46 +1406,6 @@ write.csv(file="..//Output//topline_subcustomer_current.csv",row.names = FALSE, 
 summary(engine_contracts$ContractingSubCustomer)
 ```
 
-## SubCustomer Product/Service/R&D
-```{r SubCustomerPSR}
-
-(
-SubCustomerPSR<-build_plot(
-  data=engine_contracts %>% filter(
-    SubCustomer.JPO %in% c("Army","Navy","Air Force","DLA","F-35 JPO")),
-  chart_geom = "Bar Chart",
-  share = FALSE,
-  labels_and_colors=labels_and_colors,
-  # NA, #VAR.ncol
-  x_var="Fiscal_Year", #x_var
-  y_var="Action_Obligation_OMB23_GDP21", #VAR.y.variable
-  color_var="SimpleArea", #facet_var
-  facet_var="SimpleArea", #color_var
-  second_var="SubCustomer.JPO",
-  column_key=column_key,
-  format=TRUE,
-  ytextposition=FALSE
-)+
-  # theme(strip.text.y = element_text(angle=0))+
- # theme(axis.text.x = element_text(angle=90))+
- #    scale_y_continuous("Percent of Obligations", labels = percent_format(accuracy=1))+
- #      facet_grid(.~Competition.sum ,scales="free_x", space="free_x"
- #             )+labs(title=NULL,
-  # x="Fiscal Year",
-  # y="Percent of Obligations",
-  # color="Competition")+
-  theme(legend.position = "bottom")+
-  labs(y="Obligations (Constant 2021 $s)")#+
-  # facet_grid(SimpleArea~SubCustomer.JPO, scales = "free_y",space="free_y")
-)
-
-# ggsave600dpi("..//Output//subcustomer_PSR.png", SubCustomerPSR, 
-#              width=6.5, height= 4, units="in",size=11
-#              )
-ggsave600dpi("Charts//subcustomer_PSR.png", SubCustomerPSR, 
-             width=9, height= 6, units="in",size=12,lineheight = 1.2
-             )
-```
 
 ## SubCustomer Competition
 ```{r SubCustomerComp}

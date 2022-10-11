@@ -38,14 +38,31 @@ while(engine_contracts[nrow(engine_contracts),1] %in% c("0","Return Value","0\r"
 
 engine_contracts<-apply_standard_lookups(engine_contracts)
 
+gb<-read_csv("budget/data/FY23 PB Green Book Table 6-1.csv",skip = 3)
+rdte<-gb[6,c(1,4:ncol(gb)-1)]
+colnames(rdte)<-as.numeric(substr(colnames(rdte),4,7)[2:ncol(rdte)])
+
 # --------------------------------------------------------------------------------
 # read topline contract data
 
 read_topline_contracts <- read.delim("contracts/data/Summary.SP_CompetitionVendorSizeHistoryBucketPlatformSubCustomer.txt",
                                      na.strings=c("NA","NULL"),sep="\t")
-topline_contracts<-apply_standard_lookups(read_topline_contracts)
+read_topline_contracts <- read.delim("contracts/data/Federal_Location.SP_ProdServPlatformAgencyPlaceOriginVendor.txt",
+                                     na.strings=c("NA","NULL"),sep="\t")
+while(read_topline_contracts[nrow(read_topline_contracts),1] %in% c("0","Return Value","0\r" ,"Return Value\r",
+                                                                    "An error occurred while executing batch. Error message is: One or more errors occurred."))
+  read_topline_contracts<-read_topline_contracts[1:nrow(read_topline_contracts)-1,]
 
-# --------------------------------------------------------------------------------
+if(colnames(read_topline_contracts)[1]=="productorservicecode"&colnames(read_topline_contracts)[5]=="ProductOrServiceCode")
+  read_topline_contracts<-read_topline_contracts[,2:ncol(read_topline_contracts)]
+
+topline_contracts<-apply_standard_lookups(read_topline_contracts)
+topline_contracts<-topline_contracts%>% filter(Customer=="Defense")
+# if ("SubCustomer.platform" %in% names(engine_contracts) & "ProjectName" %in% names(topline_contracts)){
+#   topline_contracts$SubCustomer.JPO<-as.character(topline_contracts$SubCustomer.platform)
+#   topline_contracts$SubCustomer.JPO[topline_contracts$ProjectName %in% c("JSF (F-35) ","JSF (F-35)") & !is.na(topline_contracts$ProjectName)&engine_contracts$SubCustomer.platform=="Navy"]<-"F-35 JPO"
+#   topline_contracts$SubCustomer.JPO<-factor(topline_contracts$SubCustomer.JPO)
+# }
 
 # --------------------------------------------------------------------------------
 # clean and summarize data
@@ -172,19 +189,19 @@ biz_engine_contracts<-engine_contracts %>% dplyr::rename(
   project = ProjectName
 )
 
-write.csv(biz_engine_contracts, "contracts/app/power_bi.csv")
-save(topline_contracts ,engine_contracts,file="contracts/app/engine_contract.Rdata")
-
-save(engine_contracts,file="contracts/data/just_engine_contract.Rdata")
-
-load(file="contracts/app/engine_contract.Rdata")
-
-
 if ("SubCustomer.platform" %in% names(engine_contracts) & "ProjectName" %in% names(engine_contracts)){
   engine_contracts$SubCustomer.JPO<-as.character(engine_contracts$SubCustomer.platform)
   engine_contracts$SubCustomer.JPO[engine_contracts$ProjectName %in% c("JSF (F-35) ","JSF (F-35)") & !is.na(engine_contracts$ProjectName)&engine_contracts$SubCustomer.platform=="Navy"]<-"F-35 JPO"
   engine_contracts$SubCustomer.JPO<-factor(engine_contracts$SubCustomer.JPO)
 }
+write.csv(biz_engine_contracts, "contracts/app/power_bi.csv")
+save(topline_contracts ,engine_contracts,file="contracts/app/engine_contract.Rdata")
+
+save(engine_contracts,file="contracts/data/just_engine_contract.Rdata")
+
+# load(file="contracts/app/engine_contract.Rdata")
+
+
 
 
 #-----------------------------------------------------------------------

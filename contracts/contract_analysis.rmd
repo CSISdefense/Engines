@@ -261,12 +261,20 @@ column_key<-get_column_key(engine_contracts)
     # x="Fiscal Year",
     # y="Percent of Obligations",
     # color="Competition")+
-    theme(legend.position = "right")+
-    labs(y="Obligations (Constant 2021 $s), Variable Scale")+
-    facet_grid(SimpleArea~.,scales="free_y")
+    scale_y_continuous(expand=expansion(add=c(0,1.5e9)),label = scales::unit_format(unit = "M", scale = 1e-6))+
+    theme(legend.position = "bottom")+
+    labs(y="Obligations (Constant 2021 $s)")+
+    facet_grid(SimpleArea~.,scales="free_y",space="free_y")
 )
 
 ggsave600dpi(SimpleArea,file="charts/SimpleArea.png",width=5,height=6,size = 11)
+ggsave600dpi(SimpleArea,file="charts/SimpleArea.svg",width=3.25,height=6,size = 11)
+
+write.csv(file="charts//SimpleArea.csv",row.names = FALSE, na = "",
+          SimpleArea$data%>% #mutate(Fiscal_Year=lubridate::year(dFYear))%>%
+            pivot_wider(id_cols=c(SimpleArea),
+                        names_from=Fiscal_Year,values_from=Action_Obligation_OMB23_GDP21))
+
 ```
 
 
@@ -391,6 +399,46 @@ write.csv(PricingMechanism$data,# %>%
 
 ```
 
+## SubCustomer Product/Service/R&D
+```{r SubCustomerPSR}
+
+(
+SubCustomerPSR<-build_plot(
+  data=engine_contracts %>% filter(
+    SubCustomer.JPO %in% c("Army","Navy","Air Force","DLA","F-35 JPO")),
+  chart_geom = "Bar Chart",
+  share = FALSE,
+  labels_and_colors=labels_and_colors,
+  # NA, #VAR.ncol
+  x_var="Fiscal_Year", #x_var
+  y_var="Action_Obligation_OMB23_GDP21", #VAR.y.variable
+  color_var="SimpleArea", #facet_var
+  facet_var="SimpleArea", #color_var
+  second_var="SubCustomer.JPO",
+  column_key=column_key,
+  format=TRUE,
+  ytextposition=FALSE
+)+
+  # theme(strip.text.y = element_text(angle=0))+
+ # theme(axis.text.x = element_text(angle=90))+
+ #    scale_y_continuous("Percent of Obligations", labels = percent_format(accuracy=1))+
+ #      facet_grid(.~Competition.sum ,scales="free_x", space="free_x"
+ #             )+labs(title=NULL,
+  # x="Fiscal Year",
+  # y="Percent of Obligations",
+  # color="Competition")+
+  theme(legend.position = "bottom")+
+  labs(y="Obligations (Constant 2021 $s)")#+
+  # facet_grid(SimpleArea~SubCustomer.JPO, scales = "free_y",space="free_y")
+)
+
+# ggsave600dpi("..//Output//subcustomer_PSR.png", SubCustomerPSR, 
+#              width=6.5, height= 4, units="in",size=11
+#              )
+ggsave600dpi("Charts//subcustomer_PSR.png", SubCustomerPSR, 
+             width=9, height= 6, units="in",size=12,lineheight = 1.2
+             )
+```
 
 ## super facet: engine contracts by service and SimpleArea
 ```{r ServiceArea}
@@ -546,6 +594,14 @@ engine_contracts <- engine_contracts %>%
 topline_contracts <- topline_contracts %>%
   mutate(type = "Topline")
 colnames(topline_contracts)[colnames(topline_contracts)=="ContractingSubCustomer"]<-"SubCustomer"
+topline_contracts$SimpleArea<-factor(topline_contracts$SimpleArea)
+levels(topline_contracts$SimpleArea)<-
+  list("Products"=c("Products","Products (All)"),
+       'Services'=c("Services","Services (Non-R&D)"),
+       "R&D"=c("R&D"),
+       "Total"="Total",
+       'Unlabeled'="Unlabeled"
+  )
 
 # engine_contracts <- engine_contracts %>%
 #   select(Fiscal_Year, SubCustomer, SimpleArea, Action_Obligation_OMB23_GDP21, type)
@@ -557,14 +613,7 @@ comparison_contracts <- engine_contracts %>%
   group_by(Fiscal_Year, SubCustomer, SimpleArea, type) %>%
   dplyr::summarise(Action_Obligation_OMB23_GDP21 = sum(Action_Obligation_OMB23_GDP21, na.rm = TRUE))
 
-comparison_contracts$SimpleArea<-factor(comparison_contracts$SimpleArea)
-levels(comparison_contracts$SimpleArea)<-
-  list("Products"=c("Products","Products (All)"),
-       'Services'=c("Services","Services (Non-R&D)"),
-       "R&D"=c("R&D"),
-       "Total"="Total",
-       'Unlabeled'="Unlabeled"
-  )
+
 
 
 dyear <- comparison_contracts %>%
@@ -672,13 +721,13 @@ write.csv(graph_contracts_overall$data,# %>%
             # spread(key=Fiscal_Year, value=Action_Obligation_OMB23_GDP21),
           file="charts/percent_change_total.csv",row.names = FALSE)
 
+```
 
 
-# --------------------------------------------------------------------------------
-# percent change comparison by SubCustomer
+## percent change comparison by SubCustomer
 
 
-
+```{r pSubCust}
 (
   comparison_contracts_subcustomer <- comparison_contracts %>%
     group_by(Fiscal_Year, SubCustomer, type) %>%
@@ -861,11 +910,11 @@ summary(factor(comparison_contracts_area_total$SimpleArea))
   graph_contracts_overall_area <- comparison_contracts_area_total %>%
     filter(!is.na(SimpleArea) & !SimpleArea %in% c("Services","Unlabeled")) %>%
     filter(!is.na(SimpleArea) & !SimpleArea %in% c("Services","Unlabeled")&
-             Fiscal.Year>=2000) %>%
+             Fiscal_Year>=2000) %>%
     mutate(type = factor(type, levels = c("Topline", "Engines"))) %>%
     ggplot() +
     geom_line(
-      aes(x = Fiscal.Year, 
+      aes(x = Fiscal_Year, 
           y = baseline_percent_change,
           linetype=SimpleArea),
       alpha = .9,
@@ -908,4 +957,132 @@ write.csv(graph_contracts_overall_area$data, #%>%
             # spread(key=Fiscal_Year, value=Action_Obligation_OMB23_GDP21),
           file="charts/percent_change_total_area.csv",row.names = FALSE)
 
+```
+# Percent of Topline
+## Join
+```{r}
+
+aircraft<-topline_contracts %>% filter(PlatformPortfolio=="Aircraft")%>%
+  mutate(type="Aircraft")
+
+
+percent_contracts <- engine_contracts %>% 
+  select(Fiscal_Year, SubCustomer.JPO, SimpleArea, Action_Obligation_OMB23_GDP21, type) %>%
+  rbind(topline_contracts %>% filter(Fiscal_Year>=2000)%>%
+          select(Fiscal_Year, SubCustomer.JPO, SimpleArea, Action_Obligation_OMB23_GDP21, type)) %>%
+    rbind(aircraft %>% filter(Fiscal_Year>=2000)%>%
+          select(Fiscal_Year, SubCustomer.JPO, SimpleArea, Action_Obligation_OMB23_GDP21, type)) %>%
+  group_by(Fiscal_Year, SubCustomer.JPO, SimpleArea, type) %>%
+  dplyr::summarise(Action_Obligation_OMB23_GDP21 = sum(Action_Obligation_OMB23_GDP21, na.rm = TRUE)) %>%
+  pivot_wider(names_from=type, values_from=Action_Obligation_OMB23_GDP21) %>%
+  group_by(Fiscal_Year, SubCustomer.JPO, SimpleArea) %>%
+  dplyr::summarise(Engines = sum(Engines, na.rm = TRUE),
+                   Topline = sum(Topline, na.rm = TRUE),
+                   Aircraft = sum(Aircraft, na.rm = TRUE))
+
+
+```
+##Simple Area
+
+```{r pSimpleArea}
+pSimpleArea<-percent_contracts %>%
+  group_by(Fiscal_Year, SimpleArea) %>%
+  dplyr::summarise(Engines = sum(Engines, na.rm = TRUE),
+                   Aircraft = sum(Aircraft, na.rm = TRUE),
+                   Topline = sum(Topline, na.rm = TRUE))%>%
+  mutate(pTopline=Engines/Topline,
+         pAircraft=Engines/Aircraft)%>%
+  pivot_longer(cols=c(pTopline,pAircraft))
+
+(
+  pSA<-build_plot(
+    data=pSimpleArea %>% filter(!is.na(SimpleArea)) ,
+    chart_geom = "Line Chart",
+    share = FALSE,
+    # labels_and_colors=labels_and_colors,
+    # NA, #VAR.ncol
+    x_var="Fiscal_Year", #x_var
+    y_var="value", #VAR.y.variable
+    color_var="name", #color_var
+    facet_var="SimpleArea", #facet_var
+    column_key=column_key,
+    format=FALSE,
+    ytextposition=FALSE
+  )+scale_y_continuous(labels=scales::percent)+
+    # theme(strip.text.y = element_text(angle=0))+
+    # theme(axis.text.x = element_text(angle=90))+
+    #    scale_y_continuous("Percent of Obligations", labels = percent_format(accuracy=1))+
+    #      facet_grid(.~Competition.sum ,scales="free_x", space="free_x"
+    #             )+labs(title=NULL,
+    # x="Fiscal Year",
+    # y="Percent of Obligations",
+    # color="Competition")+
+    theme(legend.position = "right")+
+    labs(y="Percent of Topline or\nAircraft Portfolio Obligations")
+    # facet_grid(SimpleArea~.,scales="free_y")
+)
+
+ggsave600dpi(pSA,file="charts/pSimpleArea.svg",width=6.5,height=2.5,size = 11,lineheight = 1.2)
+
+ggsave600dpi(gridExtra::grid.arrange(SimpleArea+labs(caption=NULL),pSA),file="charts/pSimpleArea.svg",width=6.5,height=2.5,size = 11,lineheight = 1.2)
+
+
+gridExtra::grid.arrange(SimpleArea+labs(caption=NULL),pSA)
+
+write.csv(file="charts//pSimpleArea.csv",row.names = FALSE, na = "",
+          pSA$data%>% #mutate(Fiscal_Year=lubridate::year(dFYear))%>%
+            pivot_wider(id_cols=c(SimpleArea,name),
+                        names_from=Fiscal_Year,values_from=value))
+
+```
+
+
+##SubCustomer.JPO
+
+```{r pSimpleArea}
+pSubCustomer<-percent_contracts %>%
+  group_by(Fiscal_Year, SubCustomer.JPO) %>%
+  dplyr::summarise(Engines = sum(Engines, na.rm = TRUE),
+                   Aircraft = sum(Aircraft, na.rm = TRUE),
+                   Topline = sum(Topline, na.rm = TRUE))%>%
+  mutate(pTopline=Engines/Topline,
+         pAircraft=Engines/Aircraft)%>%
+  pivot_longer(cols=c(pTopline,pAircraft))
+
+(
+  pSC<-build_plot(
+    data=pSubCustomer %>% filter(SubCustomer.JPO %in% c("Army","Navy","Air Force","DLA","F-35 JPO")),
+    chart_geom = "Line Chart",
+    share = FALSE,
+    # labels_and_colors=labels_and_colors,
+    # NA, #VAR.ncol
+    x_var="Fiscal_Year", #x_var
+    y_var="value", #VAR.y.variable
+    color_var="name", #color_var
+    facet_var="SubCustomer.JPO", #facet_var
+    column_key=column_key,
+    format=FALSE,
+    ytextposition=FALSE
+  )+
+    # theme(strip.text.y = element_text(angle=0))+
+    # theme(axis.text.x = element_text(angle=90))+
+    #    scale_y_continuous("Percent of Obligations", labels = percent_format(accuracy=1))+
+    #      facet_grid(.~Competition.sum ,scales="free_x", space="free_x"
+    #             )+labs(title=NULL,
+    # x="Fiscal Year",
+    # y="Percent of Obligations",
+    # color="Competition")+
+    theme(legend.position = "right")+
+    labs(y="Obligations (Constant 2021 $s)")+
+    coord_cartesian(ylim=c(0,0.35))
+    # facet_grid(Subc~.,scales="free_y")
+)
+
+
+ggsave600dpi(pSC,file="charts/pSubCustomerJPO.svg",width=6.5,height=4,size = 11)
+
+write.csv(file="charts//pSubCustomerJPO.csv",row.names = FALSE, na = "",
+          pSC$data%>% #mutate(Fiscal_Year=lubridate::year(dFYear))%>%
+            pivot_wider(id_cols=c(SimpleArea,name),
+                        names_from=Fiscal_Year,values_from=value))
 ```
