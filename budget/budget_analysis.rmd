@@ -449,10 +449,8 @@ engine_actual_FY <- engine_actual %>%
   # filter(Amount_Then_Year != 0) %>%
   group_by(FY) %>%
   dplyr::summarize(Amount_Then_Year = sum(Amount_Then_Year, na.rm = TRUE),
-                   Amount_OMB23_GDP21 = sum(Amount_OMB23_GDP21, na.rm = TRUE))
-
-engine_actule
-  left_join(rdte %>%select(Fiscal_Year,TOA),by("FY"="Fiscal_Year"))
+                   Amount_OMB23_GDP21 = sum(Amount_OMB23_GDP21, na.rm = TRUE))%>%
+  left_join(rdte %>%select(Fiscal_Year,TOA),by=c("FY"="Fiscal_Year"))
 
 engine_actual
 
