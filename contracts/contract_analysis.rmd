@@ -23,7 +23,7 @@ source("theme/chart_theme.R")
 source("theme/money_labels.R")
 
 load(file="app/engine_contract.Rdata")
-load(file="data/just_engine_contract.Rdata")
+# load(file="data/just_engine_contract.Rdata")
 ```
 
 ## Project
