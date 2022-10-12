@@ -364,7 +364,7 @@ write.csv(file="charts//SimpleArea.csv",row.names = FALSE, na = "",
     # NA, #VAR.ncol
     x_var="Fiscal_Year", #x_var
     y_var="Action_Obligation_OMB23_GDP21", #VAR.y.variable
-    color_var="ProductOrServiceArea", #color_var
+    color_var="ProductServiceOrRnDarea", #color_var
     # facet_var="Competition.sum", #facet_var
     column_key=column_key,
     format=TRUE,
@@ -396,7 +396,7 @@ ggsave600dpi("charts//psr_RnDphase.svg", RnDphase,
 output_TY<-engine_contracts %>% filter(SimpleArea=="R&D") %>%
   format_data_for_plot(fy_var="Fiscal_Year",y_var="Action_Obligation_Then_Year",color_var = "ProductOrServiceArea",
                        labels_and_colors=labels_and_colors) %>%
-  pivot_wider(id_cols=c(ProductOrServiceArea),
+  pivot_wider(id_cols=c(ProductServiceOrRnDarea),
               names_from=Fiscal_Year,values_from=Action_Obligation_Then_Year)%>%
   arrange(ProductOrServiceArea)
 
