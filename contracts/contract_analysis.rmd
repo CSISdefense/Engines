@@ -37,7 +37,7 @@ colnames(engine_contracts)[colnames(engine_contracts)=="Action_Obligation_Then_Y
 colnames(engine_contracts)[colnames(engine_contracts)=="Action_Obligation_Then_Year_OMB23_GDP21"]<-
   "Action_Obligation_OMB23_GDP21"
 
-topplat<-engine_contracts %>% group_by (ProjectName,SimpleArea) %>%
+topplat<-engine_contracts %>% group_by (Project.Name,SimpleArea) %>%
   summarise(Action_Obligation_OMB23_GDP21=sum(Action_Obligation_OMB23_GDP21),
             Action_Obligation_2020=sum(ifelse(Fiscal_Year==2020,Action_Obligation_OMB23_GDP21,0)))%>%
               group_by (SimpleArea) %>%
@@ -47,12 +47,12 @@ topplat %>% arrange(desc(Action_Obligation_OMB23_GDP21))
 
 
 topplat$TopProject<-
-  ifelse(topplat$rank_2020<=7 | topplat$rank_total<=7,topplat$ProjectName,NA)
+  ifelse(topplat$rank_2020<=7 | topplat$rank_total<=7,topplat$Project.Name,NA)
 
 engine_contracts<-left_join(engine_contracts,topplat %>% select(-Action_Obligation_OMB23_GDP21,Action_Obligation_2020),
-          by=c("ProjectName","SimpleArea"))
+          by=c("Project.Name","SimpleArea"))
 
-engine_contracts$TopProject[is.na(engine_contracts$TopProject) & !is.na(engine_contracts$ProjectName)]<-
+engine_contracts$TopProject[is.na(engine_contracts$TopProject) & !is.na(engine_contracts$Project.Name)]<-
   "Other Labeled Project"
 
 
@@ -630,7 +630,7 @@ write.csv(super_facet$data %>%
 # summary(factor(engine_contracts$ProjectPlatform))
 # engine_contracts$Fiscal_Year
 # 
-# topplat<-engine_contracts %>% filter(SimpleArea=="Aircraft") %>% group_by (ProjectName) %>%
+# topplat<-engine_contracts %>% filter(SimpleArea=="Aircraft") %>% group_by (Project.Name) %>%
 #   summarise(Action_Obligation_OMB23_GDP21=sum(Action_Obligation_OMB23_GDP21),
 #             Action_Obligation_2020=sum(ifelse(Fiscal_Year==2020,Action_Obligation_OMB23_GDP21,0))
 #             )%>% mutate(rank_total=rank(desc(Action_Obligation_OMB23_GDP21)),
@@ -638,9 +638,9 @@ write.csv(super_facet$data %>%
 # topplat %>% arrange(desc(Action_Obligation_OMB23_GDP21))
 # 
 # engine_contracts$TopAircraftProject<-
-#   ifelse(engine_contracts$ProjectName %in% topplat$ProjectName[topplat$rank_2020<=7 | topplat$rank_total<=7],
-#          engine_contracts$ProjectName,NA)
-# engine_contracts$TopAircraftProject[is.na(engine_contracts$TopAircraftProject) & !is.na(engine_contracts$ProjectName)]<-
+#   ifelse(engine_contracts$Project.Name %in% topplat$Project.Name[topplat$rank_2020<=7 | topplat$rank_total<=7],
+#          engine_contracts$Project.Name,NA)
+# engine_contracts$TopAircraftProject[is.na(engine_contracts$TopAircraftProject) & !is.na(engine_contracts$Project.Name)]<-
 #   "Other Labeled Project"
 # summary(factor(engine_contracts$TopAircraftProject))
 
@@ -688,7 +688,7 @@ RnD<-build_plot(
 # summary(factor(engine_contracts$ProjectPlatform))
 # engine_contracts$Fiscal_Year
 # 
-# topplat<-engine_contracts %>% filter(SimpleArea=="Aircraft") %>% group_by (ProjectName) %>%
+# topplat<-engine_contracts %>% filter(SimpleArea=="Aircraft") %>% group_by (Project.Name) %>%
 #   summarise(Action_Obligation_OMB23_GDP21=sum(Action_Obligation_OMB23_GDP21),
 #             Action_Obligation_2020=sum(ifelse(Fiscal_Year==2020,Action_Obligation_OMB23_GDP21,0))
 #             )%>% mutate(rank_total=rank(desc(Action_Obligation_OMB23_GDP21)),
@@ -696,9 +696,9 @@ RnD<-build_plot(
 # topplat %>% arrange(desc(Action_Obligation_OMB23_GDP21))
 # 
 # engine_contracts$TopAircraftProject<-
-#   ifelse(engine_contracts$ProjectName %in% topplat$ProjectName[topplat$rank_2020<=7 | topplat$rank_total<=7],
-#          engine_contracts$ProjectName,NA)
-# engine_contracts$TopAircraftProject[is.na(engine_contracts$TopAircraftProject) & !is.na(engine_contracts$ProjectName)]<-
+#   ifelse(engine_contracts$Project.Name %in% topplat$Project.Name[topplat$rank_2020<=7 | topplat$rank_total<=7],
+#          engine_contracts$Project.Name,NA)
+# engine_contracts$TopAircraftProject[is.na(engine_contracts$TopAircraftProject) & !is.na(engine_contracts$Project.Name)]<-
 #   "Other Labeled Project"
 # summary(factor(engine_contracts$TopAircraftProject))
 
@@ -746,7 +746,7 @@ Products<-build_plot(
 # summary(factor(engine_contracts$ProjectPlatform))
 # engine_contracts$Fiscal_Year
 # 
-# topplat<-engine_contracts %>% filter(SimpleArea=="Aircraft") %>% group_by (ProjectName) %>%
+# topplat<-engine_contracts %>% filter(SimpleArea=="Aircraft") %>% group_by (Project.Name) %>%
 #   summarise(Action_Obligation_OMB23_GDP21=sum(Action_Obligation_OMB23_GDP21),
 #             Action_Obligation_2020=sum(ifelse(Fiscal_Year==2020,Action_Obligation_OMB23_GDP21,0))
 #             )%>% mutate(rank_total=rank(desc(Action_Obligation_OMB23_GDP21)),
@@ -754,9 +754,9 @@ Products<-build_plot(
 # topplat %>% arrange(desc(Action_Obligation_OMB23_GDP21))
 # 
 # engine_contracts$TopAircraftProject<-
-#   ifelse(engine_contracts$ProjectName %in% topplat$ProjectName[topplat$rank_2020<=7 | topplat$rank_total<=7],
-#          engine_contracts$ProjectName,NA)
-# engine_contracts$TopAircraftProject[is.na(engine_contracts$TopAircraftProject) & !is.na(engine_contracts$ProjectName)]<-
+#   ifelse(engine_contracts$Project.Name %in% topplat$Project.Name[topplat$rank_2020<=7 | topplat$rank_total<=7],
+#          engine_contracts$Project.Name,NA)
+# engine_contracts$TopAircraftProject[is.na(engine_contracts$TopAircraftProject) & !is.na(engine_contracts$Project.Name)]<-
 #   "Other Labeled Project"
 # summary(factor(engine_contracts$TopAircraftProject))
 
@@ -1241,7 +1241,7 @@ pSimpleArea<-percent_contracts %>%
 
 ggsave600dpi(pSA,file="charts/pSimpleArea.svg",width=6.5,height=2.5,size = 11,lineheight = 1.2)
 
-ggsave600dpi(gridExtra::grid.arrange(SimpleArea+labs(caption=NULL),pSA),file="charts/pSimpleArea.svg",width=6.5,height=2.5,size = 11,lineheight = 1.2)
+ggsave600dpi(gridExtra::grid.arrange(pSA+labs(caption=NULL),pSA),file="charts/pSimpleArea.svg",width=6.5,height=2.5,size = 11,lineheight = 1.2)
 
 
 gridExtra::grid.arrange(SimpleArea+labs(caption=NULL),pSA)
@@ -1300,6 +1300,6 @@ ggsave600dpi(pSC,file="charts/pSubCustomerJPO.svg",width=6.5,height=4,size = 11)
 
 write.csv(file="charts//pSubCustomerJPO.csv",row.names = FALSE, na = "",
           pSC$data%>% #mutate(Fiscal_Year=lubridate::year(dFYear))%>%
-            pivot_wider(id_cols=c(SimpleArea,name),
+            pivot_wider(id_cols=c(SubCustomer.JPO,name),
                         names_from=Fiscal_Year,values_from=value))
 ```
