@@ -38,25 +38,26 @@ while(engine_contracts[nrow(engine_contracts),1] %in% c("0","Return Value","0\r"
 
 engine_contracts<-apply_standard_lookups(engine_contracts)
 
-gb<-read_csv("budget/data/FY23 PB Green Book Table 6-1.csv",skip = 3)
-rdte<-gb[6,c(1,4:ncol(gb)-1)]
-colnames(rdte)<-as.numeric(substr(colnames(rdte),4,7)[2:ncol(rdte)])
 
 # --------------------------------------------------------------------------------
 # read topline contract data
 
-read_topline_contracts <- read.delim("contracts/data/Summary.SP_CompetitionVendorSizeHistoryBucketPlatformSubCustomer.txt",
+topline_contracts <- read.delim("contracts/data/Summary.SP_CompetitionVendorSizeHistoryBucketPlatformSubCustomer.txt",
                                      na.strings=c("NA","NULL"),sep="\t")
-read_topline_contracts <- read.delim("contracts/data/Federal_Location.SP_ProdServPlatformAgencyPlaceOriginVendor.txt",
+topline_contracts <- read.delim("contracts/data/Federal_Location.SP_ProdServPlatformAgencyPlaceOriginVendor.txt",
                                      na.strings=c("NA","NULL"),sep="\t")
-while(read_topline_contracts[nrow(read_topline_contracts),1] %in% c("0","Return Value","0\r" ,"Return Value\r",
+while(topline_contracts[nrow(topline_contracts),1] %in% c("0","Return Value","0\r" ,"Return Value\r",
                                                                     "An error occurred while executing batch. Error message is: One or more errors occurred."))
-  read_topline_contracts<-read_topline_contracts[1:nrow(read_topline_contracts)-1,]
+  topline_contracts<-topline_contracts[1:nrow(topline_contracts)-1,]
 
-if(colnames(read_topline_contracts)[1]=="productorservicecode"&colnames(read_topline_contracts)[5]=="ProductOrServiceCode")
-  read_topline_contracts<-read_topline_contracts[,2:ncol(read_topline_contracts)]
+if(colnames(topline_contracts)[1]=="productorservicecode"&colnames(topline_contracts)[5]=="ProductOrServiceCode")
+  topline_contracts<-topline_contracts[,2:ncol(topline_contracts)]
+topline_contracts<-standardize_variable_names(topline_contracts)
+topline_contracts<-topline_contracts%>% select(Fiscal_Year, Contracting_Agency_ID, ProductOrServiceCode, ProjectID,PlatformPortfolio, Action_Obligation_OMB23_GDP21) %>%
+  group_by(Fiscal_Year, Contracting_Agency_ID, ProductOrServiceCode, ProjectID,PlatformPortfolio) %>%
+  dplyr::summarise(Action_Obligation_OMB23_GDP21 = sum(Action_Obligation_OMB23_GDP21, na.rm = TRUE))
 
-topline_contracts<-apply_standard_lookups(read_topline_contracts)
+topline_contracts<-apply_standard_lookups(topline_contracts)
 topline_contracts<-topline_contracts%>% filter(Customer=="Defense")
 # if ("SubCustomer.platform" %in% names(engine_contracts) & "ProjectName" %in% names(topline_contracts)){
 #   topline_contracts$SubCustomer.JPO<-as.character(topline_contracts$SubCustomer.platform)
@@ -186,16 +187,25 @@ biz_engine_contracts<-engine_contracts %>% dplyr::rename(
   vendor_size = VendorSize,
   # parent = ParentID,
   AllContractor = AllContractor,
-  project = ProjectName
+  project = Project.Name
 )
-
-if ("SubCustomer.platform" %in% names(engine_contracts) & "ProjectName" %in% names(engine_contracts)){
+if ("SubCustomer.platform" %in% names(engine_contracts) & "Project.Name" %in% names(engine_contracts)){
   engine_contracts$SubCustomer.JPO<-as.character(engine_contracts$SubCustomer.platform)
-  engine_contracts$SubCustomer.JPO[engine_contracts$ProjectName %in% c("JSF (F-35) ","JSF (F-35)") & !is.na(engine_contracts$ProjectName)&engine_contracts$SubCustomer.platform=="Navy"]<-"F-35 JPO"
+  engine_contracts$SubCustomer.JPO[engine_contracts$Project.Name %in% c("JSF (F-35) ","JSF (F-35)") & !is.na(engine_contracts$ProjectName)&engine_contracts$SubCustomer.platform=="Navy"]<-"F-35 JPO"
   engine_contracts$SubCustomer.JPO<-factor(engine_contracts$SubCustomer.JPO)
 }
 write.csv(biz_engine_contracts, "contracts/app/power_bi.csv")
 save(topline_contracts ,engine_contracts,file="contracts/app/engine_contract.Rdata")
+
+engine_contracts<-csis360::read_and_join_experiment(engine_contracts,
+                                               "ProductOrServiceCodes.csv",
+                                               by=c("ProductOrServiceCode"="ProductOrServiceCode"),
+                                               add_var=c("ProductServiceOrRnDarea",
+                                                         "ProductOrServiceCodeText"),
+                                               path="https://raw.githubusercontent.com/CSISdefense/Lookup-Tables/master/",
+                                               # skip_check_var = c("CrisisProductOrServiceArea","Simple"),
+                                               dir=""
+)
 
 save(engine_contracts,file="contracts/data/just_engine_contract.Rdata")
 
@@ -246,6 +256,7 @@ engine_vendor_overall<-engine_vendor%>%
 write.csv(engine_vendor_overall, file="contracts/data/TopEngineVendors.csv")
 save(file="contracts/data/engine_vendor.rda",engine_vendor)
 colnames(engine_vendor)
+
 
 
 # OTA ####

@@ -120,6 +120,16 @@ d00 <- d00 %>%
 d99 <- d99 %>%
   gather(`X1997`:`X2003`, key = "FY", value = "Amount")
 
+
+#### Green book data
+gb<-read_csv("budget/data/FY23 PB Green Book Table 6-1.csv",skip = 3)
+rdte<-gb[6,c(1,5:ncol(gb)-1)]
+rdte<-rdte%>%pivot_longer(cols=-1)
+colnames(rdte)<-c("PublicLawTitle","Fiscal_Year","TOA")
+rdte$Fiscal_Year<-as.numeric(substr(rdte$Fiscal_Year,4,7))
+
+
+
 # --------------------------------------------------------------------------------
 # combine data 
 #   (notes: the data tables for each President's budget have to be combined)
@@ -526,7 +536,7 @@ engine_budget <- engine_budget %>%
 engine_budget_wide <-
   spread(engine_budget, key = "FY", value = "Amount_Then_Year") # to view discrepancies
 
-save(engine_budget, engine_budget_wide, file="budget/engine_budget.rda")
+save(engine_budget, engine_budget_wide, rdte,file="budget/engine_budget.rda")
 
 write.csv(
   engine_budget %>%
