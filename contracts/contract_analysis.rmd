@@ -61,6 +61,41 @@ summary(factor(engine_contracts$TopProject))
 
 ```
 
+## PSC
+```{r PreprocessPSC}
+
+summary(factor(engine_contracts$ProjectPlatform))
+
+topPSC<-engine_contracts %>% group_by (ProductOrServiceCode,ProductOrServiceCodeText,SimpleArea) %>%
+  summarise(Action_Obligation_OMB23_GDP21=sum(Action_Obligation_OMB23_GDP21),
+            Action_Obligation_2020=sum(ifelse(Fiscal_Year==2020,Action_Obligation_OMB23_GDP21,0)))%>%
+              group_by (SimpleArea) %>%
+    mutate(rank_total=rank(desc(Action_Obligation_OMB23_GDP21)),
+                        rank_2020=rank(desc(Action_Obligation_2020)))
+topPSC %>% arrange(desc(Action_Obligation_OMB23_GDP21))
+
+topPSC$TopPScode<-
+  ifelse(topPSC$rank_2020<=7 | topPSC$rank_total<=7,topPSC$ProductOrServiceCode,NA)
+topPSC$TopPStext<-
+  ifelse(topPSC$rank_2020<=7 | topPSC$rank_total<=7,topPSC$ProductOrServiceCodeText,NA)
+
+
+engine_contracts<-left_join(engine_contracts,topPSC %>% select(-Action_Obligation_OMB23_GDP21,Action_Obligation_2020),
+          by=c("ProductOrServiceCode","SimpleArea"))
+
+engine_contracts$TopPScode[is.na(engine_contracts$TopPScode) & !is.na(engine_contracts$ProductOrServiceCode)]<-
+  "Other Labeled PSC"
+engine_contracts$TopPStext[is.na(engine_contracts$TopPStext) & !is.na(engine_contracts$ProductOrServiceCode)]<-
+  "Other Labeled PSC"
+
+engine_contracts$TopPStext<-factor_wrap(engine_contracts$TopPStext)
+
+summary(factor(engine_contracts$TopPStext))
+
+
+```
+
+
 # ================================================================================
 # charting engines 
 ## engine contracts 
@@ -748,23 +783,35 @@ write.csv(super_facet$data %>%
 
 
 ## R&D
-```{r Aircraft}
-# summary(factor(engine_contracts$ProjectPlatform))
-# engine_contracts$Fiscal_Year
-# 
-# topplat<-engine_contracts %>% filter(SimpleArea=="Aircraft") %>% group_by (Project.Name) %>%
-#   summarise(Action_Obligation_OMB23_GDP21=sum(Action_Obligation_OMB23_GDP21),
-#             Action_Obligation_2020=sum(ifelse(Fiscal_Year==2020,Action_Obligation_OMB23_GDP21,0))
-#             )%>% mutate(rank_total=rank(desc(Action_Obligation_OMB23_GDP21)),
-#                         rank_2020=rank(desc(Action_Obligation_2020)))
-# topplat %>% arrange(desc(Action_Obligation_OMB23_GDP21))
-# 
-# engine_contracts$TopAircraftProject<-
-#   ifelse(engine_contracts$Project.Name %in% topplat$Project.Name[topplat$rank_2020<=7 | topplat$rank_total<=7],
-#          engine_contracts$Project.Name,NA)
-# engine_contracts$TopAircraftProject[is.na(engine_contracts$TopAircraftProject) & !is.na(engine_contracts$Project.Name)]<-
-#   "Other Labeled Project"
-# summary(factor(engine_contracts$TopAircraftProject))
+```{r RnD}
+
+(
+RnDpsc<-build_plot(
+  data=engine_contracts %>% filter(SimpleArea=="R&D"),
+  chart_geom = "Line Chart",
+  share = FALSE,
+  # labels_and_colors=labels_and_colors,
+  # NA, #VAR.ncol
+  x_var="dFYear", #x_var
+  y_var="Action_Obligation_OMB23_GDP21", #VAR.y.variable
+  color_var="TopPStext", #color_var
+  facet_var="TopPStext", #facet_var
+  # column_key=column_key,
+  format=TRUE,
+  ytextposition=FALSE
+)+scale_x_date("Fiscal Year",labels = scales::label_date("'%y"))+
+  # theme(strip.text.y = element_text(angle=0))+
+ # theme(axis.text.x = element_text(angle=90))+
+ #    scale_y_continuous("Percent of Obligations", labels = percent_format(accuracy=1))+
+ #      facet_grid(.~Competition.sum ,scales="free_x", space="free_x"
+ #             )+labs(title=NULL,
+  # x="Fiscal Year",
+  # y="Percent of Obligations",
+  # color="Competition")+
+  theme(legend.position = "none")+
+  labs(y="Obligations (Constant 2021 $s)")
+)
+  
 
 
 (
@@ -807,23 +854,34 @@ RnD<-build_plot(
 
 ## Products
 ```{r Products}
-# summary(factor(engine_contracts$ProjectPlatform))
-# engine_contracts$Fiscal_Year
-# 
-# topplat<-engine_contracts %>% filter(SimpleArea=="Aircraft") %>% group_by (Project.Name) %>%
-#   summarise(Action_Obligation_OMB23_GDP21=sum(Action_Obligation_OMB23_GDP21),
-#             Action_Obligation_2020=sum(ifelse(Fiscal_Year==2020,Action_Obligation_OMB23_GDP21,0))
-#             )%>% mutate(rank_total=rank(desc(Action_Obligation_OMB23_GDP21)),
-#                         rank_2020=rank(desc(Action_Obligation_2020)))
-# topplat %>% arrange(desc(Action_Obligation_OMB23_GDP21))
-# 
-# engine_contracts$TopAircraftProject<-
-#   ifelse(engine_contracts$Project.Name %in% topplat$Project.Name[topplat$rank_2020<=7 | topplat$rank_total<=7],
-#          engine_contracts$Project.Name,NA)
-# engine_contracts$TopAircraftProject[is.na(engine_contracts$TopAircraftProject) & !is.na(engine_contracts$Project.Name)]<-
-#   "Other Labeled Project"
-# summary(factor(engine_contracts$TopAircraftProject))
 
+(
+ProductsPSC<-build_plot(
+  data=engine_contracts %>% filter(SimpleArea=="Products"),
+  chart_geom = "Line Chart",
+  share = FALSE,
+  # labels_and_colors=labels_and_colors,
+  # NA, #VAR.ncol
+  x_var="dFYear", #x_var
+  y_var="Action_Obligation_OMB23_GDP21", #VAR.y.variable
+  color_var="TopPStext", #color_var
+  facet_var="TopPStext", #facet_var
+  # column_key=column_key,
+  format=TRUE,
+  ytextposition=FALSE
+)+scale_x_date("Fiscal Year",labels = scales::label_date("'%y"))+
+  # theme(strip.text.y = element_text(angle=0))+
+ # theme(axis.text.x = element_text(angle=90))+
+ #    scale_y_continuous("Percent of Obligations", labels = percent_format(accuracy=1))+
+ #      facet_grid(.~Competition.sum ,scales="free_x", space="free_x"
+ #             )+labs(title=NULL,
+  # x="Fiscal Year",
+  # y="Percent of Obligations",
+  # color="Competition")+
+  theme(legend.position = "none")+
+  labs(y="Obligations (Constant 2021 $s)")
+)
+ 
 
 (
 Products<-build_plot(
@@ -865,23 +923,34 @@ Products<-build_plot(
 
 ## Services
 ```{r Services}
-# summary(factor(engine_contracts$ProjectPlatform))
-# engine_contracts$Fiscal_Year
-# 
-# topplat<-engine_contracts %>% filter(SimpleArea=="Aircraft") %>% group_by (Project.Name) %>%
-#   summarise(Action_Obligation_OMB23_GDP21=sum(Action_Obligation_OMB23_GDP21),
-#             Action_Obligation_2020=sum(ifelse(Fiscal_Year==2020,Action_Obligation_OMB23_GDP21,0))
-#             )%>% mutate(rank_total=rank(desc(Action_Obligation_OMB23_GDP21)),
-#                         rank_2020=rank(desc(Action_Obligation_2020)))
-# topplat %>% arrange(desc(Action_Obligation_OMB23_GDP21))
-# 
-# engine_contracts$TopAircraftProject<-
-#   ifelse(engine_contracts$Project.Name %in% topplat$Project.Name[topplat$rank_2020<=7 | topplat$rank_total<=7],
-#          engine_contracts$Project.Name,NA)
-# engine_contracts$TopAircraftProject[is.na(engine_contracts$TopAircraftProject) & !is.na(engine_contracts$Project.Name)]<-
-#   "Other Labeled Project"
-# summary(factor(engine_contracts$TopAircraftProject))
 
+(
+ServicesPSC<-build_plot(
+  data=engine_contracts %>% filter(SimpleArea=="Services"),
+  chart_geom = "Line Chart",
+  share = FALSE,
+  # labels_and_colors=labels_and_colors,
+  # NA, #VAR.ncol
+  x_var="dFYear", #x_var
+  y_var="Action_Obligation_OMB23_GDP21", #VAR.y.variable
+  color_var="TopPStext", #color_var
+  facet_var="TopPStext", #facet_var
+  # column_key=column_key,
+  format=TRUE,
+  ytextposition=FALSE
+)+scale_x_date("Fiscal Year",labels = scales::label_date("'%y"))+
+  # theme(strip.text.y = element_text(angle=0))+
+ # theme(axis.text.x = element_text(angle=90))+
+ #    scale_y_continuous("Percent of Obligations", labels = percent_format(accuracy=1))+
+ #      facet_grid(.~Competition.sum ,scales="free_x", space="free_x"
+ #             )+labs(title=NULL,
+  # x="Fiscal Year",
+  # y="Percent of Obligations",
+  # color="Competition")+
+  theme(legend.position = "none")+
+  labs(y="Obligations (Constant 2021 $s)")
+)
+ 
 
 (
 Services<-build_plot(
