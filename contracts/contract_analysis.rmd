@@ -28,7 +28,6 @@ load(file="data/just_engine_contract.Rdata")
 
 ## Project
 ```{r PreprocessProject}
-
 summary(factor(engine_contracts$SimpleArea))
 
 colnames(engine_contracts)[colnames(engine_contracts)=="Action_Obligation_Then_Year_Then_Year"]<-
@@ -313,7 +312,7 @@ column_key<-get_column_key(engine_contracts)
 
 (
   SimpleArea<-build_plot(
-    data=engine_contracts %>% filter(SimpleArea="R&D"),
+    data=engine_contracts,
     chart_geom = "Bar Chart",
     share = FALSE,
     labels_and_colors=labels_and_colors,
