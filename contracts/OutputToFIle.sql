@@ -14,7 +14,7 @@ exec Project.[SP_EngineAllVendorHistoryCompetitionFundingMechanismVendorSizeProd
 
 SET ANSI_WARNINGS OFF;
 SET NOCOUNT ON;
---6H02m	298,478 rows
+--3H09m	298,478 rows  664,393
 exec Summary.SP_CompetitionVendorSizeHistoryBucketPlatformSubCustomer
 @Customer='Defense'
 ,@SubCustomer=NULL

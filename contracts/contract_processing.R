@@ -38,9 +38,6 @@ while(engine_contracts[nrow(engine_contracts),1] %in% c("0","Return Value","0\r"
 
 engine_contracts<-apply_standard_lookups(engine_contracts)
 
-gb<-read_csv("budget/data/FY23 PB Green Book Table 6-1.csv",skip = 3)
-rdte<-gb[6,c(1,4:ncol(gb)-1)]
-colnames(rdte)<-as.numeric(substr(colnames(rdte),4,7)[2:ncol(rdte)])
 
 # --------------------------------------------------------------------------------
 # read topline contract data
