@@ -24,6 +24,9 @@ source("theme/money_labels.R")
 
 load(file="app/engine_contract.Rdata")
 # load(file="data/just_engine_contract.Rdata")
+labels_and_colors<-prepare_labels_and_colors(engine_contracts %>% select(-PricingMechanism))
+column_key<-get_column_key(engine_contracts)
+
 ```
 
 ## Project
@@ -306,8 +309,6 @@ write.csv(Competition_Share$data,# %>%
 ##Simple Area
 
 ```{r SimpleArea}
-labels_and_colors<-prepare_labels_and_colors(engine_contracts %>% select(-PricingMechanism))
-column_key<-get_column_key(engine_contracts)
 
 
 (
