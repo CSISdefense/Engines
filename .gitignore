@@ -12,3 +12,5 @@ contracts/data/Summary.SP_CompetitionVendorSizeHistoryBucketPlatformSubCustomer.
 contracts/app/power_bi.csv
 
 contracts/data/engine.txt
+
+contracts/data/Federal_Location.SP_ProdServPlatformAgencyPlaceOriginVendor.txt
