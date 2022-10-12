@@ -200,6 +200,16 @@ if ("SubCustomer.platform" %in% names(engine_contracts) & "Project.Name" %in% na
 write.csv(biz_engine_contracts, "contracts/app/power_bi.csv")
 save(topline_contracts ,engine_contracts,file="contracts/app/engine_contract.Rdata")
 
+engine_contracts<-csis360::read_and_join_experiment(engine_contracts,
+                                               "ProductOrServiceCodes.csv",
+                                               by=c("ProductOrServiceCode"="ProductOrServiceCode"),
+                                               add_var=c("ProductServiceOrRnDarea",
+                                                         "ProductOrServiceCodeText"),
+                                               path="https://raw.githubusercontent.com/CSISdefense/Lookup-Tables/master/",
+                                               # skip_check_var = c("CrisisProductOrServiceArea","Simple"),
+                                               dir=""
+)
+
 save(engine_contracts,file="contracts/data/just_engine_contract.Rdata")
 
 # load(file="contracts/app/engine_contract.Rdata")
@@ -249,6 +259,7 @@ engine_vendor_overall<-engine_vendor%>%
 write.csv(engine_vendor_overall, file="contracts/data/TopEngineVendors.csv")
 save(file="contracts/data/engine_vendor.rda",engine_vendor)
 colnames(engine_vendor)
+
 
 
 # OTA ####
