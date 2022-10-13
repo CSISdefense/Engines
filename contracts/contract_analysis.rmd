@@ -106,7 +106,37 @@ summary(factor(engine_contracts$TopPStext))
 
 
 ```
+# Service investigation
+```{r invest}
+write.csv(file="data\\service_invest.csv",engine_contracts %>%
+  select(SimpleArea,ClaimantProgramCode,PlatformPortfolio,ProductOrServiceCode,ProductOrServiceCodeText,ProductServiceOrRnDarea,Action_Obligation_OMB23_GDP21,SubCustomer.JPO,Contracting_Agency_ID,ContractingOfficeID,fundingrequestingagencyid,fundingrequestingofficeid,ProjectID,Project.Name) %>%
+    group_by(SimpleArea,ClaimantProgramCode,PlatformPortfolio,ProductOrServiceCode,ProductOrServiceCodeText,ProductServiceOrRnDarea,SubCustomer.JPO,Contracting_Agency_ID,ContractingOfficeID,fundingrequestingagencyid,fundingrequestingofficeid,ProjectID,Project.Name) %>%
+    summarise(Action_Obligation_OMB23_GDP21=sum(Action_Obligation_OMB23_GDP21,na.rm=TRUE)),row.names = FALSE)
+  
 
+write.csv(file="data\\service_invest_year.csv",engine_contracts %>%
+  select(SimpleArea,ClaimantProgramCode,PlatformPortfolio,ProductOrServiceCode,ProductOrServiceCodeText,ProductServiceOrRnDarea,Action_Obligation_OMB23_GDP21,SubCustomer.JPO,Contracting_Agency_ID,ContractingOfficeID,fundingrequestingagencyid,fundingrequestingofficeid,ProjectID,Project.Name,Fiscal_Year) %>%
+    group_by(SimpleArea,ClaimantProgramCode,PlatformPortfolio,ProductOrServiceCode,ProductOrServiceCodeText,ProductServiceOrRnDarea,SubCustomer.JPO,Contracting_Agency_ID,ContractingOfficeID,fundingrequestingagencyid,fundingrequestingofficeid,ProjectID,Project.Name,Fiscal_Year) %>%
+    summarise(Action_Obligation_OMB23_GDP21=sum(Action_Obligation_OMB23_GDP21,na.rm=TRUE)),row.names = FALSE)
+```
+A1B is sometimes being overriden by other platform codes (as known). $391m over the period including a $39m deobligation from Ord. and missiles.
+
+I reclassified the following projects 'ITEP','C-20 ACFT','UH-60 UTTAS BLACK HAWK','B-52 STRATO FORTRESS','A-4 SKYHAWK','E-3A','REPAIR SHIP AIRCRAFT','T-400' and will be comfortable limiting to Aircraft Platform Portfolio henceforth. Around 9  million under missile defense, but PAC-3 related primarily so not taking a closer look at MDA.
+
+Nearly $3b of engine related service code work on aircraft codes A1C 41 million on A1A. 700 million on C9E but 4.76 billion on claimant program code S1.
+
+Not sure why there's a 145 million deobligation for peacekeeper missile with aircraft engine type, maybe look into that.
+
+Offices to allow for service
+N0000019 Nav Air
+N61340 Naval Air Warfare Center Training Systems Division
+N68335	NAVAIR WARFARE CTR AIRCRAFT DIV
+
+The next two are not obviously relevant, so a good place to stop.
+F4FDAN Air Force Life Cycle Management Center WWU F22 PGM OFC
+
+W9127S army corps of engineers
+N64498 navy surface warfare
 
 # ================================================================================
 # charting engines 
@@ -468,6 +498,34 @@ write.csv(file="charts//psr_RnDphase_current.csv",row.names = FALSE, na = "",
     x_var="Fiscal_Year", #x_var
     y_var="Action_Obligation_OMB23_GDP21", #VAR.y.variable
     color_var="ProductOrServiceArea", #color_var
+    # facet_var="Competition.sum", #facet_var
+    column_key=column_key,
+    format=TRUE,
+    ytextposition=FALSE
+  )+
+    # theme(strip.text.y = element_text(angle=0))+
+    # theme(axis.text.x = element_text(angle=90))+
+    #    scale_y_continuous("Percent of Obligations", labels = percent_format(accuracy=1))+
+    #      facet_grid(.~Competition.sum ,scales="free_x", space="free_x"
+    #             )+labs(title=NULL,
+    # x="Fiscal Year",
+    # y="Percent of Obligations",
+    # color="Competition")+
+    theme(legend.position = "right")+
+    labs(y="Obligations (Constant 2021 $s)")
+)
+
+
+(
+  ProductArea<-build_plot(
+    data=engine_contracts %>% filter(SimpleArea=="Products"),
+    chart_geom = "Bar Chart",
+    share = FALSE,
+    labels_and_colors=labels_and_colors,
+    # NA, #VAR.ncol
+    x_var="Fiscal_Year", #x_var
+    y_var="Action_Obligation_OMB23_GDP21", #VAR.y.variable
+    color_var="PlatformPortfolio", #color_var
     # facet_var="Competition.sum", #facet_var
     column_key=column_key,
     format=TRUE,
