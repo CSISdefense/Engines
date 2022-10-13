@@ -128,12 +128,15 @@ Nearly $3b of engine related service code work on aircraft codes A1C 41 million 
 Not sure why there's a 145 million deobligation for peacekeeper missile with aircraft engine type, maybe look into that.
 
 Offices to allow for service
+F4FDAN Air Force Life Cycle Management Center WWU F22 PGM OFC
 N0000019 Nav Air
 N61340 Naval Air Warfare Center Training Systems Division
 N68335	NAVAIR WARFARE CTR AIRCRAFT DIV
 
+Together these top codes get at $3.8 b of the 8.7 b of services.
+
 The next two are not obviously relevant, so a good place to stop.
-F4FDAN Air Force Life Cycle Management Center WWU F22 PGM OFC
+
 
 W9127S army corps of engineers
 N64498 navy surface warfare
