@@ -8,7 +8,7 @@ GO
 
 SET ANSI_WARNINGS OFF;
 SET NOCOUNT ON;
---2H24m	298,478 rows
+--2H17,m	674,730 rows
 exec Project.[SP_EngineAllVendorHistoryCompetitionFundingMechanismVendorSizeProdServAreaSubCustomer]
 
 
