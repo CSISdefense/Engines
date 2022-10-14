@@ -231,6 +231,11 @@ engine_budget_organization_future <- engine_budget %>%
   dplyr::summarize(Amount_Then_Year = sum(Amount_Then_Year, na.rm = TRUE),
                    Amount_OMB23_GDP21 = sum(Amount_OMB23_GDP21, na.rm = TRUE))
 
+engine_budget_organization_future<-engine_budget_organization_future%>%
+  left_join(rdtedept)
+
+
+
 engine_budget_organization_future_wide <-
   spread(engine_budget_organization_future, key = "FY", value = "Amount_Then_Year")
 
@@ -259,6 +264,34 @@ engine_budget_organization_future_wide <-
     xlab("Fiscal Year") + 
     ylab("Constant 2021 $") 
 )
+
+
+(
+  plot_ebf <- ggplot(engine_budget_organization_future) +
+    geom_line(
+      aes(
+        x = FY,
+        y = Amount_OMB23_GDP21/ServiceTOA_OMB23_GDP21,
+        group = PByear,
+        alpha = PByear
+      ),
+      color = "#554449",
+      size = 1
+    ) +
+    facet_wrap(~ Organization) +
+    scale_y_continuous(label = label_percent()) +
+    scale_x_continuous(
+      breaks = seq(2000, 2025, by = 5),
+      labels = function(x) {
+        paste("'",substring(as.character(x), 3, 4),sep="")
+      }
+    ) +
+    ggtitle("DoD RDT&E Aircraft Engine Spending Projections by Service") +
+    chart_theme +
+    xlab("Fiscal Year") + 
+    ylab("Constant 2021 $") 
+)
+
 
 ggsave(
   "charts/Amount_service.svg",
@@ -452,7 +485,7 @@ engine_actual_FY <- engine_actual %>%
                    Amount_OMB23_GDP21 = sum(Amount_OMB23_GDP21, na.rm = TRUE))%>%
   left_join(rdte %>%select(Fiscal_Year,TOA),by=c("FY"="Fiscal_Year"))
 
-engine_actual
+
 
 
 
@@ -554,12 +587,73 @@ engine_actual
     ) 
 )
 
+
+engine_actual_FY_org <- engine_actual %>%
+  # filter(Amount_Then_Year != 0) %>%
+  group_by(FY,Organization) %>%
+  dplyr::summarize(Amount_Then_Year = sum(Amount_Then_Year, na.rm = TRUE),
+                   Amount_OMB23_GDP21 = sum(Amount_OMB23_GDP21, na.rm = TRUE))%>%
+  left_join(rdtedept %>%select(FY,Organization,ServiceTOA_OMB23_GDP21),by=c("FY","Organization"))%>%
+  mutate(pEngine=Amount_OMB23_GDP21/ServiceTOA_OMB23_GDP21)
+(
+ plot_peorgact <- build_plot(engine_actual_FY_org,
+                         chart_geom="Line Chart",
+                         share=FALSE,
+                         x_var="FY",
+                         y_var="pEngine",
+                         facet="Organization",
+                         format=TRUE,
+                         caption="Budget Documents for Army, Navy, and Air Force; CSIS Analysis."
+                         ) +
+    ggtitle("DoD RDT&E Aircraft Engine Spending Projections") +
+    scale_y_continuous(label = label_percent()) +
+    xlab("Fiscal Year") + 
+    ylab("Engines as a Percent of\nDepartment RDT&E\nTotal Obligation Authority") +geom_vline(
+      xintercept = 2021,
+      color = "#554449",
+      alpha = .5,
+      linetype = "solid"
+    ) +
+    geom_vline(
+      xintercept = 2023,
+      color = "#554449",
+      linetype = "dotted"
+    )+ 
+    geom_rect(
+      # aes(
+        xmin = 2021,
+        xmax = Inf,
+        ymin = 0,
+        ymax = Inf,
+        alpha = 0.01,
+        fill = "grey",
+      # ),
+      
+      # data = empty#engine_actual#engine_actual_project
+    ) 
+)
+
 ggsave(
   "charts/actual_amount_service.svg",
   plot_eorgact+labs(title=NULL),
   # device = "svg",
   width = 6.5,
   height = 3.5,
+  units = "in"
+)
+
+(
+both<-gridExtra::grid.arrange(plot_eorgact+labs(title=NULL,x=NULL),
+                              plot_peorgact+labs(title=NULL))
+)
+
+
+ggsave(
+  "charts/actual_amount_service_both.svg",
+  both,
+  # device = "svg",
+  width = 6.5,
+  height = 4.5,
   units = "in"
 )
 

@@ -127,8 +127,34 @@ rdte<-gb[6,c(1,5:ncol(gb)-1)]
 rdte<-rdte%>%pivot_longer(cols=-1)
 colnames(rdte)<-c("PublicLawTitle","Fiscal_Year","TOA")
 rdte$Fiscal_Year<-as.numeric(substr(rdte$Fiscal_Year,4,7))
+rdte<-rdte%>% csis360::deflate(
+  money_var= "TOA",
+  fy_var="FY",
+  deflator_var="OMB23_GDP21"
+)
 
-
+  rdtedept<-read_csv("budget/data/PB23_T6-6_RDTE_TOA.csv")
+  colnames(rdtedept)[1]<-"Organization"
+  rdtedept<-rdtedept%>%pivot_longer(cols=-Organization,names_to = "FY",values_to="ServiceTOA")
+  # rdtedept$Account<-"RDT&E"
+  rdtedept$ServiceTOA<-rdtedept$ServiceTOA*1000000
+  rdtedept <- rdtedept %>% filter(Organization!="Total RDT&E")
+  rdtedept$Organization<-factor(rdtedept$Organization)
+  levels(rdtedept$Organization)<-list(
+    "Other DoD"=c("DIR OF OPER, T&E,DEF" ,"DIR OF T&E, DEF.","RDT&E,DEF.AGENCIES" ),
+    "Air Force"=c("RDT&E, AIR FORCE","RDT&E, Space Force"),
+    "Army"="RDT&E, ARMY",
+    "Navy"="RDT&E, NAVY"
+  )
+  
+  rdtedept<-rdtedept %>% group_by(FY,Organization) %>%
+    mutate(FY=as.numeric(FY)) %>%
+    summarise(ServiceTOA=sum(ServiceTOA,na.rm = TRUE))
+  rdtedept<-rdtedept%>% csis360::deflate(
+    money_var= "ServiceTOA",
+    fy_var="FY",
+    deflator_var="OMB23_GDP21"
+  )
 
 # --------------------------------------------------------------------------------
 # combine data 
@@ -536,7 +562,7 @@ engine_budget <- engine_budget %>%
 engine_budget_wide <-
   spread(engine_budget, key = "FY", value = "Amount_Then_Year") # to view discrepancies
 
-save(engine_budget, engine_budget_wide, rdte,file="budget/engine_budget.rda")
+save(engine_budget, engine_budget_wide, rdte,rdtedept,file="budget/engine_budget.rda")
 
 write.csv(
   engine_budget %>%

@@ -22,11 +22,12 @@ library(csis360)
 source("theme/chart_theme.R")
 source("theme/money_labels.R")
 
-local_path<-"F:\\Users\\gsanders\\Documents\\Repositories\\Lookup-Tables\\style\\"
+# local_path<-"F:\\Users\\gsanders\\Documents\\Repositories\\Lookup-Tables\\style\\"
+local_path<-"K:\\Users\\Greg\\Repositories\\Lookup-Tables\\style\\"
 load(file="app/engine_contract.Rdata")
 # load(file="data/just_engine_contract.Rdata")
-labels_and_colors<-prepare_labels_and_colors(engine_contracts %>% select(-PricingMechanism))#, path=local_path)
-column_key<-get_column_key(engine_contracts)#, path=local_path)
+labels_and_colors<-prepare_labels_and_colors(engine_contracts %>% select(-PricingMechanism), path=local_path)
+column_key<-get_column_key(engine_contracts, path=local_path)
 
 # engine_contracts %>% filter(csistransactionid==104709800)
 ```
@@ -66,6 +67,23 @@ engine_contracts$TopProject[is.na(engine_contracts$TopProject) & !is.na(engine_c
 
 summary(factor(engine_contracts$TopProject))
 
+TPOlist<-c("JSF (F-35)","Advanced Engine Development","F-100 Engine","F/A-22")
+engine_contracts$TopProjectOverall[!is.na(engine_contracts$Project.Name)]<-"Other labeled project"
+engine_contracts$TopProjectOverall[is.na(engine_contracts$Project.Name)]<-"Unlabeled project"
+engine_contracts$TopProjectOverall[engine_contracts$Project.Name %in% TPOlist]<-
+  engine_contracts$Project.Name[engine_contracts$Project.Name %in% TPOlist]
+summary(factor(engine_contracts$TopProjectOverall))
+
+
+Shortlist<-c("JSF (F-35)","Advanced Engine Development")
+# engine_contracts$SimpleArea.engines[!is.na(engine_contracts$Project.Name)]<-"Other labeled project"
+# engine_contracts$TopProjectOverall[is.na(engine_contracts$Project.Name)]<-"Unlabeled project"
+engine_contracts$SimpleArea.engines<-NA
+engine_contracts$SimpleArea.engines[engine_contracts$Project.Name %in% Shortlist]<-
+  engine_contracts$Project.Name[engine_contracts$Project.Name %in% Shortlist]
+engine_contracts$SimpleArea.engines[is.na(engine_contracts$SimpleArea.engines)&!is.na(engine_contracts$SimpleArea)]<-
+  paste("Other",engine_contracts$SimpleArea[is.na(engine_contracts$SimpleArea.engines)&!is.na(engine_contracts$SimpleArea)])
+summary(factor(engine_contracts$SimpleArea.engines))
 
 ```
 
@@ -110,14 +128,14 @@ summary(factor(engine_contracts$TopPStext))
 ## Service investigation
 ```{r invest}
 write.csv(file="data\\service_invest.csv",engine_contracts %>%
-  select(SimpleArea,ClaimantProgramCode,PlatformPortfolio,ProductOrServiceCode,ProductOrServiceCodeText,ProductServiceOrRnDarea,Action_Obligation_OMB23_GDP21,SubCustomer.JPO,Contracting_Agency_ID,ContractingOfficeID,fundingrequestingagencyid,fundingrequestingofficeid,ProjectID,Project.Name) %>%
-    group_by(SimpleArea,ClaimantProgramCode,PlatformPortfolio,ProductOrServiceCode,ProductOrServiceCodeText,ProductServiceOrRnDarea,SubCustomer.JPO,Contracting_Agency_ID,ContractingOfficeID,fundingrequestingagencyid,fundingrequestingofficeid,ProjectID,Project.Name) %>%
+  select(SimpleArea,ClaimantProgramCode,PlatformPortfolio,ProductOrServiceCode,ProductOrServiceCodeText,ProductServiceOrRnDarea,Action_Obligation_OMB23_GDP21,SubCustomer.engines,Contracting_Agency_ID,ContractingOfficeID,fundingrequestingagencyid,fundingrequestingofficeid,ProjectID,Project.Name) %>%
+    group_by(SimpleArea,ClaimantProgramCode,PlatformPortfolio,ProductOrServiceCode,ProductOrServiceCodeText,ProductServiceOrRnDarea,SubCustomer.engines,Contracting_Agency_ID,ContractingOfficeID,fundingrequestingagencyid,fundingrequestingofficeid,ProjectID,Project.Name) %>%
     summarise(Action_Obligation_OMB23_GDP21=sum(Action_Obligation_OMB23_GDP21,na.rm=TRUE)),row.names = FALSE)
   
 
 write.csv(file="data\\service_invest_year.csv",engine_contracts %>%
-  select(SimpleArea,ClaimantProgramCode,PlatformPortfolio,ProductOrServiceCode,ProductOrServiceCodeText,ProductServiceOrRnDarea,Action_Obligation_OMB23_GDP21,SubCustomer.JPO,Contracting_Agency_ID,ContractingOfficeID,fundingrequestingagencyid,fundingrequestingofficeid,ProjectID,Project.Name,Fiscal_Year) %>%
-    group_by(SimpleArea,ClaimantProgramCode,PlatformPortfolio,ProductOrServiceCode,ProductOrServiceCodeText,ProductServiceOrRnDarea,SubCustomer.JPO,Contracting_Agency_ID,ContractingOfficeID,fundingrequestingagencyid,fundingrequestingofficeid,ProjectID,Project.Name,Fiscal_Year) %>%
+  select(SimpleArea,ClaimantProgramCode,PlatformPortfolio,ProductOrServiceCode,ProductOrServiceCodeText,ProductServiceOrRnDarea,Action_Obligation_OMB23_GDP21,SubCustomer.engines,Contracting_Agency_ID,ContractingOfficeID,fundingrequestingagencyid,fundingrequestingofficeid,ProjectID,Project.Name,Fiscal_Year) %>%
+    group_by(SimpleArea,ClaimantProgramCode,PlatformPortfolio,ProductOrServiceCode,ProductOrServiceCodeText,ProductServiceOrRnDarea,SubCustomer.engines,Contracting_Agency_ID,ContractingOfficeID,fundingrequestingagencyid,fundingrequestingofficeid,ProjectID,Project.Name,Fiscal_Year) %>%
     summarise(Action_Obligation_OMB23_GDP21=sum(Action_Obligation_OMB23_GDP21,na.rm=TRUE)),row.names = FALSE)
 ```
 A1B is sometimes being overriden by other platform codes (as known). $391m over the period including a $39m deobligation from Ord. and missiles.
@@ -350,7 +368,7 @@ write.csv(Competition_Share$data,# %>%
           file="charts/share_competition.csv",row.names = FALSE)
 ```
 
-### Comp. Subcustomer PSR
+### Comp. Subcust PSR (Fig 6)   
 ```{r CusComp}
 engine_contracts %>% group_by(Fiscal_Year) %>% summarise(Action_Obligation_OMB23_GDP21=sum(Action_Obligation_OMB23_GDP21))
 engine_contracts %>% filter(Fiscal_Year==2021) %>% group_by(Competition.sum) %>% summarise(Action_Obligation_OMB23_GDP21=sum(Action_Obligation_OMB23_GDP21))
@@ -359,8 +377,7 @@ summary(factor(engine_contracts$ProjectName))
 
 (
 CustCompMultiShare<-build_plot(
-  data=engine_contracts %>% filter(Fiscal_Year>=2000&
-                                     SubCustomer.JPO %in% c("Army","Navy","Air Force","DLA","F-35 JPO")),
+  data=engine_contracts %>% filter(Fiscal_Year>=2000),
   chart_geom = "Bar Chart",
   share = TRUE,
   labels_and_colors=labels_and_colors,
@@ -368,7 +385,7 @@ CustCompMultiShare<-build_plot(
   x_var="dFYear", #x_var
   y_var="Action_Obligation_OMB23_GDP21", #VAR.y.variable
   color_var="Competition.multisum", #color_var
-  facet_var="SubCustomer.JPO", #facet_var
+  facet_var="SubCustomer.engines", #facet_var
   column_key=column_key,
   format=TRUE,
   ytextposition=FALSE
@@ -388,8 +405,7 @@ CustCompMultiShare<-build_plot(
 
 (
 CustCompMulti<-build_plot(
-  data=engine_contracts %>% filter(Fiscal_Year>=1991&
-                                     SubCustomer.JPO %in% c("Army","Navy","Air Force","DLA","F-35 JPO")),
+  data=engine_contracts %>% filter(Fiscal_Year>=2000),
   chart_geom = "Bar Chart",
   share = FALSE,
   labels_and_colors=labels_and_colors,
@@ -397,7 +413,7 @@ CustCompMulti<-build_plot(
   x_var="dFYear", #x_var
   y_var="Action_Obligation_OMB23_GDP21", #VAR.y.variable
   color_var="Competition.multisum", #color_var
-  facet_var="SubCustomer.JPO", #facet_var
+  facet_var="SubCustomer.engines", #facet_var
   column_key=column_key,
   format=TRUE,
   ytextposition=FALSE
@@ -430,12 +446,12 @@ ggsave600dpi(file="charts//EngineCompSubCustShare.svg", CustCompMultiShare,
 
 
 # ggsave600dpi(gridExtra::grid.arrange(pSA+labs(caption=NULL),pSA),file="charts/SimpleAreaBoth.svg",width=6.5,height=2.5,size = 11,lineheight = 1.2)
-(both<-gridExtra::grid.arrange(CustCompMulti+labs(caption=NULL,x=NULL)+facet_wrap(SubCustomer.JPO~.,nrow=1)+
+(both<-gridExtra::grid.arrange(CustCompMulti+labs(caption=NULL,x=NULL)+facet_wrap(SubCustomer.engines~.,nrow=1)+
                                  theme(legend.position="none")+
                           labs(y="Obligations\n(Constant 2021 $s)")+
             scale_x_date(NULL,labels = scales::label_date("'%y"),date_breaks = "5 years"),
                          CustCompMultiShare+
-         facet_wrap(SubCustomer.JPO~.,nrow=1)+
+         facet_wrap(SubCustomer.engines~.,nrow=1)+
             scale_x_date("Fiscal Year",labels = scales::label_date("'%y"),date_breaks = "5 years"))
 )
 ggsave(file="charts/EngineCompSubCustiBoth.svg",
@@ -444,16 +460,16 @@ ggsave(file="charts/EngineCompSubCustiBoth.svg",
        
 write.csv(file="charts//EngineCompSubCust.csv",row.names = FALSE, na = "",
           CustCompMulti$data%>% mutate(Fiscal_Year=lubridate::year(dFYear))%>%
-            pivot_wider(id_cols=c(SubCustomer.JPO,Competition.multisum),
+            pivot_wider(id_cols=c(SubCustomer.engines,Competition.multisum),
                         names_from=Fiscal_Year,values_from=Action_Obligation_OMB23_GDP21)%>%
-            arrange(SubCustomer.JPO,Competition.multisum))
+            arrange(SubCustomer.engines,Competition.multisum))
 
 
 write.csv(file="charts//EngineCompSubCust_cur.csv",row.names = FALSE, na = "",
-          engine_contracts %>% group_by(SubCustomer.JPO,Competition.multisum,Fiscal_Year)%>%
+          engine_contracts %>% group_by(SubCustomer.engines,Competition.multisum,Fiscal_Year)%>%
             dplyr::summarize(Action_Obligation_Then_Year=sum(Action_Obligation_Then_Year,na.rm=TRUE))%>%
-          pivot_wider(id_cols=c(SubCustomer.JPO,Competition.multisum),
-                      names_from=Fiscal_Year,values_from=Action_Obligation_Then_Year)%>%arrange(SubCustomer.JPO,Competition.multisum))
+          pivot_wider(id_cols=c(SubCustomer.engines,Competition.multisum),
+                      names_from=Fiscal_Year,values_from=Action_Obligation_Then_Year)%>%arrange(SubCustomer.engines,Competition.multisum))
 
 
 ```
@@ -462,8 +478,7 @@ write.csv(file="charts//EngineCompSubCust_cur.csv",row.names = FALSE, na = "",
 ```{r CusCompPSR}
 (
 ToplineCompMultiPSR<-build_plot(
-  data=engine_contracts %>% filter(Fiscal_Year>=1991&
-                                     SubCustomer.JPO %in% c("Army","Navy","Air Force","DLA","F-35 JPO")),
+  data=engine_contracts %>% filter(Fiscal_Year>=2000),
   chart_geom = "Bar Chart",
   share = TRUE,
   labels_and_colors=labels_and_colors,
@@ -471,7 +486,7 @@ ToplineCompMultiPSR<-build_plot(
   x_var="dFYear", #x_var
   y_var="Action_Obligation_OMB23_GDP21", #VAR.y.variable
   color_var="Competition.multisum", #color_var
-  facet_var="SubCustomer.JPO", #facet_var
+  facet_var="SubCustomer.engines", #facet_var
   second_var="SimpleArea.AETP",
   column_key=column_key,
   format=TRUE,
@@ -494,8 +509,7 @@ ToplineCompMultiPSR<-build_plot(
 
 (
 ToplineCompMultiSimpleArea<-build_plot(
-  data=engine_contracts %>% filter(Fiscal_Year>=1991&
-                                     SubCustomer.JPO %in% c("Army","Navy","Air Force","DLA","F-35 JPO")),
+  data=engine_contracts %>% filter(Fiscal_Year>=2000)),
   chart_geom = "Line Chart",
   share = TRUE,
   labels_and_colors=labels_and_colors,
@@ -503,7 +517,7 @@ ToplineCompMultiSimpleArea<-build_plot(
   x_var="dFYear", #x_var
   y_var="Action_Obligation_OMB23_GDP21", #VAR.y.variable
   color_var="Competition.multisum", #color_var
-  facet_var="SubCustomer.JPO", #facet_var
+  facet_var="SubCustomer.engines", #facet_var
   second_var = "SimpleArea",
   column_key=column_key,
   format=TRUE,
@@ -542,7 +556,7 @@ ToplineCompMultiSimpleArea<-build_plot(
     # NA, #VAR.ncol
     x_var="dFYear", #x_var
     y_var="Action_Obligation_OMB23_GDP21", #VAR.y.variable
-    color_var="SimpleArea.AETP", #color_var
+    color_var="SimpleArea.engines", #color_var
     facet_var="SimpleArea.AETP", #facet_var
     column_key=column_key,
     format=TRUE,
@@ -568,8 +582,10 @@ ggsave600dpi(SimpleArea,file="charts/SimpleArea.svg",width=3.25,height=6,size = 
 
 write.csv(file="charts//SimpleArea.csv",row.names = FALSE, na = "",
           SimpleArea$data%>% mutate(Fiscal_Year=lubridate::year(dFYear))%>%
-            pivot_wider(id_cols=c(SimpleArea.AETP),
-                        names_from=Fiscal_Year,values_from=Action_Obligation_OMB23_GDP21))
+            arrange(Fiscal_Year) %>%
+            pivot_wider(id_cols=c(SimpleArea.AETP,SimpleArea.engines),
+                        names_from=Fiscal_Year,values_from=Action_Obligation_OMB23_GDP21))%>%
+  arrange(SimpleArea.AETP,SimpleArea.engines)
 
 ```
 
@@ -843,14 +859,14 @@ write.csv(PricingMechanism$data,# %>%
 
 ```
 
-# SubCustomer Product/Service/R&D
+# SubCustomer PSR (Fig 3)
 ## Build Plot
 ```{r SubCustomerPSR}
-summary(factor(engine_contracts$SubCustomer.JPO))
+summary(factor(engine_contracts$SubCustomer.engines))
+
 (
 SubCustomerPSR<-build_plot(
   data=engine_contracts %>% filter(
-    SubCustomer.JPO %in% c("Army","Navy","Air Force","DLA","F-35 JPO") &
       !is.na(SimpleArea.AETP)),
   chart_geom = "Bar Chart",
   share = FALSE,
@@ -858,9 +874,9 @@ SubCustomerPSR<-build_plot(
   # NA, #VAR.ncol
   x_var="dFYear", #x_var
   y_var="Action_Obligation_OMB23_GDP21", #VAR.y.variable
-  color_var="SimpleArea.AETP", #facet_var
+  color_var="SimpleArea.engines", #facet_var
   facet_var="SimpleArea.AETP", #color_var
-  second_var="SubCustomer.JPO",
+  second_var="SubCustomer.engines",
   column_key=column_key,
   format=TRUE,
   ytextposition=FALSE
@@ -876,9 +892,9 @@ SubCustomerPSR<-build_plot(
     scale_x_date(labels = scales::label_date("'%y"),date_breaks = "5 years")+
   theme(legend.position = "bottom")+
   labs(y="Obligations (Constant 2021 $s)")+
-  scale_y_continuous(expand=expansion(add=c(0,1.5e9)),label = scales::unit_format(unit = "M", scale = 1e-6))+
-    facet_grid(SimpleArea.AETP~SubCustomer.JPO,scales="free_y",space="free_y")
-  # facet_grid(SimpleArea.AETP~SubCustomer.JPO, scales = "free_y",space="free_y")
+  scale_y_continuous(expand=expansion(add=c(0,1.5e9)),label = scales::unit_format(unit = "B", scale = 1e-9))+
+    facet_grid(SimpleArea.AETP~SubCustomer.engines,scales="free_y",space="free_y")
+  # facet_grid(SimpleArea.AETP~SubCustomer.engines, scales = "free_y",space="free_y")
 )
 
 # ggsave600dpi("..//Output//subcustomer_PSR.png", SubCustomerPSR, 
@@ -890,9 +906,9 @@ ggsave600dpi("Charts//subcustomer_PSR.svg", SubCustomerPSR,
 
 write.csv(file="charts//subcustomer_PSR.csv",row.names = FALSE, na = "",
           SubCustomerPSR$data%>% mutate(Fiscal_Year=lubridate::year(dFYear))%>%
-            pivot_wider(id_cols=c(SubCustomer.JPO,SimpleArea.AETP),
+            pivot_wider(id_cols=c(SubCustomer.engines,SimpleArea.AETP,SimpleArea.engines),
                         names_from=Fiscal_Year,values_from=Action_Obligation_OMB23_GDP21)%>%
-            arrange(SubCustomer.JPO,SimpleArea.AETP))
+            arrange(SubCustomer.engines,SimpleArea.AETP,SimpleArea.engines))
 
 ```
 
@@ -1047,7 +1063,7 @@ write.csv(super_facet$data %>%
 
 (
 RnDpsc<-build_plot(
-  data=engine_contracts %>% filter(SimpleArea=="R&D"),
+  data=engine_contracts %>% filter(SimpleArea.AETP=="R&D and AETP"),
   chart_geom = "Line Chart",
   share = FALSE,
   # labels_and_colors=labels_and_colors,
@@ -1069,7 +1085,7 @@ RnDpsc<-build_plot(
   # y="Percent of Obligations",
   # color="Competition")+
   theme(legend.position = "none")+
-  labs(y="Obligations (Constant 2021 $s)")+
+  labs(y="Obligations (Constant 2021 $s)")
   
 )
   
@@ -1077,7 +1093,7 @@ RnDpsc<-build_plot(
 
 (
 RnD<-build_plot(
-  data=engine_contracts %>% filter(SimpleArea=="R&D"),
+  data=engine_contracts %>% filter(SimpleArea.AETP=="R&D and AETP"),
   chart_geom = "Line Chart",
   share = FALSE,
   # labels_and_colors=labels_and_colors,
@@ -1118,7 +1134,7 @@ RnD<-build_plot(
 
 (
 ProductsPSC<-build_plot(
-  data=engine_contracts %>% filter(SimpleArea=="Products"),
+  data=engine_contracts %>% filter(SimpleArea.AETP=="Products"),
   chart_geom = "Line Chart",
   share = FALSE,
   # labels_and_colors=labels_and_colors,
@@ -1146,7 +1162,7 @@ ProductsPSC<-build_plot(
 
 (
 Products<-build_plot(
-  data=engine_contracts %>% filter(SimpleArea=="Products"),
+  data=engine_contracts %>% filter(SimpleArea.AETP=="Products"),
   chart_geom = "Line Chart",
   share = FALSE,
   # labels_and_colors=labels_and_colors,
@@ -1173,7 +1189,7 @@ Products<-build_plot(
   
   
   write.csv(file="charts//products_project_cur.csv",row.names = FALSE,na = "",
-            engine_contracts %>% filter(SimpleArea=="Products")  %>%
+            engine_contracts %>% filter(SimpleArea.AETP=="Products")  %>%
               format_data_for_plot(fy_var="Fiscal_Year",y_var="Action_Obligation_Then_Year",color_var = "TopProject"#,
                                    # labels_and_colors=labels_and_colors
                                    )%>% arrange(Fiscal_Year) %>%
@@ -1187,7 +1203,7 @@ Products<-build_plot(
 
 (
 ServicesPSC<-build_plot(
-  data=engine_contracts %>% filter(SimpleArea=="Services"),
+  data=engine_contracts %>% filter(SimpleArea.AETP=="Services"),
   chart_geom = "Line Chart",
   share = FALSE,
   # labels_and_colors=labels_and_colors,
@@ -1215,7 +1231,7 @@ ServicesPSC<-build_plot(
 
 (
 Services<-build_plot(
-  data=engine_contracts %>% filter(SimpleArea=="Services"),
+  data=engine_contracts %>% filter(SimpleArea.AETP=="Services"),
   chart_geom = "Line Chart",
   share = FALSE,
   # labels_and_colors=labels_and_colors,
@@ -1242,7 +1258,7 @@ Services<-build_plot(
   
   
   write.csv(file="charts//Services_project_cur.csv",row.names = FALSE,na = "",
-            engine_contracts %>% filter(SimpleArea=="Services")  %>%
+            engine_contracts %>% filter(SimpleArea.AETP=="Services")  %>%
               format_data_for_plot(fy_var="Fiscal_Year",y_var="Action_Obligation_Then_Year",color_var = "TopProject"#,
                                    # labels_and_colors=labels_and_colors
                                    )%>% arrange(Fiscal_Year) %>%
@@ -1631,20 +1647,20 @@ write.csv(graph_contracts_overall_area$data, #%>%
 ## Join
 ```{r}
 
-aircraft<-topline_contracts %>% filter(PlatformPortfolio=="Aircraft")%>%
+aircraft<-topline_contracts %>% filter(PlatformPorfolio.engine=="Aircraft")%>%
   mutate(type="Aircraft")
 
 
 percent_contracts <- engine_contracts %>% 
-  select(Fiscal_Year,dFYear, SubCustomer.JPO, SimpleArea.AETP, Action_Obligation_OMB23_GDP21, type) %>%
+  select(Fiscal_Year,dFYear, SubCustomer.engines, SimpleArea.AETP, Action_Obligation_OMB23_GDP21, type) %>%
   rbind(topline_contracts %>% filter(Fiscal_Year>=2000)%>%
-          select(Fiscal_Year,dFYear, SubCustomer.JPO, SimpleArea.AETP, Action_Obligation_OMB23_GDP21, type)) %>%
+          select(Fiscal_Year,dFYear, SubCustomer.engines, SimpleArea.AETP, Action_Obligation_OMB23_GDP21, type)) %>%
     rbind(aircraft %>% filter(Fiscal_Year>=2000)%>%
-          select(Fiscal_Year,dFYear, SubCustomer.JPO, SimpleArea.AETP, Action_Obligation_OMB23_GDP21, type)) %>%
-  group_by(Fiscal_Year,dFYear, SubCustomer.JPO, SimpleArea.AETP, type) %>%
+          select(Fiscal_Year,dFYear, SubCustomer.engines, SimpleArea.AETP, Action_Obligation_OMB23_GDP21, type)) %>%
+  group_by(Fiscal_Year,dFYear, SubCustomer.engines, SimpleArea.AETP, type) %>%
   dplyr::summarise(Action_Obligation_OMB23_GDP21 = sum(Action_Obligation_OMB23_GDP21, na.rm = TRUE)) %>%
   pivot_wider(names_from=type, values_from=Action_Obligation_OMB23_GDP21) %>%
-  group_by(Fiscal_Year,dFYear, SubCustomer.JPO, SimpleArea.AETP) %>%
+  group_by(Fiscal_Year,dFYear, SubCustomer.engines, SimpleArea.AETP) %>%
   dplyr::summarise(Engines = sum(Engines, na.rm = TRUE),
                    Topline = sum(Topline, na.rm = TRUE),
                    Aircraft = sum(Aircraft, na.rm = TRUE))
@@ -1659,25 +1675,25 @@ pSimpleArea.AETP<-percent_contracts %>%
   dplyr::summarise(Engines = sum(Engines, na.rm = TRUE),
                    Aircraft = sum(Aircraft, na.rm = TRUE),
                    Topline = sum(Topline, na.rm = TRUE))%>%
-  mutate(pTopline=Engines/Topline,
-         pAircraft=Engines/Aircraft)%>%
-  pivot_longer(cols=c(pTopline,pAircraft))
+  mutate(pToplineArea=Engines/Topline,
+         pAircraftArea=Engines/Aircraft)%>%
+  pivot_longer(cols=c(pToplineArea,pAircraftArea),names_to = "MetricName")
 
 (
   pSA<-build_plot(
     data=pSimpleArea.AETP %>% filter(!is.na(SimpleArea.AETP)) ,
     chart_geom = "Line Chart",
     share = FALSE,
-    # labels_and_colors=labels_and_colors,
+    labels_and_colors=prepare_labels_and_colors(pSimpleArea.AETP,path=local_path),
     # NA, #VAR.ncol
     x_var="dFYear", #x_var
     y_var="value", #VAR.y.variable
-    color_var="name", #color_var
+    color_var="MetricName", #color_var
     facet_var="SimpleArea.AETP", #facet_var
     column_key=column_key,
-    format=FALSE,
+    format=TRUE,
     ytextposition=FALSE
-  )+scale_y_continuous(labels=scales::percent)+
+  )+scale_y_continuous(labels=label_percent())+
     # theme(strip.text.y = element_text(angle=0))+
     # theme(axis.text.x = element_text(angle=90))+
     #    scale_y_continuous("Percent of Obligations", labels = percent_format(accuracy=1))+
@@ -1710,17 +1726,17 @@ ggsave(file="charts/SimpleAreaBoth.svg",
 
 write.csv(file="charts//pSimpleArea.csv",row.names = FALSE, na = "",
           pSA$data%>% mutate(Fiscal_Year=lubridate::year(dFYear))%>%
-            pivot_wider(id_cols=c(SimpleArea.AETP,name),
+            pivot_wider(id_cols=c(SimpleArea.AETP,MetricName),
                         names_from=Fiscal_Year,values_from=value))
 
 ```
 
 
-##SubCustomer.JPO
+##SubCustomer.engines
 
-```{r pSimpleArea}
+```{r pSimpleCust}
 pSubCustomer<-percent_contracts %>%
-  group_by(Fiscal_Year,dFYear, SubCustomer.JPO) %>%
+  group_by(Fiscal_Year,dFYear, SubCustomer.engines) %>%
   dplyr::summarise(Engines = sum(Engines, na.rm = TRUE),
                    Aircraft = sum(Aircraft, na.rm = TRUE),
                    Topline = sum(Topline, na.rm = TRUE))%>%
@@ -1730,7 +1746,7 @@ pSubCustomer<-percent_contracts %>%
 
 (
   pSC<-build_plot(
-    data=pSubCustomer %>% filter(SubCustomer.JPO %in% c("Army","Navy","Air Force","DLA","F-35 JPO")),
+    data=pSubCustomer,
     chart_geom = "Line Chart",
     share = FALSE,
     # labels_and_colors=labels_and_colors,
@@ -1738,7 +1754,7 @@ pSubCustomer<-percent_contracts %>%
     x_var="Fiscal_Year", #x_var
     y_var="value", #VAR.y.variable
     color_var="name", #color_var
-    facet_var="SubCustomer.JPO", #facet_var
+    facet_var="SubCustomer.engines", #facet_var
     column_key=column_key,
     format=FALSE,
     ytextposition=FALSE
@@ -1762,6 +1778,6 @@ ggsave600dpi(pSC,file="charts/pSubCustomerJPO.svg",width=6.5,height=4,size = 11)
 
 write.csv(file="charts//pSubCustomerJPO.csv",row.names = FALSE, na = "",
           pSC$data%>% #mutate(Fiscal_Year=lubridate::year(dFYear))%>%
-            pivot_wider(id_cols=c(SubCustomer.JPO,name),
+            pivot_wider(id_cols=c(SubCustomer.engines,name),
                         names_from=Fiscal_Year,values_from=value))
 ```
