@@ -29,9 +29,9 @@ source("contracts/theme/money_labels.R")
 # Read engine contract data ####
 
 engine_contracts <-
-  read_delim("contracts/data/Project.SP_EngineAllVendorHistoryCompetitionFundingMechanismVendorSizeProdServAreaSubCustomer.txt",
+  read_delim("contracts/data/Project.SP_EngineAllVendorHistoryCompetitionFundingMechanismVendorSizeProdServAreaSubCustomerNoDescription.txt",
              na =c("NA","NULL"),delim="\t", guess_max = 900000)
-
+#674730
 # engine_contracts[nrow(engine_contracts),1]
 while(engine_contracts[nrow(engine_contracts),1] %in% c("0","Return Value","0\r" ,"Return Value\r"))
   engine_contracts<-engine_contracts[1:nrow(engine_contracts)-1,]
