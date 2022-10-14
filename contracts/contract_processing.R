@@ -30,7 +30,7 @@ source("contracts/theme/money_labels.R")
 
 engine_contracts <-
   read_delim("contracts/data/Project.SP_EngineAllVendorHistoryCompetitionFundingMechanismVendorSizeProdServAreaSubCustomer.txt",
-             na =c("NA","NULL"),delim="\t")
+             na =c("NA","NULL"),delim="\t", guess_max = 900000)
 
 # engine_contracts[nrow(engine_contracts),1]
 while(engine_contracts[nrow(engine_contracts),1] %in% c("0","Return Value","0\r" ,"Return Value\r"))
@@ -192,11 +192,10 @@ biz_engine_contracts<-engine_contracts %>% dplyr::rename(
 )
 if ("SubCustomer.platform" %in% names(engine_contracts) & "Project.Name" %in% names(engine_contracts)){
   engine_contracts$SubCustomer.JPO<-as.character(engine_contracts$SubCustomer.platform)
-  engine_contracts$SubCustomer.JPO[engine_contracts$Project.Name %in% c("JSF (F-35) ","JSF (F-35)") & !is.na(engine_contracts$ProjectName)&engine_contracts$SubCustomer.platform=="Navy"]<-"F-35 JPO"
+  engine_contracts$SubCustomer.JPO[engine_contracts$Project.Name %in% c("JSF (F-35) ","JSF (F-35)") & !is.na(engine_contracts$Project.Name)&engine_contracts$SubCustomer.platform=="Navy"]<-"F-35 JPO"
   engine_contracts$SubCustomer.JPO<-factor(engine_contracts$SubCustomer.JPO)
 }
 write.csv(biz_engine_contracts, "contracts/app/power_bi.csv")
-save(topline_contracts ,engine_contracts,file="contracts/app/engine_contract.Rdata")
 
 # 
 # engine_contracts<-csis360::read_and_join_experiment(engine_contracts,
@@ -217,6 +216,59 @@ engine_contracts<-csis360::read_and_join_experiment(engine_contracts,
                                                # skip_check_var = c("CrisisProductOrServiceArea","Simple"),
                                                dir=""
 )
+
+servicelist<-c('J028','J029','H128','H129','H228','H229','H328','H329','H928','H929','K028','K029','L028','L029','N028','N029','W028','W029')
+nrow(engine_contracts %>% filter(Customer=="Defense" & (((PlatformPortfolio == "Aircraft") & 
+                                                           ProductOrServiceArea == "Engines & Power Plants"))))
+#294,956
+nrow(engine_contracts %>% filter(Customer=="Defense" & (((PlatformPortfolio == "Aircraft") & 
+                                                           (ProductOrServiceArea == "Engines & Power Plants" |
+                                                         ClaimantProgramCode == 'A1B')))))
+#630349
+nrow(engine_contracts %>% filter(Customer=="Defense" & (((PlatformPortfolio == "Aircraft") & 
+                                                           (ProductOrServiceArea == "Engines & Power Plants" |
+                                                              ClaimantProgramCode == 'A1B'|
+                                                              ProductOrServiceCode %in% servicelist)))))
+#634148
+nrow(engine_contracts %>% filter(Customer=="Defense" & (((PlatformPortfolio == "Aircraft") & 
+                                                           (ProductOrServiceArea == "Engines & Power Plants" |
+                                                              ClaimantProgramCode == 'A1B'|
+                                                              ProductOrServiceCode %in% servicelist)))|
+                                                          (ProductOrServiceCode %in% servicelist &
+                                                           ClaimantProgramCode %in% c('C9E','S1','S10'))))
+#643885
+
+
+nrow(engine_contracts %>% filter(Customer=="Defense" & (((PlatformPortfolio == "Aircraft") & 
+                                                           (ProductOrServiceArea == "Engines & Power Plants" |
+                                                              ClaimantProgramCode == 'A1B'|
+                                                              ProductOrServiceCode %in% servicelist)))|
+                                   (ProductOrServiceCode %in% servicelist &
+                                      ClaimantProgramCode %in% c('C9E','S1','S10')&
+                                      (#fundingrequestingofficeid %in% c('F4FDAN','N00019','N61340','N68335') |
+                                         SubCustomer=="Air Force"))))
+
+engine_contracts<-engine_contracts %>% filter(Customer=="Defense" & (((PlatformPortfolio == "Aircraft") & 
+                                                      (ProductOrServiceArea == "Engines & Power Plants" |
+                                                         ClaimantProgramCode == 'A1B'|
+                                                         ProductOrServiceCode %in% servicelist)))|
+                              (ProductOrServiceCode %in% servicelist &
+                                 ClaimantProgramCode %in% c('C9E','S1','S10')&
+                                 (#fundingrequestingofficeid %in% c('F4FDAN','N00019','N61340','N68335') |
+                                   SubCustomer=="Air Force")))
+
+engine_contracts$SimpleArea.AETP<-engine_contracts$SimpleArea
+engine_contracts$SimpleArea.AETP[engine_contracts$ProjectID==2260 | engine_contracts$SimpleArea=="R&D"]<-"R&D and AETP"
+summary(factor(engine_contracts$SimpleArea.AETP))
+
+topline_contracts$SimpleArea.AETP<-as.character(topline_contracts$SimpleArea)
+topline_contracts$SimpleArea.AETP[topline_contracts$ProjectID==2260 | topline_contracts$SimpleArea=="R&D"]<-"R&D and AETP"
+summary(factor(topline_contracts$SimpleArea.AETP))
+
+
+save(topline_contracts ,engine_contracts,file="contracts/app/engine_contract.Rdata")
+
+nrow(engine_contracts %>% filter(Customer!="Defense"))
 
 save(engine_contracts,file="contracts/data/just_engine_contract.Rdata")
 
@@ -265,8 +317,10 @@ engine_vendor_overall<-engine_vendor%>%
   arrange(pos)
 
 write.csv(engine_vendor_overall, file="contracts/data/TopEngineVendors.csv")
+
 save(file="contracts/data/engine_vendor.rda",engine_vendor)
 colnames(engine_vendor)
+
 
 
 
