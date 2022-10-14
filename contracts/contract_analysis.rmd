@@ -24,10 +24,10 @@ source("theme/money_labels.R")
 
 load(file="app/engine_contract.Rdata")
 # load(file="data/just_engine_contract.Rdata")
-labels_and_colors<-prepare_labels_and_colors(engine_contracts %>% select(-PricingMechanism),
-                           path="F:\\Users\\gsanders\\Documents\\Repositories\\Lookup-Tables\\style\\")
-column_key<-get_column_key(engine_contracts,
-                           path="F:\\Users\\gsanders\\Documents\\Repositories\\Lookup-Tables\\style\\")
+labels_and_colors<-prepare_labels_and_colors(engine_contracts %>% select(-PricingMechanism))#,
+                           # path="F:\\Users\\gsanders\\Documents\\Repositories\\Lookup-Tables\\style\\")
+column_key<-get_column_key(engine_contracts)#,
+                           # path="F:\\Users\\gsanders\\Documents\\Repositories\\Lookup-Tables\\style\\")
 
 # engine_contracts %>% filter(csistransactionid==104709800)
 ```
@@ -485,7 +485,7 @@ CustCompMultiSimpleArea<-build_plot(
 engine_contracts %>% filter(Competition.sum =="Unlabeled" & Fiscal_Year>=2019) %>% group_by(CompetitionClassification)%>%
   summarise(Action_Obligation_OMB23_GDP21=sum(Action_Obligation_OMB23_GDP21))
 
-ggsave600dpi(file="charts//EngineCompSubCust.png", ToplineCompMulti,  
+ggsave600dpi(file="charts//EngineCompSubCust.png", CustCompMulti,  
              width=9, height= 5.5, units="in",size=14, lineheight=1.2
              )
 
