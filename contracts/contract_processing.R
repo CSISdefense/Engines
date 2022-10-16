@@ -29,7 +29,7 @@ source("contracts/theme/money_labels.R")
 # Read engine contract data ####
 
 engine_contracts <-
-  read_delim("contracts/data/Project.SP_EngineAllVendorHistoryCompetitionFundingMechanismVendorSizeProdServAreaSubCustomer.txt",
+  read_delim("contracts/data/Project.SP_EngineAllVendorHistoryCompetitionFundingMechanismVendorSizeProdServAreaSubCustomerNoDescription.txt",
              na =c("NA","NULL"),delim="\t", guess_max = 900000)
 
 # engine_contracts[nrow(engine_contracts),1]
