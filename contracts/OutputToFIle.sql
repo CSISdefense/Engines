@@ -28,3 +28,9 @@ SET NOCOUNT ON;
 exec Vendor.sp_EntityCountHistoryEngineSubCustomer
 @Customer='Defense'
 
+
+SET ANSI_WARNINGS OFF;
+SET NOCOUNT ON;
+--6H41m	3,825,140 rows
+exec Project.[SP_ProdServPlatformOffice]
+@Customer='Defense'
