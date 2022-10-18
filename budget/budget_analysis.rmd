@@ -788,7 +788,7 @@ colnames(engine_budget)
 ```
 
 
-## Stage Facet
+## Stage Facet (Figure 5)
 ```{r Facet2}
 # facet 2 ------------------------------------------------------------------------
 summary(factor(engine_actual$stagename))
