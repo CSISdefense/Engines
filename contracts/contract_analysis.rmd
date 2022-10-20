@@ -242,6 +242,22 @@ write.csv(Shiny.VendorSize$data,# %>%
 sum((engine_contracts %>% filter(Competition.multisum == "Unlabeled"))$Action_Obligation_OMB23_GDP21 )
 ```
 
+###Top VEndor
+```{r TopVendor}
+Top_Vendor<-
+engine_contracts %>% group_by(AllContractor,Fiscal_Year)%>%
+  summarise(Action_Obligation_OMB23_GDP21=sum(Action_Obligation_OMB23_GDP21)
+            # Action_Obligation_2020=sum(ifelse(Fiscal_Year==2020,Action_Obligation_OMB23_GDP21,0))
+            )%>%
+              group_by (Fiscal_Year) %>%
+    mutate(rank_FY=rank(desc(Action_Obligation_OMB23_GDP21)),
+           pObl=Action_Obligation_OMB23_GDP21/sum(Action_Obligation_OMB23_GDP21))%>%
+  arrange(Fiscal_Year,rank_FY)
+
+Top_Vendor %>% dplyr::filter( rank_FY<=5)
+
+```
+
 ## Competition
 ### engine  CompetitionClassification  
 ```{r Competition}
