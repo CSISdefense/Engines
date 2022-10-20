@@ -119,11 +119,16 @@ engine_actual<-engine_just_actual %>%
   dplyr::summarize(Amount_Then_Year = sum(Amount_Then_Year, na.rm = TRUE),
                    Amount_OMB23_GDP21 = sum(Amount_OMB23_GDP21, na.rm = TRUE))
 
-engine_actual<-engine_actual %>% mutate(
-    stagename = recode(
-      stagename,
-      "'(6.7) Operational\nSystems\nDevelopment'='(6.7) Operational\nSystems Development'"
-    ))
+levels(engine_actual$stagename)=
+  list("(6.1) Basic\nResearch"="(6.1) Basic\nResearch",
+       "(6.2) Applied\nResearch"="(6.2) Applied\nResearch",                             
+ "(6.3) Advanced\nTechnology\nDevelopment"="(6.3) Advanced\nTechnology\nDevelopment",
+"(6.4) Advanced\nComponent\nDevelopment &\nPrototypes"="(6.4) Advanced\nComponent\nDevelopment &\nPrototypes",
+"(6.5) System\nDevelopment &\nDemonstration"="(6.5) System\nDevelopment &\nDemonstration",          
+"(6.7) Operational\nSystems\nDevelopment"=c("(6.7) Operational\nSystems Development",
+                                           "(6.7) Operational\nSystems\nDevelopment"
+)
+)
 
 summary(factor(engine_actual$stagename))
 summary(factor(engine_actual$stage))
