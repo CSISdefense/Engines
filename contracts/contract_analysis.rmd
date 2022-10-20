@@ -23,11 +23,11 @@ source("theme/chart_theme.R")
 source("theme/money_labels.R")
 
 # local_path<-"F:\\Users\\gsanders\\Documents\\Repositories\\Lookup-Tables\\style\\"
-local_path<-"K:\\Users\\Greg\\Repositories\\Lookup-Tables\\style\\"
+# local_path<-"K:\\Users\\Greg\\Repositories\\Lookup-Tables\\style\\"
 load(file="app/engine_contract.Rdata")
 # load(file="data/just_engine_contract.Rdata")
-labels_and_colors<-prepare_labels_and_colors(engine_contracts %>% select(-PricingMechanism,-MajorCommandName), path=local_path)
-column_key<-get_column_key(engine_contracts, path=local_path)
+labels_and_colors<-prepare_labels_and_colors(engine_contracts %>% select(-PricingMechanism,-MajorCommandName))#, path=local_path
+column_key<-get_column_key(engine_contracts)# ,path=local_path
 
 # engine_contracts %>% filter(csistransactionid==104709800)
 ```
