@@ -471,7 +471,7 @@ engine_budget_stage_service_future_wide <-
 # Actual
 
 
-## Annual
+## Annual 
 
 ```{r esa}
 # ================================================================================
@@ -483,9 +483,7 @@ engine_actual_FY <- engine_actual %>%
   group_by(FY) %>%
   dplyr::summarize(Amount_Then_Year = sum(Amount_Then_Year, na.rm = TRUE),
                    Amount_OMB23_GDP21 = sum(Amount_OMB23_GDP21, na.rm = TRUE))%>%
-  left_join(rdte %>%select(Fiscal_Year,TOA),by=c("FY"="Fiscal_Year"))
-
-
+  left_join(rdte %>%select(FY,TOA_OMB23_GDP21),by=c("FY"="FY"))
 
 
 
@@ -542,7 +540,7 @@ engine_actual_FY <- engine_actual %>%
 # )
 ```
 
-## Services
+## Services (Fig 2)
 ```{r esa}
 # ================================================================================
 # charting engines - actual  
@@ -556,10 +554,10 @@ engine_actual_FY <- engine_actual %>%
                          x_var="FY",
                          y_var="Amount_OMB23_GDP21",
                          facet="Organization",
-                         format=TRUE,
-                         caption="Budget Documents for Army, Navy, and Air Force; CSIS Analysis."
+                         format=TRUE
                          ) +
-    ggtitle("DoD RDT&E Aircraft Engine Spending Projections") +
+    labs(main="DoD RDT&E Aircraft Engine Spending Projections",
+         caption="Source: CSIS analysis based on RDT&E budget documents (PB 2000–21),\nwhich can be found at https://comptroller.defense.gov/Budget-Materials/. ") +
     scale_y_continuous(label = unit_format(unit = "M", scale = 1e-6)) +
     xlab("Fiscal Year") + 
     ylab("Constant 2021 $") +geom_vline(
@@ -605,7 +603,8 @@ engine_actual_FY_org <- engine_actual %>%
                          format=TRUE,
                          caption="Budget Documents for Army, Navy, and Air Force; CSIS Analysis."
                          ) +
-    ggtitle("DoD RDT&E Aircraft Engine Spending Projections") +
+    labs(main="DoD RDT&E Aircraft Engine Spending Projections",
+         caption="Source: CSIS analysis based on RDT&E budget documents (PB 2000–21),\nwhich can be found at https://comptroller.defense.gov/Budget-Materials/.")+
     scale_y_continuous(label = label_percent()) +
     xlab("Fiscal Year") + 
     ylab("Engines as a Percent of\nDepartment RDT&E\nTotal Obligation Authority") +geom_vline(
@@ -643,7 +642,7 @@ ggsave(
 )
 
 (
-both<-gridExtra::grid.arrange(plot_eorgact+labs(title=NULL,x=NULL),
+both<-gridExtra::grid.arrange(plot_eorgact+labs(title=NULL,x=NULL,caption=NULL),
                               plot_peorgact+labs(title=NULL))
 )
 
@@ -656,6 +655,25 @@ ggsave(
   height = 4.5,
   units = "in"
 )
+
+ggsave(
+  "charts/actual_amount_service_both.emf",
+  both,
+  # device = "svg",
+  width = 6.5,
+  height = 4.5,
+  units = "in"
+)
+
+ggsave(
+  "charts/actual_amount_service_both.png",
+  both,
+  # device = "svg",
+  width = 6.5,
+  height = 4.5,
+  units = "in"
+)
+
 
 write.csv(
   engine_actual %>% 
@@ -679,7 +697,7 @@ colnames(engine_budget)
 
 ```
 
-## Project Facet
+## Project Facet (Fig. 4)
 ```{r facet1}
 
 # facet --------------------------------------------------------------------------
@@ -744,7 +762,9 @@ levels=c("F135",
       }
     ) +
     scale_fill_manual(values=c("#72a0c1","#32602F","#1d2d5c"))+
-    ggtitle("DoD RDT&E Aircraft Engine Spending By Project") +
+    
+    labs(main="DoD RDT&E Aircraft Engine Spending By Project",
+         caption="Source: CSIS analysis based on RDT&E budget documents (PB 2000–21), which can be found at https://comptroller.defense.gov/Budget-Materials/. ") +
     xlab("Fiscal Year") +
     ylab("Constant 2021 $") + 
     geom_vline(
@@ -765,9 +785,27 @@ ggsave(
   facet+theme(legend.position="bottom")+labs(title=NULL),
   device = "svg",
   width = 6.5,
-  height = 6,
+  height = 7,
   units = "in"
 )
+
+
+ggsave(
+  "charts/actual_Amount_project.emf",
+  facet+theme(legend.position="bottom")+labs(title=NULL),
+  width = 6.5,
+  height = 7,
+  units = "in"
+)
+
+ggsave(
+  "charts/actual_Amount_project.png",
+  facet+theme(legend.position="bottom")+labs(title=NULL),
+  width = 6.5,
+  height = 7,
+  units = "in"
+)
+
 
 write.csv(
   engine_actual_1 %>% 
@@ -788,7 +826,7 @@ colnames(engine_budget)
 ```
 
 
-## Stage Facet
+## Stage Facet (Fig. 5)
 ```{r Facet2}
 # facet 2 ------------------------------------------------------------------------
 summary(factor(engine_actual$stagename))
@@ -805,7 +843,8 @@ summary(factor_wrap(engine_budget$stage,nwrap=2))
                            format=TRUE,
                            caption="Budget Documents for Army, Navy, and Air Force; CSIS Analysis."
                            ) +
-      ggtitle("DoD RDT&E Aircraft Engine Spending Projections") +
+        labs(main="DoD RDT&E Aircraft Engine Spending By Stage",
+         caption="Source: CSIS analysis based on RDT&E budget documents (PB 2000–21), which can be found at https://comptroller.defense.gov/Budget-Materials/. ") +
       scale_y_continuous(label = unit_format(unit = "M", scale = 1e-6)) +
          scale_x_continuous(
         breaks = seq(2000, 2027, by = 10),

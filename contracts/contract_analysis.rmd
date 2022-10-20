@@ -452,7 +452,8 @@ ggsave600dpi(file="charts//EngineCompSubCustShare.svg", CustCompMultiShare,
             scale_x_date(NULL,labels = scales::label_date("'%y"),date_breaks = "5 years"),
                          CustCompMultiShare+
          facet_wrap(SubCustomer.engines~.,nrow=1)+
-            scale_x_date("Fiscal Year",labels = scales::label_date("'%y"),date_breaks = "5 years"))
+            scale_x_date("Fiscal Year",labels = scales::label_date("'%y"),date_breaks = "5 years")+
+           labs(caption="Source: FPDS and CSIS Analysis."))
 )
 ggsave(file="charts/EngineCompSubCustiBoth.svg",
        both,
@@ -584,8 +585,8 @@ write.csv(file="charts//SimpleArea.csv",row.names = FALSE, na = "",
           SimpleArea$data%>% mutate(Fiscal_Year=lubridate::year(dFYear))%>%
             arrange(Fiscal_Year) %>%
             pivot_wider(id_cols=c(SimpleArea.AETP,SimpleArea.engines),
-                        names_from=Fiscal_Year,values_from=Action_Obligation_OMB23_GDP21))%>%
-  arrange(SimpleArea.AETP,SimpleArea.engines)
+                        names_from=Fiscal_Year,values_from=Action_Obligation_OMB23_GDP21)%>%
+            arrange(SimpleArea.AETP,SimpleArea.engines))
 
 ```
 
@@ -900,8 +901,8 @@ SubCustomerPSR<-build_plot(
 # ggsave600dpi("..//Output//subcustomer_PSR.png", SubCustomerPSR, 
 #              width=6.5, height= 4, units="in",size=11
 #              )
-ggsave600dpi("Charts//subcustomer_PSR.svg", SubCustomerPSR, 
-             width=6.5, height= 6, units="in",size=12,lineheight = 1.2
+ggsave("Charts//subcustomer_PSR.svg", SubCustomerPSR+labs(caption="Source: FPDS and CSIS analysis."), 
+             width=6.5, height= 6, units="in"
              )
 
 write.csv(file="charts//subcustomer_PSR.csv",row.names = FALSE, na = "",
@@ -1693,7 +1694,7 @@ pSimpleArea.AETP<-percent_contracts %>%
     column_key=column_key,
     format=TRUE,
     ytextposition=FALSE
-  )+scale_y_continuous(labels=label_percent())+
+  )+scale_y_continuous(labels=scales::label_percent())+
     # theme(strip.text.y = element_text(angle=0))+
     # theme(axis.text.x = element_text(angle=90))+
     #    scale_y_continuous("Percent of Obligations", labels = percent_format(accuracy=1))+
@@ -1716,10 +1717,13 @@ ggsave600dpi(gridExtra::grid.arrange(pSA+labs(caption=NULL),pSA),
                                  labs(y="Obligations\n(Constant 2021 $s)")+
                             scale_x_date(labels = scales::label_date("'%y"),date_breaks = "5 years")+
                             theme(legend.position="right"),
-                          pSA+scale_x_date("Fiscal Year",labels = scales::label_date("'%y"),date_breaks = "5 years"))
+                          pSA+
+                            scale_x_date("Fiscal Year",labels = scales::label_date("'%y"),date_breaks = "5 years")+
+                            labs(
+                                      caption=
+                                        "Source: Federal Procurement Data System (FPDS) and CSIS analysis."))
     )
 ggsave(file="charts/SimpleAreaBoth.svg",
-       
        both,
        width=6.5,height=4.5)
        
