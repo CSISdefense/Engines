@@ -125,8 +125,8 @@ d99 <- d99 %>%
 gb<-read_csv("budget/data/FY23 PB Green Book Table 6-1.csv",skip = 3)
 rdte<-gb[6,c(1,5:ncol(gb)-1)]
 rdte<-rdte%>%pivot_longer(cols=-1)
-colnames(rdte)<-c("PublicLawTitle","Fiscal_Year","TOA")
-rdte$Fiscal_Year<-as.numeric(substr(rdte$Fiscal_Year,4,7))
+colnames(rdte)<-c("PublicLawTitle","FY","TOA")
+rdte$FY<-as.numeric(substr(rdte$FY,4,7))
 rdte<-rdte%>% csis360::deflate(
   money_var= "TOA",
   fy_var="FY",
