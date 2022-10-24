@@ -683,7 +683,9 @@ ggsave(
   # device = "svg",
   width = 6.5,
   height = 4.5,
-  units = "in"
+  units = "in",
+  dpi=600
+  
 )
 
 
@@ -815,7 +817,9 @@ ggsave(
   facet+theme(legend.position="bottom")+labs(title=NULL),
   width = 6.5,
   height = 7,
-  units = "in"
+  units = "in",
+  dpi=600
+  # size=12,lineheight = 1
 )
 
 
@@ -893,10 +897,17 @@ summary(factor_wrap(engine_budget$stage,nwrap=2))
   ggsave(
     "charts/actual_amount_service_stage_nocrosstab.svg",
     plot_eorgstageact+theme(legend.position="non")+labs(title=NULL),
-    device = "svg",
-    width = 8,
+    width = 7.5,
     height = 4,
     units = "in"
+  )
+  ggsave600dpi(
+    "charts/actual_amount_service_stage_nocrosstab.png",
+    plot_eorgstageact+theme(legend.position="non")+labs(title=NULL),
+    width = 7.5,
+    height = 4,
+    units = "in",
+    size=12, lineheight = 1
   )
 
 write.csv(

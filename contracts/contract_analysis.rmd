@@ -473,6 +473,9 @@ ggsave600dpi(file="charts//EngineCompSubCustShare.svg", CustCompMultiShare,
 )
 ggsave(file="charts/EngineCompSubCustiBoth.svg",
        both,
+       width=6.5,height=4.5,dpi=600)
+ggsave(file="charts/EngineCompSubCustiBoth.png",
+       both,
        width=6.5,height=4.5)
        
 write.csv(file="charts//EngineCompSubCust.csv",row.names = FALSE, na = "",
