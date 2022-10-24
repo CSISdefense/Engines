@@ -24,19 +24,75 @@ library(readr)
 
 source("contracts/theme/chart_theme.R")
 source("contracts/theme/money_labels.R")
+# path<-"C:\\Users\\gsand\\Repositories\\Lookup-Tables\\"
+# path<-"https://raw.githubusercontent.com/CSISdefense/Lookup-Tables/master/"
+path<-"K:\\Users\\Greg\\Repositories\\Lookup-Tables\\"
 
 # --------------------------------------------------------------------------------
 # Read engine contract data ####
 engine_contracts <-
-  read_delim("contracts/data/Project.SP_EngineAllVendorHistoryCompetitionFundingMechanismVendorSizeProdServAreaSubCustomerNoDescription.txt",
+  read_delim("contracts/data/Project.SP_EngineAllVendorHistoryCompetitionBudgetMechanismVendorSizeProdServAreaSubCustomer2.txt",
              na =c("NA","NULL"),delim="\t", guess_max = 900000)
+colnames(engine_contracts)
 #674730
+engine_contracts<-engine_contracts %>% select(-dunsnumber...22)
+colnames(engine_contracts)[colnames(engine_contracts)=="dunsnumber...14"]<-"dunsnumber"
+engine_contracts$progsourceaccount <-text_to_number(engine_contracts$progsourceaccount )
+# debug(read_and_join_experiment)
+engine_contracts<-read_and_join_experiment(engine_contracts,
+                                      "Budget_MainAccountCode.csv",
+                                      by=c("progsourceagency"="TreasuryAgencyCode",
+                                           "progsourceaccount"="MainAccountCode"),
+                                      add_var=c("ColorOfMoney"),
+                                      skip_check_var = c("ColorOfMoney"),
+                                      path=path,
+                                      dir="budget/",
+                                      case_sensitive = FALSE
+                                      )
+
 # engine_contracts[nrow(engine_contracts),1]
 while(engine_contracts[nrow(engine_contracts),1] %in% c("0","Return Value","0\r" ,"Return Value\r"))
   engine_contracts<-engine_contracts[1:nrow(engine_contracts)-1,]
 
-engine_contracts<-apply_standard_lookups(engine_contracts,
-                                         path="C:\\Users\\gsand\\Repositories\\Lookup-Tables\\")
+# undebug(apply_standard_lookups)
+engine_contracts<-apply_standard_lookups(engine_contracts,path=path)
+
+engine_contracts %>% filter(Fiscal_Year>=2011 & Fiscal_Year<=2017) %>%
+  group_by(progsourceagency,progsourceaccount,ColorOfMoney) %>%
+  summarise(Action_Obligation_OMB23_GDP21=sum(Action_Obligation_OMB23_GDP21,na.rm=TRUE)) %>%
+  arrange(-Action_Obligation_OMB23_GDP21)
+
+write.csv(engine_contracts %>% filter(Fiscal_Year>=2011 & Fiscal_Year<=2017) %>%
+  group_by(progsourceagency,progsourceaccount,ColorOfMoney) %>%
+  summarise(Action_Obligation_OMB23_GDP21=sum(Action_Obligation_OMB23_GDP21,na.rm=TRUE)),
+  file="contracts/data/BudgetAccount.csv",row.names = FALSE)
+
+engine_contracts %>% filter(Fiscal_Year>=2011 & Fiscal_Year<=2017) %>%
+  group_by(ColorOfMoney,fundingrequestingagencyid,fundingrequestingofficeid) %>%
+  summarise(Action_Obligation_OMB23_GDP21=sum(Action_Obligation_OMB23_GDP21,na.rm=TRUE)) %>%
+  arrange(-Action_Obligation_OMB23_GDP21)
+
+write.csv(engine_contracts %>% filter(Fiscal_Year>=2011 & Fiscal_Year<=2017) %>%
+            group_by(ColorOfMoney,fundingrequestingagencyid,fundingrequestingofficeid,FundingMajorCommandCode) %>%
+            summarise(Action_Obligation_OMB23_GDP21=sum(Action_Obligation_OMB23_GDP21,na.rm=TRUE)),
+          file="contracts/data/BudgetAccountFundingOffice.csv",row.names = FALSE)
+
+
+engine_contracts<-engine_contracts %>% 
+  mutate(derived_link=paste("https://www.usaspending.gov/award/CONT_AWD_",PIID,"_",agencyid,"_",
+                            ifelse(is.na(idvpiid)|idvpiid=="","_NONE_",idvpiid),"_",
+                            ifelse(is.na(idvagencyid)|idvagencyid=="","_NONE_",idvagencyid),"/",sep=""))
+
+summary(engine_contracts$derived_link==engine_contracts$usaspending_permalink)
+
+View(engine_contracts %>% select(usaspending_permalink,derived_link,agencyid,PIID,idvagencyid,idvpiid)%>% filter(engine_contracts$derived_link!=engine_contracts$usaspending_permalink))
+
+write.csv(engine_contracts %>% #filter(Fiscal_Year>=2011 & Fiscal_Year<=2017) %>%
+            group_by(usaspending_permalink,derived_link,SubCustomer.JPO,SimpleArea.engines,agencyid,PIID,idvagencyid,idvpiid,ProjectID,Project.Name,ColorOfMoney) %>%
+            summarise(Action_Obligation_OMB23_GDP21=sum(Action_Obligation_OMB23_GDP21,na.rm=TRUE)),
+          file="contracts/data/TopContract.csv",row.names = FALSE)
+
+
 
 # --------------------------------------------------------------------------------
 # read topline contract data
@@ -58,9 +114,10 @@ while(topline_contracts[nrow(topline_contracts),1] %in% c("0","Return Value","0\
 #   group_by(Fiscal_Year, Contracting_Agency_ID, ProductOrServiceCode, ProjectID,PlatformPortfolio) %>%
 #   dplyr::summarise(Action_Obligation = sum(Action_Obligation, na.rm = TRUE))
 
-debug(apply_standard_lookups)
+# undebug(apply_standard_lookups)
 topline_contracts<-apply_standard_lookups(topline_contracts,
-                                          path="C:\\Users\\gsand\\Repositories\\Lookup-Tables\\")
+                                          path=path)
+
 topline_contracts<-topline_contracts%>% filter(Customer=="Defense")
 # if ("SubCustomer.platform" %in% names(engine_contracts) & "ProjectName" %in% names(topline_contracts)){
 #   topline_contracts$SubCustomer.JPO<-as.character(topline_contracts$SubCustomer.platform)
@@ -105,7 +162,8 @@ nrow(engine_contracts %>% filter(Customer=="Defense" & (((PlatformPortfolio == "
 #674,730
 
 
-write.csv(engine_contracts %>% filter(ProductOrServiceCode %in% servicelist),file="contracts/data/engine_ambiguous_service_contracts.csv")
+write.csv(engine_contracts %>% filter(ProductOrServiceCode %in% servicelist),file="contracts/data/engine_ambiguous_service_contracts.csv",
+          row.names = FALSE)
 
 nrow(engine_contracts %>% filter(Customer=="Defense" & (((PlatformPortfolio == "Aircraft") & 
                                                            (ProductOrServiceArea == "Engines & Power Plants" |
@@ -183,6 +241,7 @@ levels(topline_contracts$SubCustomer.engines)<-list(
 summary(factor(engine_contracts$ContractingAgencyName))
 summary(factor(topline_contracts$ContractingAgencyName))
 
+engine_contracts<-engine_contracts %>% mutate(AllContractor=ifelse(is.na(ParentID),dunsnumber,ParentID))
 biz_engine_contracts<-engine_contracts %>% dplyr::rename(
   fy = Fiscal_Year,
   amount = Action_Obligation_OMB23_GDP21,
@@ -193,7 +252,7 @@ biz_engine_contracts<-engine_contracts %>% dplyr::rename(
   competition = Competition.multisum,
   contract_type = PricingMechanism,
   vendor_size = VendorSize,
-  # parent = ParentID,
+  parent = ParentID,
   AllContractor = AllContractor,
   project = Project.Name
 )
@@ -204,7 +263,6 @@ write.csv(biz_engine_contracts, "contracts/app/power_bi.csv")
 save(topline_contracts ,engine_contracts,file="contracts/app/engine_contract.Rdata")
 # load(file="contracts/app/engine_contract.Rdata")
 
-local_path<-"K:\\Users\\Greg\\Repositories\\Lookup-Tables\\style\\"
 
 #-----------------------------------------------------------------------
 # Top 10 Data processing
@@ -347,3 +405,6 @@ OTA_engine<-OTA_data_current %>% filter(ProductServiceOrRnDarea == "Engines & Po
   'J028','J029','H128','H129','H228','H229','H328','H329','H928','H929',
   'K028','K029','L028','L029','N028','N029','W028','W029'))
 write_csv(file="contracts//data//OTA_engine.csv",OTA_engine)
+
+
+summary(factor(engine_contracts$MainAccountTitle))

@@ -23,11 +23,12 @@ source("theme/chart_theme.R")
 source("theme/money_labels.R")
 
 # local_path<-"F:\\Users\\gsanders\\Documents\\Repositories\\Lookup-Tables\\style\\"
+# path<-"https://raw.githubusercontent.com/CSISdefense/Lookup-Tables/master/"
 # local_path<-"K:\\Users\\Greg\\Repositories\\Lookup-Tables\\style\\"
 load(file="app/engine_contract.Rdata")
 # load(file="data/just_engine_contract.Rdata")
-labels_and_colors<-prepare_labels_and_colors(engine_contracts %>% select(-PricingMechanism,-MajorCommandName))#, path=local_path
-column_key<-get_column_key(engine_contracts)# ,path=local_path
+labels_and_colors<-prepare_labels_and_colors(engine_contracts %>% select(-PricingMechanism,-MajorCommandName), path=local_path)
+column_key<-get_column_key(engine_contracts ,path=local_path)
 
 # engine_contracts %>% filter(csistransactionid==104709800)
 ```
@@ -817,6 +818,96 @@ write.csv(file="charts//psr_Service_current.csv",row.names = FALSE, na = "",
 # saveWorkbook(wb)
 
 ```
+
+### ColorOfMoney
+```{r ColorOfMoney}
+
+
+(
+  ColorOfMoney<-build_plot(
+    data=engine_contracts %>% filter(!is.na(SimpleArea) & 
+                                       Fiscal_Year>=2011 & Fiscal_Year<=2017),
+    chart_geom = "Bar Chart",
+    share = FALSE,
+    labels_and_colors=labels_and_colors,
+    # NA, #VAR.ncol
+    x_var="dFYear", #x_var
+    y_var="Action_Obligation_OMB23_GDP21", #VAR.y.variable
+    color_var="SimpleArea.engines", #color_var
+    facet_var="ColorOfMoney", #facet_var
+    column_key=column_key,
+    format=TRUE,
+    ytextposition=FALSE
+  )+
+    # theme(strip.text.y = element_text(angle=0))+
+    # theme(axis.text.x = element_text(angle=90))+
+    #    scale_y_continuous("Percent of Obligations", labels = percent_format(accuracy=1))+
+    #      facet_grid(.~Competition.sum ,scales="free_x", space="free_x"
+    #             )+labs(title=NULL,
+    # x="Fiscal Year",
+    # y="Percent of Obligations",
+    # color="Competition")+
+    # scale_y_continuous(expand=expansion(add=c(0,1.5e9)),label = scales::unit_format(unit = "M", scale = 1e-6))+
+    theme(legend.position = "bottom")+
+    labs(y="Obligations (Constant 2021 $s)")#+
+    # facet_grid(ColorOfMoney~.,scales="free_y",space="free_y")
+)
+
+
+
+(
+  ColorOfMoneySubCust<-build_plot(
+    data=engine_contracts %>% filter(!is.na(SimpleArea) & 
+                                       Fiscal_Year>=2011 & Fiscal_Year<=2017),
+    chart_geom = "Bar Chart",
+    share = FALSE,
+    labels_and_colors=labels_and_colors,
+    # NA, #VAR.ncol
+    x_var="dFYear", #x_var
+    y_var="Action_Obligation_OMB23_GDP21", #VAR.y.variable
+    color_var="SubCustomer.engines", #color_var
+    facet_var="ColorOfMoney", #facet_var
+    # second_var="SubCustomer.engines",
+    column_key=column_key,
+    format=TRUE,
+    ytextposition=FALSE
+  )+
+    # theme(strip.text.y = element_text(angle=0))+
+    # theme(axis.text.x = element_text(angle=90))+
+    #    scale_y_continuous("Percent of Obligations", labels = percent_format(accuracy=1))+
+    #      facet_grid(.~Competition.sum ,scales="free_x", space="free_x"
+    #             )+labs(title=NULL,
+    # x="Fiscal Year",
+    # y="Percent of Obligations",
+    # color="Competition")+
+    # scale_y_continuous(expand=expansion(add=c(0,1.5e9)),label = scales::unit_format(unit = "M", scale = 1e-6))+
+    theme(legend.position = "bottom")+
+    labs(y="Obligations (Constant 2021 $s)")#+
+    # facet_grid(ColorOfMoney~.,scales="free_y",space="free_y")
+)
+
+
+ggsave600dpi(ColorOfMoney,file="charts/ColorOfMoney.png",width=5,height=6,size = 11)
+ggsave600dpi(ColorOfMoney,file="charts/ColorOfMoney.svg",width=3.25,height=6,size = 11)
+ggsave600dpi(ColorOfMoneySubCust,file="charts/ColorOfMoneySubCust.png",width=5,height=6,size = 11)
+ggsave600dpi(ColorOfMoneySubCust,file="charts/ColorOfMoneySubCust.svg",width=3.25,height=6,size = 11)
+
+write.csv(file="charts//ColorOfMoney.csv",row.names = FALSE, na = "",
+          ColorOfMoney$data%>% mutate(Fiscal_Year=lubridate::year(dFYear))%>%
+            arrange(Fiscal_Year) %>%
+            pivot_wider(id_cols=c(ColorOfMoney,SimpleArea.engines),
+                        names_from=Fiscal_Year,values_from=Action_Obligation_OMB23_GDP21)%>%
+            arrange(ColorOfMoney,SimpleArea.engines))
+
+write.csv(file="charts//ColorOfMoneySubCust.csv",row.names = FALSE, na = "",
+          ColorOfMoneySubCust$data%>% mutate(Fiscal_Year=lubridate::year(dFYear))%>%
+            arrange(Fiscal_Year) %>%
+            pivot_wider(id_cols=c(ColorOfMoney,SubCustomer.engines),
+                        names_from=Fiscal_Year,values_from=Action_Obligation_OMB23_GDP21)%>%
+            arrange(ColorOfMoney,SubCustomer.engines))
+
+```
+
 ## engine contracts by Contract Type 
 ```{r Pricing}
 levels(factor(engine_contracts$PricingMechanism))
