@@ -34,3 +34,13 @@ SET NOCOUNT ON;
 --6H41m	3,825,140 rows
 exec Project.[SP_ProdServPlatformOffice]
 @Customer='Defense'
+
+SET ANSI_WARNINGS OFF;
+SET NOCOUNT ON;
+ exec Vendor.[SP_ParentIDprodServPlatformOffice]
+
+--4H21m	674,784 rows
+SET ANSI_WARNINGS OFF;
+SET NOCOUNT ON;
+exec [Project].[SP_EngineAllVendorHistoryCompetitionBudgetMechanismVendorSizeProdServAreaSubCustomer]
+
