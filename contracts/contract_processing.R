@@ -31,7 +31,7 @@ path<-"K:\\Users\\Greg\\Repositories\\Lookup-Tables\\"
 # --------------------------------------------------------------------------------
 # Read engine contract data ####
 engine_contracts <-
-  read_delim("contracts/data/Project.SP_EngineAllVendorHistoryCompetitionBudgetMechanismVendorSizeProdServAreaSubCustomer2.txt",
+  read_delim("contracts/data/Project.SP_EngineAllVendorHistoryCompetitionBudgetMechanismVendorSizeProdServAreaSubCustomer.txt",
              na =c("NA","NULL"),delim="\t", guess_max = 900000)
 colnames(engine_contracts)
 #674730
@@ -72,10 +72,6 @@ engine_contracts %>% filter(Fiscal_Year>=2011 & Fiscal_Year<=2017) %>%
   summarise(Action_Obligation_OMB23_GDP21=sum(Action_Obligation_OMB23_GDP21,na.rm=TRUE)) %>%
   arrange(-Action_Obligation_OMB23_GDP21)
 
-write.csv(engine_contracts %>% filter(Fiscal_Year>=2011 & Fiscal_Year<=2017) %>%
-            group_by(ColorOfMoney,fundingrequestingagencyid,fundingrequestingofficeid,FundingMajorCommandCode) %>%
-            summarise(Action_Obligation_OMB23_GDP21=sum(Action_Obligation_OMB23_GDP21,na.rm=TRUE)),
-          file="contracts/data/BudgetAccountFundingOffice.csv",row.names = FALSE)
 
 
 engine_contracts<-engine_contracts %>% 
@@ -85,12 +81,12 @@ engine_contracts<-engine_contracts %>%
 
 summary(engine_contracts$derived_link==engine_contracts$usaspending_permalink)
 
-View(engine_contracts %>% select(usaspending_permalink,derived_link,agencyid,PIID,idvagencyid,idvpiid)%>% filter(engine_contracts$derived_link!=engine_contracts$usaspending_permalink))
+# View(engine_contracts %>% select(usaspending_permalink,derived_link,agencyid,PIID,idvagencyid,idvpiid)%>% filter(engine_contracts$derived_link!=engine_contracts$usaspending_permalink))
 
-write.csv(engine_contracts %>% #filter(Fiscal_Year>=2011 & Fiscal_Year<=2017) %>%
-            group_by(usaspending_permalink,derived_link,SubCustomer.JPO,SimpleArea.engines,agencyid,PIID,idvagencyid,idvpiid,ProjectID,Project.Name,ColorOfMoney) %>%
-            summarise(Action_Obligation_OMB23_GDP21=sum(Action_Obligation_OMB23_GDP21,na.rm=TRUE)),
-          file="contracts/data/TopContract.csv",row.names = FALSE)
+# write.csv(engine_contracts %>% #filter(Fiscal_Year>=2011 & Fiscal_Year<=2017) %>%
+#             group_by(usaspending_permalink,derived_link,SubCustomer.JPO,SimpleArea.engines,ProjectID,Project.Name,ColorOfMoney) %>%
+#             summarise(Action_Obligation_OMB23_GDP21=sum(Action_Obligation_OMB23_GDP21,na.rm=TRUE)),
+#           file="contracts/data/TopContract.csv",row.names = FALSE)
 
 
 
@@ -147,19 +143,19 @@ nrow(engine_contracts %>% filter(Customer=="Defense" & (((PlatformPortfolio == "
 nrow(engine_contracts %>% filter(Customer=="Defense" & (((PlatformPortfolio == "Aircraft") & 
                                                            (ProductOrServiceArea == "Engines & Power Plants" |
                                                          ClaimantProgramCode == 'A1B')))))
-#660,504
+#660,558
 nrow(engine_contracts %>% filter(Customer=="Defense" & (((PlatformPortfolio == "Aircraft") & 
                                                            (ProductOrServiceArea == "Engines & Power Plants" |
                                                               ClaimantProgramCode == 'A1B'|
                                                               ProductOrServiceCode %in% servicelist)))))
-#664.421
+#664.475
 nrow(engine_contracts %>% filter(Customer=="Defense" & (((PlatformPortfolio == "Aircraft") & 
                                                            (ProductOrServiceArea == "Engines & Power Plants" |
                                                               ClaimantProgramCode == 'A1B'|
                                                               ProductOrServiceCode %in% servicelist)))|
                                                           (ProductOrServiceCode %in% servicelist &
                                                            ClaimantProgramCode %in% c('C9E','S1','S10'))))
-#674,730
+#674,784
 
 
 write.csv(engine_contracts %>% filter(ProductOrServiceCode %in% servicelist),file="contracts/data/engine_ambiguous_service_contracts.csv",
@@ -176,7 +172,7 @@ nrow(engine_contracts %>% filter(Customer=="Defense" & (((PlatformPortfolio == "
                                          SubCustomer=="Air Force"))))
 
 
-#666,579
+#666,663
 
 #Narrow down engine services, when no platform is available, to customers known to be focused on aircraft
 engine_contracts<-engine_contracts %>% filter(Customer=="Defense" & (((PlatformPortfolio == "Aircraft") & 
@@ -224,19 +220,21 @@ engine_contracts$SubCustomer.engines<-engine_contracts$SubCustomer.JPO
 levels(engine_contracts$SubCustomer.engines)<-list(
   "Army"="Army",
   "Navy"="Navy",
-  "F-35 JPO"="F-35 JPO",
+  "F-35 MDAP"=c("F-35 JPO","F-35 MDAP"),
   "Air Force"="Air Force",
   "DLA and Other DoD"=c("DLA","Other DoD"))
+engine_contracts$SubCustomer.engines[engine_contracts$Project.Name=="JSF (F-35)"]<-"F-35 MDAP"
+
 
 topline_contracts$SubCustomer.engines<-topline_contracts$SubCustomer.JPO
 levels(topline_contracts$SubCustomer.engines)<-list(
   "Army"="Army",
   "Navy"="Navy",
-  "F-35 JPO"="F-35 JPO",
+  "F-35 MDAP"=c("F-35 JPO","F-35 MDAP"),
   "Air Force"="Air Force",
   "DLA and Other DoD"=c("DLA","Other DoD")
   )
-
+topline_contracts$SubCustomer.engines[topline_contracts$Project.Name=="JSF (F-35)"]<-"F-35 MDAP"
 
 summary(factor(engine_contracts$ContractingAgencyName))
 summary(factor(topline_contracts$ContractingAgencyName))
