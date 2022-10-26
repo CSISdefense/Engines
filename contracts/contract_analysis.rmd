@@ -23,8 +23,8 @@ source("theme/chart_theme.R")
 source("theme/money_labels.R")
 
 # local_path<-"F:\\Users\\gsanders\\Documents\\Repositories\\Lookup-Tables\\style\\"
-# path<-"https://raw.githubusercontent.com/CSISdefense/Lookup-Tables/master/"
-# local_path<-"K:\\Users\\Greg\\Repositories\\Lookup-Tables\\style\\"
+# local_path<-"https://raw.githubusercontent.com/CSISdefense/Lookup-Tables/master/"
+local_path<-"K:\\Users\\Greg\\Repositories\\Lookup-Tables\\style\\"
 load(file="app/engine_contract.Rdata")
 # load(file="data/just_engine_contract.Rdata")
 labels_and_colors<-prepare_labels_and_colors(engine_contracts %>% select(-PricingMechanism,-MajorCommandName), path=local_path)
@@ -124,6 +124,10 @@ engine_contracts$TopPStext<-factor_wrap(engine_contracts$TopPStext)
 
 summary(factor(engine_contracts$TopPStext))
 
+write.csv(engine_contracts %>% filter(Fiscal_Year>=2011 & Fiscal_Year<=2017) %>%
+            group_by(ColorOfMoney,fundingrequestingagencyid,fundingrequestingofficeid,FundingMajorCommandCode) %>%
+            summarise(Action_Obligation_OMB23_GDP21=sum(Action_Obligation_OMB23_GDP21,na.rm=TRUE)),
+          file="contracts/data/BudgetAccountFundingOffice.csv",row.names = FALSE)
 
 ```
 ## Service investigation
@@ -849,8 +853,8 @@ write.csv(file="charts//psr_Service_current.csv",row.names = FALSE, na = "",
     # color="Competition")+
     # scale_y_continuous(expand=expansion(add=c(0,1.5e9)),label = scales::unit_format(unit = "M", scale = 1e-6))+
     theme(legend.position = "bottom")+
-    labs(y="Obligations (Constant 2021 $s)")#+
-    # facet_grid(ColorOfMoney~.,scales="free_y",space="free_y")
+    labs(y="Obligations (Constant 2021 $s)")+
+    facet_wrap(ColorOfMoney~.,nrow=2)
 )
 
 
@@ -882,13 +886,13 @@ write.csv(file="charts//psr_Service_current.csv",row.names = FALSE, na = "",
     # color="Competition")+
     # scale_y_continuous(expand=expansion(add=c(0,1.5e9)),label = scales::unit_format(unit = "M", scale = 1e-6))+
     theme(legend.position = "bottom")+
-    labs(y="Obligations (Constant 2021 $s)")#+
-    # facet_grid(ColorOfMoney~.,scales="free_y",space="free_y")
+    labs(y="Obligations (Constant 2021 $s)")+
+    facet_wrap(ColorOfMoney~.,nrow=2)
 )
 
 
-ggsave600dpi(ColorOfMoney,file="charts/ColorOfMoney.png",width=5,height=6,size = 11)
-ggsave600dpi(ColorOfMoney,file="charts/ColorOfMoney.svg",width=3.25,height=6,size = 11)
+ggsave600dpi(ColorOfMoney,file="charts/ColorOfMoney.png",width=6.5,height=2.75,size = 11)
+ggsave600dpi(ColorOfMoney,file="charts/ColorOfMoney.svg",width=6.5,height=2.75,size = 11)
 ggsave600dpi(ColorOfMoneySubCust,file="charts/ColorOfMoneySubCust.png",width=5,height=6,size = 11)
 ggsave600dpi(ColorOfMoneySubCust,file="charts/ColorOfMoneySubCust.svg",width=3.25,height=6,size = 11)
 
@@ -1021,10 +1025,18 @@ ggsave("Charts//subcustomer_PSR.png",
 
 write.csv(file="charts//subcustomer_PSR.csv",row.names = FALSE, na = "",
           SubCustomerPSR$data%>% mutate(Fiscal_Year=lubridate::year(dFYear))%>%
+            arrange(Fiscal_Year) %>%
             pivot_wider(id_cols=c(SubCustomer.engines,SimpleArea.AETP,SimpleArea.engines),
                         names_from=Fiscal_Year,values_from=Action_Obligation_OMB23_GDP21)%>%
             arrange(SubCustomer.engines,SimpleArea.AETP,SimpleArea.engines))
+summary(SubCustomerPSR$data$SubCustomer.engines)
+summary(SubCustomerPSR$data$SimpleArea.engines)
 
+summary(factor(engine_contracts$SubCustomer.engines))
+summary(factor(engine_contracts$SimpleArea.engines))
+# View(engine_contracts %>% filter(SubCustomer.engines!="F-35 JPO" & SimpleArea.engines=="JSF (F-35)"))
+write.csv(row.names = FALSE,engine_contracts %>% filter(SubCustomer.engines!="F-35 MDAP" & SimpleArea.engines=="JSF (F-35)"),
+          file = "charts/f35conflict.csv")
 ```
 
 ## super facet
@@ -1426,7 +1438,7 @@ dyear <- comparison_contracts %>%
 #Add lagged year
 sumcheck<-sum(comparison_contracts$Action_Obligation_OMB23_GDP21,na.rm=TRUE)
 comparison_contracts <- comparison_contracts %>%
-  left_join(dyear, by = c("Fiscal_Year", "SubCustomer", "SimpleArea", "type"))# %>%
+  left_join(dyear, by = c("Fiscal_Year", "SubCustomer", "SimpleArea", "SimpleArea.AETP","type","dFYear"))# %>%
 if(sumcheck!=sum(comparison_contracts$Action_Obligation_OMB23_GDP21,na.rm=TRUE)) stop("Sum Check Error")
 
 
@@ -1434,12 +1446,12 @@ dyear <- comparison_contracts %>%
   filter(Fiscal_Year==2000) %>%
   dplyr::rename(Action_Obligation_OMB23_GDP21.2000 = Action_Obligation_OMB23_GDP21) %>%
   group_by()%>%
-  select(-Action_Obligation_OMB23_GDP21.lagged,-Fiscal_Year)
+  select(-Action_Obligation_OMB23_GDP21.lagged,-Fiscal_Year,-dFYear)
 
 #Add 2000
 sumcheck<-sum(comparison_contracts$Action_Obligation_OMB23_GDP21,na.rm=TRUE)
 comparison_contracts <- comparison_contracts %>%
-  left_join(dyear, by = c("SubCustomer", "SimpleArea", "type")) %>%
+  left_join(dyear, by = c( "SubCustomer", "SimpleArea", "SimpleArea.AETP","type")) %>%
   mutate(amount_change = Action_Obligation_OMB23_GDP21 - Action_Obligation_OMB23_GDP21.lagged,
          baseline_change = Action_Obligation_OMB23_GDP21 - Action_Obligation_OMB23_GDP21.2000) #%>% 
 if(sumcheck!=sum(comparison_contracts$Action_Obligation_OMB23_GDP21,na.rm=TRUE)) stop("Sum Check Error")
@@ -1452,7 +1464,7 @@ rm(dyear)
 
 (
   comparison_contracts_overall <- comparison_contracts %>%
-    group_by(Fiscal_Year,dFYear type) %>%
+    group_by(Fiscal_Year,dFYear, type) %>%
     dplyr::summarise(Action_Obligation_OMB23_GDP21 = sum(Action_Obligation_OMB23_GDP21, na.rm = TRUE),
                      Action_Obligation_OMB23_GDP21.lagged = sum(Action_Obligation_OMB23_GDP21.lagged, na.rm = TRUE),
                      amount_change = sum(amount_change, na.rm = TRUE),
@@ -1848,7 +1860,8 @@ ggsave(file="charts/SimpleAreaBoth.png",
 write.csv(file="charts//pSimpleArea.csv",row.names = FALSE, na = "",
           pSA$data%>% mutate(Fiscal_Year=lubridate::year(dFYear))%>%
             pivot_wider(id_cols=c(SimpleArea.AETP,MetricName),
-                        names_from=Fiscal_Year,values_from=value))
+                        names_from=Fiscal_Year,values_from=value)%>%
+            arrange(desc(SimpleArea.AETP),MetricName)) 
 
 ```
 
