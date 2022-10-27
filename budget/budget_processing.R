@@ -240,21 +240,95 @@ if(any(is.na(engine_budget$ProjectName))){
   View(engine_budget %>% filter(is.na(ProjectName)))
 }
 
+
+
+#### 0603830
+# path<-"C:\\Users\\gsand\\Repositories\\Lookup-Tables\\"
+# path<-"https://raw.githubusercontent.com/CSISdefense/Lookup-Tables/master/"
+path<-"K:\\Users\\Greg\\Repositories\\Lookup-Tables\\Style\\"
+
+label_0603800<-function(x,path="https://raw.githubusercontent.com/CSISdefense/Lookup-Tables/master/Style/"){
+  # if(!"Target.Value.of.Contract" %in% colnames(x)) x$Target.Value.of.Contract<-NA
+  x<-standardize_variable_names(x,replace_special = TRUE,path)
+  
+  x$Line<-row.names(x)
+  x<-x%>% pivot_longer(cols=c(-PByear,
+                              -Line,
+                                      -ProgramElement,
+                                      -ProgramElementTitle,
+                                      -BudgetActivity,
+                                      -Cost.Categories,
+                                      -Contractor.or.Government.Performing.Activity,
+                                      -Contract.Method.Type.or.Funding.Vehicle,
+                                      -Award.or.Obligation.Date,
+  ),names_to = "FY",
+  values_to="Amount")
+  x
+}
+# undebug(label_0603800)
+jsf99<-label_0603800(read_csv("budget/data/99_0603800.csv"),path)
+jsf00<-label_0603800(read_csv("budget/data/00_0603800.csv"),path)
+jsf01<-label_0603800(read_csv("budget/data/01_0603800.csv"),path)
+jsf02<-label_0603800(read_csv("budget/data/02_0603800.csv"),path)
+jsf03<-label_0603800(read_csv("budget/data/03_0603800.csv"),path)
+jsf03$Amount<-jsf03$Amount*1000
+jsf<-rbind(jsf99,jsf00,jsf01,jsf02,jsf03)
+
+levels(factor(jsf$FY))
+levels(factor(gsub("FY.","",jsf$FY)))
+#Drop prior years and base/oco breakouts
+jsf<-jsf%>%  mutate(FY=gsub("FY.","",FY))%>%
+  mutate(FY=gsub(".Cost","",FY))%>%
+  mutate(FY=gsub("Budget.","",FY)) %>% 
+           filter(!FY %in% c("Prior Years","Cost.to.Complete","Performing.Activity.EAC","Project.Office.EAC",
+                               "Target.Value.of.Contract","to.Complete","Total","Total.Prior.1997",
+                               "Total.Prior.1998","Total.Prior.1999","Total.Prior.2000","Total.Program","Total.PY.s"  
+                               ))
+  
+levels(factor(jsf$FY))
+jsf <- jsf %>%   mutate(FY=as.numeric(FY))
+
+levels(factor(jsf$Contractor.or.Government.Performing.Activity))
+jsf$Project.Name[jsf$Contractor.or.Government.Performing.Activity %in% c("GE","GE, Cincinnati OH","General Electric")]<-"F136"
+jsf$Project.Name[jsf$Contractor.or.Government.Performing.Activity %in% c("Pratt & Whitney","Pratt & Whitney *, Hartford, CT","Pratt & Whitney,East Hartford CT",
+                                                           "Pratt/Whitney","Various")]<-"F135"
+jsf_review<-jsf %>% pivot_wider(names_from="FY",values_from="Amount")  %>% arrange(Cost.Categories,Line,PByear)  %>%
+  select(-ProgramElementTitle,-BudgetActivity)
+write.csv(jsf_review,file="Budget/data/jsf_review.csv",row.names = FALSE)
+                                                           
+summary(factor(jsf$Project.Name))
+summary(factor(jsf$Contractor.or.Government.Performing.Activity[is.na(jsf$Project.Name)]))
+# View(jsf %>% filter(is.na(Project.Name)))
+
+jsfjoin <- jsf %>%   dplyr::rename(
+  # PByear = FYDP.Year,
+  Program.Number = ProgramElement,
+  Program.Name = ProgramElementTitle,
+) %>% mutate(Type="RDT&E",Project.Number=0) %>%
+  group_by(PByear,Type,Program.Number,Program.Name,Project.Number,Project.Name,FY)%>%
+  summarise(Amount=sum(Amount,na.rm=TRUE)) 
+  
+
+
+
 # --------------------------------------------------------------------------------
-# add F135 
+#### add F135  ####
 #   (note: separate because F135 funding is embedded into the broader F-35 line)
 
 service_ratio <- read_csv("budget/data/service_ratio.csv")
+service_ratio<-standardize_variable_names(service_ratio,replace_special = TRUE)
 service_ratio$checksum<-service_ratio$navy_ratio+service_ratio$air_force_ratio
 
 f135 <- read_csv("budget/data/f135_spending.csv")
+f135<-standardize_variable_names(f135,replace_special = TRUE)
+f135<-rbind(f135,jsfjoin %>%filter(Project.Name=="F135"))
 f135_amount<-sum(f135$Amount)
 
 if(any(duplicated(service_ratio$FY))) stop("Duplicate Fiscal Years in service ratio")
 f135 <- f135 %>%
   left_join(service_ratio,by="FY")
 
-f135$FY <- str_c("X", f135$FY)
+# f135$FY <- str_c("X", f135$FY)
 
 sum(f135$Amount)
 
@@ -262,7 +336,7 @@ f135_navy <- f135 %>%
   mutate(Amount = Amount * navy_ratio) %>%
   mutate(Force = "Navy") %>%
   select(
-    "FYDP.Year",
+    "PByear",
     "Type",
     "Force",
     "Program.Number",
@@ -280,7 +354,7 @@ f135_air_force <- f135 %>%
   mutate(Amount = Amount * air_force_ratio) %>%
   mutate(Force = "Air Force") %>%
   select(
-    "FYDP.Year",
+    "PByear",
     "Type",
     "Force",
     "Program.Number",
@@ -298,20 +372,23 @@ f135_air_force$Program.Number <-
 f135 <- rbind(f135_navy, f135_air_force)
 if(sum(f135$Amount,na.rm=TRUE)!= f135_amount) warning("F135 Checksum failure")
 
-f135_original <- read_csv("budget/data/f135_spending.csv")
-f135_original$FY <- str_c("X", f135_original$FY)
+f135_original <- standardize_variable_names(read_csv("budget/data/f135_spending.csv"))
 f135_annual<- f135_original %>% group_by(FY) %>% summarize(Original_Amount=sum(Amount,na.rm = TRUE)) %>% left_join(
-  f135 %>% group_by(FY) %>%  summarize(Split_Amount=sum(Amount,na.rm = TRUE)))
+  f135 %>% filter(Program.Number %in% c("604800F","604800N")) %>% group_by(FY) %>%  summarize(Split_Amount=sum(Amount,na.rm = TRUE)))
 f135_annual %>% filter(Original_Amount!=Split_Amount)
 
 # --------------------------------------------------------------------------------
-# add F136 
-#   (note: separate because F135 funding is embeded into the broader F-35 line)
+#### add F136 ####
+#   (note: separate because F136 funding is embedded into the broader F-35 line)
 
 service_ratio <- read_csv("budget/data/service_ratio.csv")
+service_ratio<-standardize_variable_names(service_ratio,replace_special = TRUE)
 
 
 f136 <- read_csv("budget/data/f136_spending.csv")
+f136<-standardize_variable_names(f136,replace_special = TRUE)
+f136<-rbind(f136,jsfjoin %>%filter(Project.Name=="F136"))
+
 f136_amount<-sum(f136$Amount)
 if(any(duplicated(service_ratio$FY))) stop("Duplicate Fiscal Years in service ratio")
 f136 <- f136 %>%
@@ -323,7 +400,7 @@ f136_navy <- f136 %>%
   mutate(Amount = Amount * navy_ratio) %>%
   mutate(Force = "Navy") %>%
   select(
-    "FYDP.Year",
+    "PByear",
     "Type",
     "Force",
     "Program.Number",
@@ -341,7 +418,7 @@ f136_air_force <- f136 %>%
   mutate(Amount = Amount * air_force_ratio) %>%
   mutate(Force = "Air Force") %>%
   select(
-    "FYDP.Year",
+    "PByear",
     "Type",
     "Force",
     "Program.Number",
@@ -390,8 +467,7 @@ if(nrow(engine_budget %>% filter(Program.Name %in% c("F135","F136") |
 #   ... organizational structure.)
 
 engine_budget <- engine_budget %>%
-  separate(FY, into = c("X", "FY"), sep = 1) %>%
-  select(-X)%>%
+  gsub("X","",FY) %>%
   dplyr::rename(
     # PByear = FYDP.Year,
     AccountTitle = Type,
