@@ -855,6 +855,9 @@ empty_stage<-expand.grid(
 empty_stage$Amount_OMB23_GDP21<-0
 
 
+
+
+
   (
     plot_eorgstageact <- build_plot(rbind(engine_actual,
                                           empty_stage),
@@ -862,6 +865,138 @@ empty_stage$Amount_OMB23_GDP21<-0
                            share=FALSE,
                            x_var="FY",
                            y_var="Amount_OMB23_GDP21",
+                           facet_var="Organization",
+                           second_var='stagename',
+                           format=TRUE,
+                           caption="Budget Documents for Army, Navy, and Air Force; CSIS Analysis."
+                           ) +
+        labs(main="DoD RDT&E Aircraft Engine Spending By Stage",
+         caption="Source: CSIS analysis based on RDT&E budget documents (PB 2000–21), which can be found at https://comptroller.defense.gov/Budget-Materials/. ") +
+      scale_y_continuous(label = unit_format(unit = "M", scale = 1e-6)) +
+         scale_x_continuous(
+        breaks = seq(2000, 2027, by = 10),
+        labels = function(x) {
+        paste("'",substring(as.character(x), 3, 4),sep="")
+        }
+      ) +
+      xlab("Fiscal Year") + 
+      ylab("Constant 2021 $") +geom_vline(
+        xintercept = 2021,
+        color = "#554449",
+        alpha = .5,
+        linetype = "solid"
+      ) +
+      geom_vline(
+        xintercept = 2023,
+        color = "#554449",
+        linetype = "dotted"
+      )+ 
+      geom_rect(
+        # aes(
+          xmin = 2021,
+          xmax = Inf,
+          ymin = 0,
+          ymax = Inf,
+          alpha = 0.01,
+          fill = "grey",
+        # ),
+        
+        # data = empty#engine_actual#engine_actual_project
+      ) 
+  )
+  
+  ggsave(
+    "charts/actual_amount_service_stage_nocrosstab.svg",
+    plot_eorgstageact+theme(legend.position="non")+labs(title=NULL),
+    width = 7.5,
+    height = 4,
+    units = "in"
+  )
+  ggsave600dpi(
+    "charts/actual_amount_service_stage_nocrosstab.png",
+    plot_eorgstageact+theme(legend.position="non")+labs(title=NULL),
+    width = 7.5,
+    height = 4,
+    units = "in",
+    size=12, lineheight = 1
+  )
+
+write.csv(
+  engine_actual %>% 
+    group_by(FY, stage,Organization) %>%
+  dplyr::summarize(Amount_Then_Year = sum(Amount_Then_Year, na.rm = TRUE),
+                   Amount_OMB23_GDP21 = sum(Amount_OMB23_GDP21, na.rm = TRUE)) %>%
+    pivot_longer(names_to="Metric",cols=c(Amount_Then_Year,Amount_OMB23_GDP21)) %>%
+    pivot_wider(
+    names_from=FY,values_from=value) %>%
+    arrange(Metric,Organization,stage),
+    file="charts/actual_amount_service_stage.csv",
+  na = "",
+  row.names = FALSE
+  )
+# colnames(engine_actual) ProgramElement
+
+```
+
+
+## Stage Facet Contract
+```{r Facet2}
+# facet 2 ------------------------------------------------------------------------
+summary(factor(engine_actual$stagename))
+summary(factor_wrap(engine_budget$stage,nwrap=2))
+
+empty_stage<-expand.grid(
+  stagename = levels(engine_actual$stagename),
+  Organization = levels(factor(engine_actual$Organization)),
+  FY=seq(from=1998,to=2023))
+empty_stage$Amount_OMB23_GDP21<-0
+
+
+load(file="app/engine_contract.Rdata")
+RnDcontract<-engine_contracts %>% filter(SimpleArea.AETP=="R&D and AETP" &
+                                           SubCustomer %in% c("Army","Navy","Air Force")) %>%
+  group_by(Fiscal_Year,ProductServiceOrRnDarea.project,SubCustomer)%>%
+  summarise(Amount_OMB23_GDP21=sum(Action_Obligation_OMB23_GDP21,na.rm=TRUE))
+colnames(RnDcontract)[colnames(RnDcontract)=="SubCustomer"]<-"Organization"
+colnames(RnDcontract)[colnames(RnDcontract)=="ProductServiceOrRnDarea.project"]<-"stagename"
+
+
+stage<-rbind(engine_actual %>% mutate(LineType="Budget"),
+                                          empty_stage%>% mutate(LineType="Budget"),
+                                          RnDcontract%>%mutate(LineType="Contract"),
+                                          empty_stage%>% mutate(LineType="Contract"))
+stage$stagename<-factor(stage$stagename)
+ levels(stage$stagename)<-list(
+      '(6.1) Basic Research'=
+        c('(6.1) Basic Research',
+          "Basic Research (6.1)" ),
+      '(6.2) Applied Research'=
+        c('(6.2) Applied Research',
+          "Applied Research (6.2)" ),
+      '(6.3) Advanced Technology Development'=
+        c('(6.3) Advanced Technology Development',
+           "Advanced Technology Development (6.3)",
+          "Advanced Technology Development (6.3)"),
+      '(6.4) Advanced Component Development & Prototypes'=
+        c('(6.4) Advanced Component Development & Prototypes',
+          "Advanced Component Development & Prototypes (6.4)",
+          "Advanced Component Development & Prototypes (6.4)"),
+      '(6.5) System Development & Demonstration'=c('(6.5) System Development & Demonstration',
+                                                   "System Development & Demonstration (6.5)"  ),
+      '(6.7) Operational Systems Development'=c('(6.7) Operational Systems Development',
+                                                "Operational Systems Development (6.7)")
+    )
+    
+
+
+
+  (
+    plot_eorgstageactk <- build_plot(),
+                           chart_geom="Line Chart",
+                           share=FALSE,
+                           x_var="FY",
+                           y_var="Amount_OMB23_GDP21",
+                           color_var = "LineType",
                            facet_var="Organization",
                            second_var='stagename',
                            format=TRUE,
