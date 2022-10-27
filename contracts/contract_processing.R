@@ -215,6 +215,10 @@ summary(factor(engine_contracts$SimpleArea.AETP))
 topline_contracts$SimpleArea.AETP<-as.character(topline_contracts$SimpleArea)
 topline_contracts$SimpleArea.AETP[topline_contracts$ProjectID==2260 | topline_contracts$SimpleArea=="R&D"]<-"R&D and AETP"
 summary(factor(topline_contracts$SimpleArea.AETP))
+levels( factor( engine_contracts$ProductServiceOrRnDarea))
+engine_contracts$ProductServiceOrRnDarea.project<-engine_contracts$ProductServiceOrRnDarea
+engine_contracts$ProductServiceOrRnDarea.project[engine_contracts$ProjectID==2260]<-
+  "Advanced Component Development & Prototypes (6.4)"
 
 engine_contracts$SubCustomer.engines<-engine_contracts$SubCustomer.JPO
 levels(engine_contracts$SubCustomer.engines)<-list(

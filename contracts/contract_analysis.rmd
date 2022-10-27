@@ -22,9 +22,9 @@ library(csis360)
 source("theme/chart_theme.R")
 source("theme/money_labels.R")
 
-# local_path<-"F:\\Users\\gsanders\\Documents\\Repositories\\Lookup-Tables\\style\\"
-# local_path<-"https://raw.githubusercontent.com/CSISdefense/Lookup-Tables/master/"
-local_path<-"K:\\Users\\Greg\\Repositories\\Lookup-Tables\\style\\"
+local_path<-"F:\\Users\\gsanders\\Documents\\Repositories\\Lookup-Tables\\style\\"
+# local_path<-"https://raw.githubusercontent.com/CSISdefense/Lookup-Tables/master/style/"
+# local_path<-"K:\\Users\\Greg\\Repositories\\Lookup-Tables\\style\\"
 load(file="app/engine_contract.Rdata")
 # load(file="data/just_engine_contract.Rdata")
 labels_and_colors<-prepare_labels_and_colors(engine_contracts %>% select(-PricingMechanism,-MajorCommandName), path=local_path)
@@ -621,14 +621,14 @@ write.csv(file="charts//SimpleArea.csv",row.names = FALSE, na = "",
 
 (
   RnDphase<-build_plot(
-    data=engine_contracts %>% filter(SimpleArea=="R&D"),
+    data=engine_contracts %>% filter(SimpleArea.AETP=="R&D and AETP"),
     chart_geom = "Bar Chart",
     share = FALSE,
     labels_and_colors=labels_and_colors,
     # NA, #VAR.ncol
     x_var="Fiscal_Year", #x_var
     y_var="Action_Obligation_OMB23_GDP21", #VAR.y.variable
-    color_var="ProductServiceOrRnDarea", #color_var
+    color_var="ProductServiceOrRnDarea.project", #color_var
     # facet_var="Competition.sum", #facet_var
     column_key=column_key,
     format=TRUE,
@@ -658,11 +658,11 @@ ggsave600dpi("charts//psr_RnDphase.svg", RnDphase,
 
 
 output_TY<-engine_contracts %>% filter(SimpleArea=="R&D") %>%
-  format_data_for_plot(fy_var="Fiscal_Year",y_var="Action_Obligation_Then_Year",color_var = "ProductOrServiceArea",
+  format_data_for_plot(fy_var="Fiscal_Year",y_var="Action_Obligation_Then_Year",color_var = "ProductServiceOrRnDarea.project",
                        labels_and_colors=labels_and_colors) %>%
-  pivot_wider(id_cols=c(ProductServiceOrRnDarea),
+  pivot_wider(id_cols=c(ProductServiceOrRnDarea.project),
               names_from=Fiscal_Year,values_from=Action_Obligation_Then_Year)%>%
-  arrange(ProductOrServiceArea)
+  arrange(ProductServiceOrRnDarea.project)
 
 
 write.csv(file="charts//psr_RnDphase_current.csv",row.names = FALSE, na = "",
