@@ -848,8 +848,16 @@ colnames(engine_budget)
 summary(factor(engine_actual$stagename))
 summary(factor_wrap(engine_budget$stage,nwrap=2))
 
+empty_stage<-expand.grid(
+  stagename = levels(engine_actual$stagename),
+  Organization = levels(factor(engine_actual$Organization)),
+  FY=seq(from=1998,to=2023))
+empty_stage$Amount_OMB23_GDP21<-0
+
+
   (
-    plot_eorgstageact <- build_plot(engine_actual,
+    plot_eorgstageact <- build_plot(rbind(engine_actual,
+                                          empty_stage),
                            chart_geom="Line Chart",
                            share=FALSE,
                            x_var="FY",
