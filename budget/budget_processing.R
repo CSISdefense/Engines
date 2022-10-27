@@ -305,7 +305,7 @@ jsfjoin <- jsf %>%   dplyr::rename(
   Program.Number = ProgramElement,
   Program.Name = ProgramElementTitle,
 ) %>% mutate(Type="RDT&E",Project.Number=0) %>%
-  group_by(PByear,Type,Program.Number,Program.Name,Project.Number,Project.Name,FY)%>%
+  group_by(PByear,Type,Program.Number,Program.Name,Project.Number,Project.Name,BudgetActivity,FY)%>%
   summarise(Amount=sum(Amount,na.rm=TRUE)) 
   
 
@@ -320,7 +320,8 @@ service_ratio<-standardize_variable_names(service_ratio,replace_special = TRUE)
 service_ratio$checksum<-service_ratio$navy_ratio+service_ratio$air_force_ratio
 
 f135 <- read_csv("budget/data/f135_spending.csv")
-f135<-standardize_variable_names(f135,replace_special = TRUE)
+f135<-standardize_variable_names(f135,replace_special = TRUE) %>%
+  mutate(BudgetActivity=5)
 f135<-rbind(f135,jsfjoin %>%filter(Project.Name=="F135"))
 f135_amount<-sum(f135$Amount)
 
@@ -343,6 +344,7 @@ f135_navy <- f135 %>%
     "Program.Name",
     "Project.Number",
     "Project.Name",
+    "BudgetActivity",
     "FY",
     "Amount"
   ) %>%
@@ -361,6 +363,7 @@ f135_air_force <- f135 %>%
     "Program.Name",
     "Project.Number",
     "Project.Name",
+    "BudgetActivity",
     "FY",
     "Amount"
   ) %>%
@@ -385,8 +388,9 @@ service_ratio <- read_csv("budget/data/service_ratio.csv")
 service_ratio<-standardize_variable_names(service_ratio,replace_special = TRUE)
 
 
-f136 <- read_csv("budget/data/f136_spending.csv")
-f136<-standardize_variable_names(f136,replace_special = TRUE)
+f136 <- read_csv("budget/data/f136_spending.csv") 
+f136<-standardize_variable_names(f136,replace_special = TRUE) %>%
+  mutate(BudgetActivity=5)
 f136<-rbind(f136,jsfjoin %>%filter(Project.Name=="F136"))
 
 f136_amount<-sum(f136$Amount)
@@ -407,6 +411,7 @@ f136_navy <- f136 %>%
     "Program.Name",
     "Project.Number",
     "Project.Name",
+    "BudgetActivity",
     "FY",
     "Amount"
   ) %>%
@@ -425,6 +430,7 @@ f136_air_force <- f136 %>%
     "Program.Name",
     "Project.Number",
     "Project.Name",
+    "BudgetActivity",
     "FY",
     "Amount"
   ) %>%
@@ -447,8 +453,8 @@ sum(f135_f136$Amount,na.rm=TRUE)
 summary(f135_f136)
 
 
-
-if(nrow(engine_budget %>% filter(Program.Name %in% c("F135","F136") |
+engine_budget$BudgetActivity<-NA
+if(nrow(engine_budget %>% dplyr::filter(Program.Name %in% c("F135","F136") |
                                  substring(Program.Number,1,6) %in% substring(unique(f135_f136$Program.Number),1,6)|
                                  Project.Number %in% unique(f135_f136$Project.Number)))>0){
   stop("Adding redundant data!")
@@ -482,7 +488,7 @@ engine_budget <- engine_budget %>%
   mutate(FY = as.numeric(FY))
 
 engine_budget$Description<-NA
-engine_budget$BudgetActivity<-NA
+
 engine_budget$Notes<-NA
 engine_budget$Type<-NA
 engine_r1d <- engine_r1d  %>% select(-LineNumber)

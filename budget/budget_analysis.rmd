@@ -925,7 +925,10 @@ write.csv(
   )
 # colnames(engine_actual) ProgramElement
 
+```
 
+## Stage Facet CrossTabs
+```{r Stage_CrossTabs}
 total <- engine_actual %>%
   group_by(FY) %>%
   dplyr::summarize(Amount_Then_Year = sum(Amount_Then_Year, na.rm = TRUE),
