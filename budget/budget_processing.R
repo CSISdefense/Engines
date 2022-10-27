@@ -65,7 +65,6 @@ d19<-remove_bom(d19)
 # names(d14)[1] <- "FYDP.Year"
 # names(d13)[1] <- "FYDP.Year"
 
-stages <- read.csv("budget/data/stages_join.csv")
 
 # --------------------------------------------------------------------------------
 # make the data long
@@ -263,6 +262,7 @@ label_0603800<-function(x,path="https://raw.githubusercontent.com/CSISdefense/Lo
                                       -Award.or.Obligation.Date,
   ),names_to = "FY",
   values_to="Amount")
+  x$Amount<-x$Amount/1000
   x
 }
 # undebug(label_0603800)
@@ -467,7 +467,7 @@ if(nrow(engine_budget %>% filter(Program.Name %in% c("F135","F136") |
 #   ... organizational structure.)
 
 engine_budget <- engine_budget %>%
-  gsub("X","",FY) %>%
+  mutate(FY=gsub("X","",FY)) %>%
   dplyr::rename(
     # PByear = FYDP.Year,
     AccountTitle = Type,
@@ -549,9 +549,10 @@ engine_budget<-csis360::deflate(
 #    sum(engine_budget$Amount_OMB23_GDP21,na.rm=TRUE) - sum(engine_budget_alternate$Amount.OMB.2019,na.rm=TRUE)> 0.001) stop("Deflation checksum failure")
 
 # --------------------------------------------------------------------------------
-# join stages 
+#### join stages ####
 #   (note: these are the stages of R&D, i.e. basic, applied research)
 
+stages <- read.csv("budget/data/stages_join.csv")
 stages<-csis360::remove_bom(stages)
 
 stages <- stages %>%
@@ -575,7 +576,7 @@ engine_budget <- engine_budget %>%
   mutate(Amount_Then_Year = Amount_Then_Year * 1000000,
          Amount_OMB23_GDP21 = Amount_OMB23_GDP21 * 1000000)
 
-engine_budget$stage[is.na(engine_budget$stage)]<-engine_budget$BudgetActivity[is.na(engine_budget$stage)]
+engine_budget$stage[!is.na(engine_budget$BudgetActivity)]<-engine_budget$BudgetActivity[!is.na(engine_budget$BudgetActivity)]
 engine_budget <- engine_budget %>%
   dplyr::mutate(
     stage = recode(

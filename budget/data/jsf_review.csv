@@ -1,48 +1,48 @@
 "PByear","ProgramElement","Cost.Categories","Contractor.or.Government.Performing.Activity","Contract.Method.Type.or.Funding.Vehicle","Award.or.Obligation.Date","Line","Project.Name","1997","1998","1999","2000","2001","2002","2003"
-1999,603800,"Alternative Engine Program","GE, Cincinnati OH","SS/CPFF","Nov-95","2","F136",25000,29000,23000,NA,NA,NA,NA
+1999,603800,"Alternative Engine Program","GE, Cincinnati OH","SS/CPFF","Nov-95","2","F136",25,29,23,NA,NA,NA,NA
 2000,603800,"Alternative Engine Program","GE, Cincinnati OH","SS/CPFF","Nov-96","3","F136",NA,NA,NA,NA,NA,NA,NA
-2000,603800,"Alternative Engine Program","GE, Cincinnati OH","SS/CPFF","Feb-97","4","F136",NA,34956,25790,33000,NA,NA,NA
+2000,603800,"Alternative Engine Program","GE, Cincinnati OH","SS/CPFF","Feb-97","4","F136",NA,34.956,25.79,33,NA,NA,NA
 2002,603800,"AUTONOMIC LOGISTICS (formerly Prognostics and Health Management / Supportability and Training)","Pratt & Whitney","C/CPFF",NA,"15","F135",NA,NA,NA,0,0,0,NA
 2002,603800,"AUTONOMIC LOGISTICS (formerly Prognostics and Health Management / Supportability and Training)","General Electric","C/CPFF","Jan-99","16","F136",NA,NA,NA,0,0,0,NA
 2003,603800,"AUTONOMIC LOGISTICS (formerly Prognostics and Health Management / Supportability and Training)","Pratt & Whitney","C/CPFF",NA,"16","F135",NA,NA,NA,NA,0,0,NA
 2003,603800,"AUTONOMIC LOGISTICS (formerly Prognostics and Health Management / Supportability and Training)","General Electric","C/CPFF","Jan-99","17","F136",NA,NA,NA,NA,0,0,NA
-2000,603800,"Award Fees","Pratt & Whitney","C/CPFF",NA,"2","F135",NA,20369,25792,16226,NA,NA,NA
+2000,603800,"Award Fees","Pratt & Whitney","C/CPFF",NA,"2","F135",NA,20.369,25.792,16.226,NA,NA,NA
 2001,603800,"F-120 Engine Program","GE, Cincinnati OH","SS/CPFF","Nov 98/Ot 99/ Oct 00","2","F136",NA,NA,NA,NA,NA,NA,NA
-2001,603800,"F-120 Engine Program","GE, Cincinnati OH","SS/CPFF",NA,"3","F136",NA,NA,40153,26190,94000,NA,NA
+2001,603800,"F-120 Engine Program","GE, Cincinnati OH","SS/CPFF",NA,"3","F136",NA,NA,40.153,26.19,94,NA,NA
 2002,603800,"F-120 Engine Program","GE, Cincinnati OH","SS/CPFF","Nov 98/Ot 99/ Oct 00","3","F136",NA,NA,NA,0,0,0,NA
-2002,603800,"F-120 Engine Program","GE, Cincinnati OH","SS/CPFF",NA,"4","F136",NA,NA,NA,34710,45620,0,NA
+2002,603800,"F-120 Engine Program","GE, Cincinnati OH","SS/CPFF",NA,"4","F136",NA,NA,NA,34.71,45.62,0,NA
 2003,603800,"GE Engine Program","GE, Cincinnati OH","SS/CPFF",NA,"4","F136",NA,NA,NA,NA,NA,NA,NA
-2003,603800,"GE Engine Program","GE","SS/CPFF","Oct-00","5","F136",NA,NA,NA,NA,111064,NA,NA
-1999,603800,"Product Development Organizations: Weapon System Concept Demonstrations (Note 1):","Pratt & Whitney","SS/CPFF","Nov-96","1","F135",231619,310127,216900,NA,NA,NA,NA
-2001,603800,"Product Development Organizations: Weapon System Concept Demonstrations (Note 1):","Pratt & Whitney","SS/CPFF","Nov 98/99/00","1","F135",NA,NA,212666,84200,80200,NA,NA
-2002,603800,"Product Development Organizations: Weapon System Concept Demonstrations (Note 1):","Pratt & Whitney","SS/CPFF","Nov 98/99/00","1","F135",NA,NA,NA,87019,127694,0,NA
-1999,603800,"Prognostics and Health Management / Supportability and Training","Pratt & Whitney","C/CPFF","Jun-97","11","F135",3920,6180,0,NA,NA,NA,NA
-1999,603800,"Prognostics and Health Management / Supportability and Training","General Electric","C/CPFF","Mar-98","12","F136",0,200,2617,NA,NA,NA,NA
+2003,603800,"GE Engine Program","GE","SS/CPFF","Oct-00","5","F136",NA,NA,NA,NA,111.064,NA,NA
+1999,603800,"Product Development Organizations: Weapon System Concept Demonstrations (Note 1):","Pratt & Whitney","SS/CPFF","Nov-96","1","F135",231.619,310.127,216.9,NA,NA,NA,NA
+2001,603800,"Product Development Organizations: Weapon System Concept Demonstrations (Note 1):","Pratt & Whitney","SS/CPFF","Nov 98/99/00","1","F135",NA,NA,212.666,84.2,80.2,NA,NA
+2002,603800,"Product Development Organizations: Weapon System Concept Demonstrations (Note 1):","Pratt & Whitney","SS/CPFF","Nov 98/99/00","1","F135",NA,NA,NA,87.019,127.694,0,NA
+1999,603800,"Prognostics and Health Management / Supportability and Training","Pratt & Whitney","C/CPFF","Jun-97","11","F135",3.92,6.18,0,NA,NA,NA,NA
+1999,603800,"Prognostics and Health Management / Supportability and Training","General Electric","C/CPFF","Mar-98","12","F136",0,0.2,2.617,NA,NA,NA,NA
 2001,603800,"Prognostics and Health Management / Supportability and Training","Pratt & Whitney","C/CPFF",NA,"14","F135",NA,NA,NA,NA,NA,NA,NA
-2000,603800,"Prognostics and Health Management / Supportability and Training","Pratt & Whitney","C/CPFF","Jun-97","15","F135",NA,6180,NA,NA,NA,NA,NA
-2001,603800,"Prognostics and Health Management / Supportability and Training","General Electric","C/CPFF","Jan-99","15","F136",NA,NA,1500,NA,NA,NA,NA
-2000,603800,"Prognostics and Health Management / Supportability and Training","General Electric","C/CPFF",NA,"16","F136",NA,NA,1500,NA,NA,NA,NA
-1999,603800,"Technology Maturation: Propulsion","Various","Fld. Activ.","Nov 98/99/00","10","F135",3706,13550,2200,NA,NA,NA,NA
+2000,603800,"Prognostics and Health Management / Supportability and Training","Pratt & Whitney","C/CPFF","Jun-97","15","F135",NA,6.18,NA,NA,NA,NA,NA
+2001,603800,"Prognostics and Health Management / Supportability and Training","General Electric","C/CPFF","Jan-99","15","F136",NA,NA,1.5,NA,NA,NA,NA
+2000,603800,"Prognostics and Health Management / Supportability and Training","General Electric","C/CPFF",NA,"16","F136",NA,NA,1.5,NA,NA,NA,NA
+1999,603800,"Technology Maturation: Propulsion","Various","Fld. Activ.","Nov 98/99/00","10","F135",3.706,13.55,2.2,NA,NA,NA,NA
 2000,603800,"Technology Maturation: Propulsion","Pratt & Whitney","SS/CPFF","Mar-97","10","F135",NA,NA,NA,NA,NA,NA,NA
-2001,603800,"Technology Maturation: Propulsion","Pratt & Whitney","SS/TBD","Dec-98","10","F135",NA,NA,1200,NA,NA,NA,NA
+2001,603800,"Technology Maturation: Propulsion","Pratt & Whitney","SS/TBD","Dec-98","10","F135",NA,NA,1.2,NA,NA,NA,NA
 2002,603800,"Technology Maturation: Propulsion","Pratt & Whitney","SS/CPFF",NA,"10","F135",NA,NA,NA,0,0,0,NA
 2003,603800,"Technology Maturation: Propulsion","Pratt/Whitney","SS/CPFF",NA,"10","F135",NA,NA,NA,NA,NA,NA,NA
-2000,603800,"Technology Maturation: Propulsion","Pratt & Whitney","SS/TBD","12/1/1997","11","F135",NA,4600,1200,NA,NA,NA,NA
-2001,603800,"Technology Maturation: Propulsion","Various","NASA Contract","Jul-99","11","F135",NA,NA,2100,NA,NA,NA,NA
+2000,603800,"Technology Maturation: Propulsion","Pratt & Whitney","SS/TBD","12/1/1997","11","F135",NA,4.6,1.2,NA,NA,NA,NA
+2001,603800,"Technology Maturation: Propulsion","Various","NASA Contract","Jul-99","11","F135",NA,NA,2.1,NA,NA,NA,NA
 2002,603800,"Technology Maturation: Propulsion","Pratt & Whitney","SS/TBD","Dec-98","11","F135",NA,NA,NA,0,0,0,NA
 2003,603800,"Technology Maturation: Propulsion","Pratt & Whitney","SS/CPFF",NA,"11","F135",NA,NA,NA,NA,NA,NA,NA
-2000,603800,"Technology Maturation: Propulsion","Various","NASA Contract","8.1.1998","12","F135",NA,700,NA,NA,NA,NA,NA
-2001,603800,"Technology Maturation: Propulsion","Various","Miscellaneous","Various","12","F135",NA,NA,1804,48,50,NA,NA
+2000,603800,"Technology Maturation: Propulsion","Various","NASA Contract","8.1.1998","12","F135",NA,0.7,NA,NA,NA,NA,NA
+2001,603800,"Technology Maturation: Propulsion","Various","Miscellaneous","Various","12","F135",NA,NA,1.804,0.048,0.05,NA,NA
 2002,603800,"Technology Maturation: Propulsion","Various","NASA Contract","Jul-99","12","F135",NA,NA,NA,0,0,0,NA
 2003,603800,"Technology Maturation: Propulsion","Pratt & Whitney","SS/TBD",NA,"12","F135",NA,NA,NA,NA,NA,NA,NA
 2000,603800,"Technology Maturation: Propulsion","Various","Miscellaneous","Various","13","F135",NA,NA,NA,NA,NA,NA,NA
-2001,603800,"Technology Maturation: Propulsion","Various","Fld. Activ.","Nov 98/99/00","13","F135",NA,NA,15389,7197,2950,NA,NA
-2002,603800,"Technology Maturation: Propulsion","Various","Miscellaneous","Various","13","F135",NA,NA,NA,96,50,0,NA
+2001,603800,"Technology Maturation: Propulsion","Various","Fld. Activ.","Nov 98/99/00","13","F135",NA,NA,15.389,7.197,2.95,NA,NA
+2002,603800,"Technology Maturation: Propulsion","Various","Miscellaneous","Various","13","F135",NA,NA,NA,0.096,0.05,0,NA
 2003,603800,"Technology Maturation: Propulsion","Various","NASA Contract",NA,"13","F135",NA,NA,NA,NA,NA,NA,NA
-2000,603800,"Technology Maturation: Propulsion","Various","Fld. Activ.","Oct 99-Sep 00","14","F135",NA,18587,18048,3600,NA,NA,NA
-2002,603800,"Technology Maturation: Propulsion","Various","Fld. Activ.","Nov 98/99/00","14","F135",NA,NA,NA,8020,2990,0,NA
-2003,603800,"Technology Maturation: Propulsion","Various","Miscellaneous","Various","14","F135",NA,NA,NA,NA,50,NA,NA
-2003,603800,"Technology Maturation: Propulsion","Various","Fld. Activ.","Nov-00","15","F135",NA,NA,NA,NA,3749,NA,NA
+2000,603800,"Technology Maturation: Propulsion","Various","Fld. Activ.","Oct 99-Sep 00","14","F135",NA,18.587,18.048,3.6,NA,NA,NA
+2002,603800,"Technology Maturation: Propulsion","Various","Fld. Activ.","Nov 98/99/00","14","F135",NA,NA,NA,8.02,2.99,0,NA
+2003,603800,"Technology Maturation: Propulsion","Various","Miscellaneous","Various","14","F135",NA,NA,NA,NA,0.05,NA,NA
+2003,603800,"Technology Maturation: Propulsion","Various","Fld. Activ.","Nov-00","15","F135",NA,NA,NA,NA,3.749,NA,NA
 1999,603800,"Technology Maturation: Propulsion","Pratt/Whitney","C/CPFF","Dec-94","3","F135",NA,NA,NA,NA,NA,NA,NA
 1999,603800,"Technology Maturation: Propulsion","GE","SS/CPFF","Dec-94","4","F136",NA,NA,NA,NA,NA,NA,NA
 2001,603800,"Technology Maturation: Propulsion","Pratt/Whitney","C/CPFF",NA,"4","F135",NA,NA,NA,NA,NA,NA,NA
@@ -50,28 +50,28 @@
 2000,603800,"Technology Maturation: Propulsion","Pratt/Whitney","C/CPFF","Dec-94","5","F135",NA,NA,NA,NA,NA,NA,NA
 2001,603800,"Technology Maturation: Propulsion","GE","SS/CPFF",NA,"5","F136",NA,NA,NA,NA,NA,NA,NA
 2002,603800,"Technology Maturation: Propulsion","Pratt/Whitney","C/CPFF",NA,"5","F135",NA,NA,NA,0,0,0,NA
-1999,603800,"Technology Maturation: Propulsion","Pratt/Whitney","SS/CPFF","Mar-97","6","F135",13859,13009,2919,NA,NA,NA,NA
+1999,603800,"Technology Maturation: Propulsion","Pratt/Whitney","SS/CPFF","Mar-97","6","F135",13.859,13.009,2.919,NA,NA,NA,NA
 2000,603800,"Technology Maturation: Propulsion","GE","SS/CPFF","Dec-94","6","F136",NA,NA,NA,NA,NA,NA,NA
 2001,603800,"Technology Maturation: Propulsion","Pratt/Whitney","SS/CPFF",NA,"6","F135",NA,NA,NA,NA,NA,NA,NA
 2002,603800,"Technology Maturation: Propulsion","GE","SS/CPFF",NA,"6","F136",NA,NA,NA,0,0,0,NA
 2003,603800,"Technology Maturation: Propulsion","Pratt/Whitney","C/CPFF",NA,"6","F135",NA,NA,NA,NA,NA,NA,NA
-1999,603800,"Technology Maturation: Propulsion","Pratt & Whitney","SS/CPFF","Dec-97","7","F135",3640,NA,NA,NA,NA,NA,NA
+1999,603800,"Technology Maturation: Propulsion","Pratt & Whitney","SS/CPFF","Dec-97","7","F135",3.64,NA,NA,NA,NA,NA,NA
 2000,603800,"Technology Maturation: Propulsion","Pratt/Whitney","SS/CPFF","Nov-95","7","F135",NA,NA,NA,NA,NA,NA,NA
 2001,603800,"Technology Maturation: Propulsion","GE","SS/CPFF",NA,"7","F136",NA,NA,NA,NA,NA,NA,NA
 2002,603800,"Technology Maturation: Propulsion","Pratt/Whitney","SS/CPFF",NA,"7","F135",NA,NA,NA,0,0,0,NA
 2003,603800,"Technology Maturation: Propulsion","GE","SS/CPFF",NA,"7","F136",NA,NA,NA,NA,NA,NA,NA
-1999,603800,"Technology Maturation: Propulsion","Pratt & Whitney","SS/TBD","Dec-97","8","F135",2400,5600,1200,NA,NA,NA,NA
+1999,603800,"Technology Maturation: Propulsion","Pratt & Whitney","SS/TBD","Dec-97","8","F135",2.4,5.6,1.2,NA,NA,NA,NA
 2000,603800,"Technology Maturation: Propulsion","GE","SS/CPFF","Feb-97","8","F136",NA,NA,NA,NA,NA,NA,NA
-2001,603800,"Technology Maturation: Propulsion","Pratt/Whitney","SS/CPFF","Jan-99","8","F135",NA,NA,3789,NA,NA,NA,NA
+2001,603800,"Technology Maturation: Propulsion","Pratt/Whitney","SS/CPFF","Jan-99","8","F135",NA,NA,3.789,NA,NA,NA,NA
 2002,603800,"Technology Maturation: Propulsion","GE","SS/CPFF",NA,"8","F136",NA,NA,NA,0,0,0,NA
 2003,603800,"Technology Maturation: Propulsion","Pratt/Whitney","SS/CPFF",NA,"8","F135",NA,NA,NA,NA,NA,NA,NA
 1999,603800,"Technology Maturation: Propulsion","Various","Miscellaneous","Various","9","F135",NA,NA,NA,NA,NA,NA,NA
-2000,603800,"Technology Maturation: Propulsion","Pratt/Whitney","SS/CPFF","Feb-97","9","F135",NA,12429,3789,NA,NA,NA,NA
+2000,603800,"Technology Maturation: Propulsion","Pratt/Whitney","SS/CPFF","Feb-97","9","F135",NA,12.429,3.789,NA,NA,NA,NA
 2001,603800,"Technology Maturation: Propulsion","Pratt & Whitney","SS/CPFF",NA,"9","F135",NA,NA,NA,NA,NA,NA,NA
 2002,603800,"Technology Maturation: Propulsion","Pratt/Whitney","SS/CPFF","Jan-99","9","F135",NA,NA,NA,0,0,0,NA
 2003,603800,"Technology Maturation: Propulsion","GE","SS/CPFF",NA,"9","F136",NA,NA,NA,NA,NA,NA,NA
-2002,603800,"Transition Risk Reduction Activities","Pratt & Whitney,East Hartford CT","SS/CPFF","1-Apr","2","F135",NA,NA,NA,NA,85334,NA,NA
-2003,603800,"Transition Risk Reduction Activities","Pratt & Whitney","SS/CPFF","1-Apr","2","F135",NA,NA,NA,NA,52675,NA,NA
-2003,603800,"Transition Risk Reduction Activities","Pratt & Whitney","SS/CPAF","1-Nov","3","F135",NA,NA,NA,NA,24325,NA,NA
-2000,603800,"Weapon System Concept Demonstrations (including flying demonstrators and supporting propulsion efforts)","Pratt & Whitney","SS/CPFF","Nov-96","1","F135",NA,285230,188808,59974,200,NA,NA
-2003,603800,"Weapon System Concept Demonstrations (including flying demonstrators and supporting propulsion efforts)","Pratt & Whitney *, Hartford, CT","SS/CPFF","Oct","1","F135",NA,NA,NA,NA,122694,NA,NA
+2002,603800,"Transition Risk Reduction Activities","Pratt & Whitney,East Hartford CT","SS/CPFF","1-Apr","2","F135",NA,NA,NA,NA,85.334,NA,NA
+2003,603800,"Transition Risk Reduction Activities","Pratt & Whitney","SS/CPFF","1-Apr","2","F135",NA,NA,NA,NA,52.675,NA,NA
+2003,603800,"Transition Risk Reduction Activities","Pratt & Whitney","SS/CPAF","1-Nov","3","F135",NA,NA,NA,NA,24.325,NA,NA
+2000,603800,"Weapon System Concept Demonstrations (including flying demonstrators and supporting propulsion efforts)","Pratt & Whitney","SS/CPFF","Nov-96","1","F135",NA,285.23,188.808,59.974,0.2,NA,NA
+2003,603800,"Weapon System Concept Demonstrations (including flying demonstrators and supporting propulsion efforts)","Pratt & Whitney *, Hartford, CT","SS/CPFF","Oct","1","F135",NA,NA,NA,NA,122.694,NA,NA
