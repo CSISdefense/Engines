@@ -204,7 +204,7 @@ engine_budget_future %>% group_by(PByear) %>%
     scale_y_continuous(label = unit_format(unit = "M", scale = 1e-6)) +
 
     xlab("Fiscal Year") + 
-    ylab("Constant 2021 $") +
+    ylab("Budget (Constant 2021 $)") +
     scale_shape_manual(values=c(16,20))
 )
 
@@ -274,7 +274,7 @@ engine_budget_organization_future_wide <-
     ggtitle("DoD RDT&E Aircraft Engine Spending Projections by Service") +
     chart_theme +
     xlab("Fiscal Year") + 
-    ylab("Constant 2021 $") 
+    ylab("Budget (Constant 2021 $)") 
 )
 
 
@@ -301,7 +301,7 @@ engine_budget_organization_future_wide <-
     ggtitle("DoD RDT&E Aircraft Engine Spending Projections by Service") +
     chart_theme +
     xlab("Fiscal Year") + 
-    ylab("Constant 2021 $") 
+    ylab("Budget (Constant 2021 $)") 
 )
 
 
@@ -354,7 +354,7 @@ engine_budget_project_future_wide <-
     ggtitle("DoD RDT&E Aircraft Engine Spending Projections by project") +
     chart_theme +
     xlab("Fiscal Year") + 
-    ylab("Constant 2021 $") 
+    ylab("Budget (Constant 2021 $)") 
 )
 ```
 
@@ -398,7 +398,7 @@ engine_budget_stage_future_wide <-
     ggtitle("DoD RDT&E Aircraft Engine Spending Projections by Stage") +
     chart_theme +
     xlab("Fiscal Year") + 
-    ylab("Constant 2021 $")  
+    ylab("Budget (Constant 2021 $)")  
 )
 
 ggsave(
@@ -467,7 +467,7 @@ engine_budget_stage_service_future_wide <-
     theme(strip.text.x = element_text(size = 10)) +
     theme(strip.text.y = element_text(size = 10)) +
     xlab("Fiscal Year") +
-    ylab("Constant 2021 $") 
+    ylab("Budget (Constant 2021 $)") 
 )
 
 # ggsave(
@@ -511,7 +511,7 @@ engine_actual_FY <- engine_actual %>%
     ggtitle("DoD RDT&E Aircraft Engine Spending Projections") +
     scale_y_continuous(label = unit_format(unit = "M", scale = 1e-6)) +
     xlab("Fiscal Year") + 
-    ylab("Constant 2021 $") +geom_vline(
+    ylab("Budget (Constant 2021 $)") +geom_vline(
       xintercept = 2021,
       color = "#554449",
       alpha = .5,
@@ -566,13 +566,16 @@ engine_actual_FY <- engine_actual %>%
                          x_var="FY",
                          y_var="Amount_OMB23_GDP21",
                          facet="Organization",
+                         # color_var = "Organization",
+                         # labels_and_colors=budget_lc,
+                         # column_key = budget_ck,
                          format=TRUE
                          ) +
     labs(main="DoD RDT&E Aircraft Engine Spending Projections",
          caption="Source: CSIS analysis based on RDT&E budget documents (PB 2000–21),\nwhich can be found at https://comptroller.defense.gov/Budget-Materials/. ") +
-    scale_y_continuous(label = unit_format(unit = "M", scale = 1e-6)) +
+    # scale_y_continuous(label = unit_format(unit = "M", scale = 1e-6)) +
     xlab("Fiscal Year") + 
-    ylab("Constant 2021 $") +geom_vline(
+    ylab("Budget (Constant 2021 $)") +geom_vline(
       xintercept = 2021,
       color = "#554449",
       alpha = .5,
@@ -747,12 +750,22 @@ levels=c("F135",
 	"Other Air Force\nprojects")
 )
 # distinct(engine_actual_1 %>%group_by()%>% select(topProjectText,topProjectText2))
+budget_lc<-prepare_labels_and_colors(engine_actual_1,path=local_path)
+budget_ck<-get_column_key(engine_actual_1,path=local_path)
 (
   facet <-
-    ggplot() + geom_area(aes(y = Amount_OMB23_GDP21, x = FY, fill= Organization),
-                         data = engine_actual_1,
-                         
-                         stat = "identity") +
+     build_plot(engine_actual_1,
+                           chart_geom="Bar Chart",
+                           share=FALSE,
+                           x_var="FY",
+                           y_var="Amount_OMB23_GDP21",
+                           facet_var="topProjectText",
+                color_var = "Organization",
+                labels_and_colors = budget_lc,
+                column_key = budget_ck,
+                           format=TRUE,
+                           caption="Budget Documents for Army, Navy, and Air Force; CSIS Analysis."
+                           ) +
     geom_rect(
       aes(
         xmin = 2021,
@@ -764,23 +777,20 @@ levels=c("F135",
       fill = "grey",
       data = engine_actual_1
     ) +
-    facet_wrap(~ topProjectText) +
     chart_theme +
     theme(strip.text.x = element_text(size = 8)) +
     theme(strip.text.y = element_text(size = 8)) +
-    scale_y_continuous(label = unit_format(unit = "M", scale = 1e-6)) +
+    # scale_y_continuous(label = unit_format(unit = "M", scale = 1e-6)) +
     scale_x_continuous(
       breaks = seq(2000, 2027, by = 5),
       labels = function(x) {
         paste("'",substring(as.character(x), 3, 4),sep="")
       }
     ) +
-    scale_fill_manual(values=c("#72a0c1","#32602F","#1d2d5c"))+
-    
     labs(main="DoD RDT&E Aircraft Engine Spending By Project",
-         caption="Source: CSIS analysis based on RDT&E budget documents (PB 2000–21), which can be found at https://comptroller.defense.gov/Budget-Materials/. ") +
+         caption="Source: CSIS analysis based on RDT&E budget documents (PB 2000–21),\nwhich can be found at https://comptroller.defense.gov/Budget-Materials/. ") +
     xlab("Fiscal Year") +
-    ylab("Constant 2021 $") + 
+    ylab("Budget (Constant 2021 $)") + 
     geom_vline(
       xintercept = 2021,
       color = "#554449",
@@ -848,8 +858,19 @@ colnames(engine_budget)
 summary(factor(engine_actual$stagename))
 summary(factor_wrap(engine_budget$stage,nwrap=2))
 
+empty_stage<-expand.grid(
+  stagename = levels(engine_actual$stagename),
+  Organization = levels(factor(engine_actual$Organization)),
+  FY=seq(from=1998,to=2023))
+empty_stage$Amount_OMB23_GDP21<-0
+
+
+
+
+
   (
-    plot_eorgstageact <- build_plot(engine_actual,
+    plot_eorgstageact <- build_plot(rbind(engine_actual,
+                                          empty_stage),
                            chart_geom="Line Chart",
                            share=FALSE,
                            x_var="FY",
@@ -860,8 +881,8 @@ summary(factor_wrap(engine_budget$stage,nwrap=2))
                            caption="Budget Documents for Army, Navy, and Air Force; CSIS Analysis."
                            ) +
         labs(main="DoD RDT&E Aircraft Engine Spending By Stage",
-         caption="Source: CSIS analysis based on RDT&E budget documents (PB 2000–21), which can be found at https://comptroller.defense.gov/Budget-Materials/. ") +
-      scale_y_continuous(label = unit_format(unit = "M", scale = 1e-6)) +
+         caption="Source: CSIS analysis based on RDT&E budget documents (PB 2000–21),\nwhich can be found at https://comptroller.defense.gov/Budget-Materials/. ") +
+      # scale_y_continuous(label = unit_format(unit = "M", scale = 1e-6)) +
          scale_x_continuous(
         breaks = seq(2000, 2027, by = 10),
         labels = function(x) {
@@ -869,7 +890,7 @@ summary(factor_wrap(engine_budget$stage,nwrap=2))
         }
       ) +
       xlab("Fiscal Year") + 
-      ylab("Constant 2021 $") +geom_vline(
+      ylab("Budget (Constant 2021 $)") +geom_vline(
         xintercept = 2021,
         color = "#554449",
         alpha = .5,
@@ -923,6 +944,141 @@ write.csv(
   na = "",
   row.names = FALSE
   )
+# colnames(engine_actual) ProgramElement
+
+```
+
+
+## Stage Facet Contract
+```{r Facet2}
+# facet 2 ------------------------------------------------------------------------
+summary(factor(engine_actual$stagename))
+summary(factor_wrap(engine_budget$stage,nwrap=2))
+
+empty_stage<-expand.grid(
+  stagename = levels(engine_actual$stagename),
+  Organization = levels(factor(engine_actual$Organization)),
+  FY=seq(from=1998,to=2023))
+empty_stage$Amount_OMB23_GDP21<-0
+
+
+load(file="app/engine_contract.Rdata")
+RnDcontract<-engine_contracts %>% filter(SimpleArea.AETP=="R&D and AETP" &
+                                           SubCustomer %in% c("Army","Navy","Air Force")) %>%
+  group_by(Fiscal_Year,ProductServiceOrRnDarea.project,SubCustomer)%>%
+  summarise(Amount_OMB23_GDP21=sum(Action_Obligation_OMB23_GDP21,na.rm=TRUE))
+colnames(RnDcontract)[colnames(RnDcontract)=="SubCustomer"]<-"Organization"
+colnames(RnDcontract)[colnames(RnDcontract)=="Fiscal_Year"]<-"FY"
+colnames(RnDcontract)[colnames(RnDcontract)=="ProductServiceOrRnDarea.project"]<-"stagename"
+
+
+stage<-rbind(engine_actual %>% mutate(LineType="Budget"),
+                                          empty_stage%>% mutate(LineType="Budget"),
+                                          RnDcontract%>%mutate(LineType="Contract"),
+                                          empty_stage%>% mutate(LineType="Contract"))
+stage$stagename<-factor(stage$stagename)
+  summary(stage$stagename)
+
+ levels(stage$stagename)<-list(
+      '(6.1) Basic\nResearch'=
+        c('(6.1) Basic\nResearch',
+          "Basic Research (6.1)" ),
+      '(6.2) Applied\nResearch'=
+        c('(6.2) Applied\nResearch',
+          "Applied Research (6.2)" ),
+      '(6.3) Advanced\nTechnology\nDevelopment'=
+        c('(6.3) Advanced\nTechnology\nDevelopment',
+           "Advanced Technology Development (6.3)",
+          "Advanced Technology Development (6.3)"),
+      '(6.4) Advanced\nComponent\nDevelopment &\nPrototypes'=
+        c('(6.4) Advanced\nComponent\nDevelopment &\nPrototypes',
+          "Advanced Component Development & Prototypes (6.4)",
+          "Advanced Component Development & Prototypes (6.4)"),
+      '(6.5) System\nDevelopment &\nDemonstration'=c('(6.5) System\nDevelopment &\nDemonstration',
+                                                   "System Development & Demonstration (6.5)"  ),
+      '(6.7) Operational\nSystems\nDevelopment'=c('(6.7) Operational\nSystems\nDevelopment',
+                                                "Operational Systems Development (6.7)")
+    )
+    summary(stage$stagename)
+
+
+
+  (
+    plot_eorgstageactk <- build_plot(stage,
+                           chart_geom="Line Chart",
+                           share=FALSE,
+                           x_var="FY",
+                           y_var="Amount_OMB23_GDP21",
+                           color_var = "LineType",
+                           facet_var="stagename",
+                           # second_var='stagename',
+                           format=TRUE,
+                           caption="Budget Documents for Army, Navy, and Air Force; CSIS Analysis."
+                           ) +
+        labs(main="DoD RDT&E Aircraft Engine Spending By Stage",
+         caption="Source: CSIS analysis based on RDT&E budget documents (PB 2000–21),\nwhich can be found at https://comptroller.defense.gov/Budget-Materials/. ") +
+      scale_y_continuous(label = unit_format(unit = "M", scale = 1e-6)) +
+         scale_x_continuous(
+        breaks = seq(2000, 2027, by = 10),
+        labels = function(x) {
+        paste("'",substring(as.character(x), 3, 4),sep="")
+        }
+      ) +
+      xlab("Fiscal Year") + 
+      ylab("Budget (Constant 2021 $)") +geom_vline(
+        xintercept = 2021,
+        color = "#554449",
+        alpha = .5,
+        linetype = "solid"
+      ) +
+      geom_vline(
+        xintercept = 2023,
+        color = "#554449",
+        linetype = "dotted"
+      )+ 
+      geom_rect(
+        # aes(
+          xmin = 2021,
+          xmax = Inf,
+          ymin = 0,
+          ymax = Inf,
+          alpha = 0.01,
+          fill = "grey",
+        # ),
+        
+        # data = empty#engine_actual#engine_actual_project
+      ) 
+  )
+#   
+#   ggsave(
+#     "charts/actual_amount_service_stage_nocrosstab.svg",
+#     plot_eorgstageact+theme(legend.position="non")+labs(title=NULL),
+#     width = 7.5,
+#     height = 4,
+#     units = "in"
+#   )
+#   ggsave600dpi(
+#     "charts/actual_amount_service_stage_nocrosstab.png",
+#     plot_eorgstageact+theme(legend.position="non")+labs(title=NULL),
+#     width = 7.5,
+#     height = 4,
+#     units = "in",
+#     size=12, lineheight = 1
+#   )
+# 
+# write.csv(
+#   engine_actual %>% 
+#     group_by(FY, stage,Organization) %>%
+#   dplyr::summarize(Amount_Then_Year = sum(Amount_Then_Year, na.rm = TRUE),
+#                    Amount_OMB23_GDP21 = sum(Amount_OMB23_GDP21, na.rm = TRUE)) %>%
+#     pivot_longer(names_to="Metric",cols=c(Amount_Then_Year,Amount_OMB23_GDP21)) %>%
+#     pivot_wider(
+#     names_from=FY,values_from=value) %>%
+#     arrange(Metric,Organization,stage),
+#     file="charts/actual_amount_service_stage.csv",
+#   na = "",
+#   row.names = FALSE
+#   )
 # colnames(engine_actual) ProgramElement
 
 ```
@@ -1119,7 +1275,7 @@ summary( total$stage)
     ) +
     ggtitle("DoD RDT&E Aircraft Engine Spending by Service and Stage") +
     xlab("Fiscal Year") +
-    ylab("Constant 2021 $") + 
+    ylab("Budget (Constant 2021 $)") + 
     geom_vline(
       xintercept = 2021,
       color = "#554449",

@@ -76,17 +76,17 @@ engine_contracts %>% filter(Fiscal_Year>=2011 & Fiscal_Year<=2017) %>%
 
 engine_contracts<-engine_contracts %>% 
   mutate(derived_link=paste("https://www.usaspending.gov/award/CONT_AWD_",PIID,"_",agencyid,"_",
-                            ifelse(is.na(idvpiid)|idvpiid=="","_NONE_",idvpiid),"_",
-                            ifelse(is.na(idvagencyid)|idvagencyid=="","_NONE_",idvagencyid),"/",sep=""))
+                            ifelse(is.na(idvpiid)|idvpiid=="","-NONE-",idvpiid),"_",
+                            ifelse(is.na(idvagencyid)|idvagencyid=="","-NONE-",idvagencyid),"/",sep=""))
 
 summary(engine_contracts$derived_link==engine_contracts$usaspending_permalink)
 
 # View(engine_contracts %>% select(usaspending_permalink,derived_link,agencyid,PIID,idvagencyid,idvpiid)%>% filter(engine_contracts$derived_link!=engine_contracts$usaspending_permalink))
 
-# write.csv(engine_contracts %>% #filter(Fiscal_Year>=2011 & Fiscal_Year<=2017) %>%
-#             group_by(usaspending_permalink,derived_link,SubCustomer.JPO,SimpleArea.engines,ProjectID,Project.Name,ColorOfMoney) %>%
-#             summarise(Action_Obligation_OMB23_GDP21=sum(Action_Obligation_OMB23_GDP21,na.rm=TRUE)),
-#           file="contracts/data/TopContract.csv",row.names = FALSE)
+write.csv(engine_contracts %>% #filter(Fiscal_Year>=2011 & Fiscal_Year<=2017) %>%
+            group_by(usaspending_permalink,derived_link,SubCustomer.JPO,SimpleArea.engines,ProjectID,Project.Name,ColorOfMoney,Fiscal_Year) %>%
+            summarise(Action_Obligation_OMB23_GDP21=sum(Action_Obligation_OMB23_GDP21,na.rm=TRUE)),
+          file="contracts/data/TopContract.csv",row.names = FALSE)
 
 
 
@@ -215,6 +215,10 @@ summary(factor(engine_contracts$SimpleArea.AETP))
 topline_contracts$SimpleArea.AETP<-as.character(topline_contracts$SimpleArea)
 topline_contracts$SimpleArea.AETP[topline_contracts$ProjectID==2260 | topline_contracts$SimpleArea=="R&D"]<-"R&D and AETP"
 summary(factor(topline_contracts$SimpleArea.AETP))
+levels( factor( engine_contracts$ProductServiceOrRnDarea))
+engine_contracts$ProductServiceOrRnDarea.project<-engine_contracts$ProductServiceOrRnDarea
+engine_contracts$ProductServiceOrRnDarea.project[engine_contracts$ProjectID==2260]<-
+  "Advanced Component Development & Prototypes (6.4)"
 
 engine_contracts$SubCustomer.engines<-engine_contracts$SubCustomer.JPO
 levels(engine_contracts$SubCustomer.engines)<-list(
