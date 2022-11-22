@@ -265,7 +265,10 @@ write.csv(biz_engine_contracts, "contracts/app/power_bi.csv")
 save(topline_contracts ,engine_contracts,file="contracts/app/engine_contract.Rdata")
 # load(file="contracts/app/engine_contract.Rdata")
 
+load(file="contracts/app/engine_contract.Rdata")
+engine_sbirstter<-
 
+  
 #-----------------------------------------------------------------------
 # Top 10 Data processing
 ##############################################################
@@ -311,7 +314,21 @@ save(file="contracts/data/engine_vendor.rda",engine_vendor)
 colnames(engine_vendor)
 
 
+# SBIR STR ####
+engine_sbirsttr <-
+  read_delim("contracts/data/Project.SP_EngineAllVendorHistoryCompetitionBudgetMechanismVendorSizeProdServAreaSubCustomer.txt",
+             na =c("NA","NULL"),delim="\t", guess_max = 900000)
+engine_sbirsttr<-engine_sbirsttr%>% filter(research_code!="")
 
+engine_sbirsttr<-apply_standard_lookups(engine_sbirsttr)
+engine_sbirsttr<-engine_sbirsttr %>% 
+engine_sbirsttr_description <-
+  read_delim("contracts/data/engine_sbirsttr_text.txt",
+             na =c("NA","NULL"),delim="\t", guess_max = 900000)
+engine_sbirsttr<-engine_sbirsttr %>%
+  left_join(engine_sbirsttr_description)
+
+write.csv(file="contracts/data/engine_sbirsttr.csv",engine_sbirsttr,row.names = FALSE)
 
 # OTA ####
 
