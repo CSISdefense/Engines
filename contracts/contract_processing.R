@@ -19,6 +19,7 @@ library(svglite)
 library(scales)
 library(csis360)
 library(readr)
+
 # --------------------------------------------------------------------------------
 # add theme
 
@@ -321,7 +322,7 @@ engine_sbirsttr <-
 engine_sbirsttr<-engine_sbirsttr%>% filter(research_code!="")
 
 engine_sbirsttr<-apply_standard_lookups(engine_sbirsttr)
-engine_sbirsttr<-engine_sbirsttr %>% 
+
 engine_sbirsttr_description <-
   read_delim("contracts/data/engine_sbirsttr_text.txt",
              na =c("NA","NULL"),delim="\t", guess_max = 900000)
