@@ -22,8 +22,8 @@ library(csis360)
 source("theme/chart_theme.R")
 source("theme/money_labels.R")
 
-local_path<-"F:\\Users\\gsanders\\Documents\\Repositories\\Lookup-Tables\\style\\"
-# local_path<-"https://raw.githubusercontent.com/CSISdefense/Lookup-Tables/master/style/"
+# local_path<-"F:\\Users\\gsanders\\Documents\\Repositories\\Lookup-Tables\\style\\"
+local_path<-"https://raw.githubusercontent.com/CSISdefense/Lookup-Tables/master/style/"
 # local_path<-"K:\\Users\\Greg\\Repositories\\Lookup-Tables\\style\\"
 load(file="app/engine_contract.Rdata")
 # load(file="data/just_engine_contract.Rdata")
@@ -247,7 +247,8 @@ write.csv(Shiny.VendorSize$data,# %>%
 sum((engine_contracts %>% filter(Competition.multisum == "Unlabeled"))$Action_Obligation_OMB23_GDP21 )
 ```
 
-###Top VEndor
+##Top Vendor
+### Prep
 ```{r TopVendor}
 Top_Vendor<-
 engine_contracts %>% group_by(AllContractor,Fiscal_Year)%>%
@@ -261,7 +262,68 @@ engine_contracts %>% group_by(AllContractor,Fiscal_Year)%>%
 
 Top_Vendor %>% dplyr::filter( rank_FY<=5)
 
+Top_Vendor<-
+engine_contracts %>% group_by(AllContractor)%>%
+  summarise(Action_Obligation_OMB23_GDP21=sum(Action_Obligation_OMB23_GDP21)
+            # Action_Obligation_2020=sum(ifelse(Fiscal_Year==2020,Action_Obligation_OMB23_GDP21,0))
+            )%>%
+              group_by () %>%
+    mutate(rank_total=rank(desc(Action_Obligation_OMB23_GDP21)),
+           pObl=Action_Obligation_OMB23_GDP21/sum(Action_Obligation_OMB23_GDP21))%>%
+  arrange(rank_total)
+
+Top_Vendor %>% dplyr::filter( rank_total<=5)
+
+engine_contracts$TopVendors<-engine_contracts$AllContractor
+engine_contracts$TopVendors[engine_contracts$TopVendors %in% 
+                              Top_Vendor$AllContractor[Top_Vendor$rank_total>5]]<-"All Other Vendors"
+
 ```
+
+
+### engine contracts by Vendor Size 
+```{r TopVendor}
+(
+  TopVendors <- engine_contracts %>%
+    filter(TopVendors != "Unlabeled") %>%
+    group_by(Fiscal_Year, TopVendors) %>%
+    dplyr::summarise(Action_Obligation_OMB23_GDP21 = sum(Action_Obligation_OMB23_GDP21, na.rm = TRUE)) %>%
+    ggplot() +
+    geom_area(aes(y = Action_Obligation_OMB23_GDP21, x = Fiscal_Year), alpha = .9, stat = "identity") +
+    facet_wrap(~ TopVendors, nrow = 2) +
+    chart_theme +
+    ggtitle("DoD Aircraft Engine Contract Obligations by Vendor Size") +
+    xlab("Fiscal Year") +
+    ylab("Constant 2021 $") +
+    scale_y_continuous(labels = money_labels) +
+    scale_x_continuous(
+      breaks = seq(2000, 2020, by = 2),
+      labels = function(x) {
+        substring(as.character(x), 3, 4)
+      }
+    )
+)
+
+
+
+
+ggsave(
+  "charts/amount_top_vendor.svg",
+  TopVendors,
+  device = "svg",
+  width = 8,
+  height = 6,
+  units = "in"
+)
+
+write.csv(TopVendors$data,# %>%
+            # spread(key=Fiscal_Year, value=Action_Obligation_OMB23_GDP21),
+          file="charts/amount_top_vendor.csv",row.names = FALSE)
+
+# --------------------------------------------------------------------------------
+sum((engine_contracts %>% filter(Competition.multisum == "Unlabeled"))$Action_Obligation_OMB23_GDP21 )
+```
+
 
 ## Competition
 ### engine  CompetitionClassification  
