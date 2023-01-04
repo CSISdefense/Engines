@@ -13,6 +13,7 @@ library(ggthemes)
 library(extrafont)
 library(extrafontdb)
 library(svglite)
+
 # theme --------------------------------------------------------------------------
 
 source("inventory/theme/chart_theme.R")
