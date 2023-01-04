@@ -1,0 +1,66 @@
+---
+title: "Engine Inventory"
+author: "Gregory Sanders"
+date: "2023-01-04"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(csis360)
+library(ggrepel)
+library(readr)
+library(tidyverse)
+load("data\\engine_specs_combined.rda")
+engine<-read_csv(file="data\\Holderness trim engine_specs_combined.csv",na = "NA")
+
+```
+
+## R Markdown
+
+
+```{r engine}
+
+engine$Series.Order.Cut<-cut(engine$`Series Order`,breaks=c(0,1,2,3,5,9))
+engine<-engine %>% group_by(EngineSeries) %>%
+  mutate(EngineLabel=ifelse(`Series Order`==min(`Series Order`),EngineSeries,NA))
+levels(engine$Series.Order.Cut)<-list(
+  "1"="(0,1]",
+  "2"="(1,2]",
+  "3"="(2,3]",
+  "4-5"="(3,5]",
+  "6-9"="(5,9]"
+)
+
+
+(
+order<-ggplot(engine,aes(x=`Rotor Inlet Temperature (F)`, 
+                  y=`Thrust-to-Weight Ratio`))+
+  geom_line(aes(group=EngineSeries, color=EngineSeries))+
+   geom_point(aes(shape=factor(Series.Order.Cut)))+
+    geom_text(aes(label=EngineLabel),
+              hjust="right",
+              check_overlap =TRUE#colour = "white",  ,fill = factor(EngineSeries) fontface = "bold"
+              )#+theme(legend.position = "bottom")
+)
+
+View(engine %>% arrange(EngineSeries,`Series Order`))
+
+ggsave(order,file="engine_order.png",
+       height=6.5,width=9)
+
+
+
+# (new_engine<-
+# ggplot(engine,aes(x=Rotor.Inlet.Temper..ature..FÂº., 
+#                   y=Thrust..to..Weight.Ratio))+
+#   geom_line(aes(group=EngineSeries))+
+#   geom_point(aes(shape=factor(New.Centerline.Design..Yes.1..No.0.)))
+# )
+# engine$
+
+summary(cars)
+```
+
+## Including Plots
+
