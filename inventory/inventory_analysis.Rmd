@@ -35,20 +35,27 @@ levels(engine$Series.Order.Cut)<-list(
 
 (
 order<-ggplot(engine,aes(x=`Rotor Inlet Temperature (F)`, 
-                  y=`Thrust-to-Weight Ratio`))+
-  geom_line(aes(group=EngineSeries, color=EngineSeries))+
-   geom_point(aes(shape=factor(Series.Order.Cut)))+
-    geom_text(aes(label=EngineLabel),
-              hjust="right",
-              check_overlap =TRUE#colour = "white",  ,fill = factor(EngineSeries) fontface = "bold"
-              )#+theme(legend.position = "bottom")
+                  y=`Thrust-to-Weight Ratio`,
+                  label=EngineLabel))+
+  geom_line(aes(group=EngineSeries,color=EngineSeries))+
+   geom_point(aes(shape=factor(Series.Order.Cut)),fill="black")+
+    # geom_text(aes(),
+              # hjust="right",
+              # check_overlap =TRUE#colour = "white",  ,fill = factor(EngineSeries) fontface = "bold"
+              # )+#+theme(legend.position = "bottom")+
+  geom_label_repel(aes(fill=EngineSeries), colour="white", segment.colour="black",min.segment.length = unit(0.1, 'lines'))+scale_color_discrete(guide="none")+scale_fill_discrete(guide="none")+
+         scale_shape("Engine Series Order")+
+         theme(legend.position = "bottom")
 )
 
 View(engine %>% arrange(EngineSeries,`Series Order`))
 
 ggsave(order,file="engine_order.png",
-       height=6.5,width=9)
+       height=7,width=6.5)
 
+ggsave(order,
+       file="engine_order.svg",
+       height=7,width=6.5)
 
 
 # (new_engine<-
