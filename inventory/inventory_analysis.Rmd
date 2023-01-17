@@ -5,6 +5,8 @@ date: "2023-01-04"
 output: html_document
 ---
 
+#Setup
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(csis360)
@@ -16,7 +18,7 @@ engine<-read_csv(file="data\\Holderness trim engine_specs_combined.csv",na = "NA
 
 ```
 
-## R Markdown
+#
 
 
 ```{r engine}
@@ -69,5 +71,5 @@ ggsave(order,
 summary(cars)
 ```
 
-## Including Plots
+## Scatter Plot
 
