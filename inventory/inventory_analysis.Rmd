@@ -16,13 +16,6 @@ library(tidyverse)
 load("data\\engine_specs_combined.rda")
 engine<-read_csv(file="data\\Holderness trim engine_specs_combined.csv",na = "NA")
 
-```
-
-#
-
-
-```{r engine}
-
 engine$Series.Order.Cut<-cut(engine$`Series Order`,breaks=c(0,1,2,3,5,9))
 engine<-engine %>% group_by(EngineSeries) %>%
   mutate(EngineLabel=ifelse(`Series Order`==min(`Series Order`),EngineSeries,NA))
@@ -34,6 +27,15 @@ levels(engine$Series.Order.Cut)<-list(
   "6-9"="(5,9]"
 )
 
+
+```
+
+
+
+## Full Scatter
+
+
+```{r engine}
 
 (
 order<-ggplot(engine,aes(x=`Rotor Inlet Temperature (F)`, 
@@ -59,7 +61,7 @@ ggsave(order,
        file="engine_order.svg",
        height=7,width=6.5)
 
-
+write.csv(engine %>% group_by(EngineSeries) %>%  summarise(`Thrust-to-Weight Ratio`=mean(`Thrust-to-Weight Ratio`)) %>% arrange(`Thrust-to-Weight Ratio`),file="EngineSeries.csv" , row.names = FALSE)
 # (new_engine<-
 # ggplot(engine,aes(x=Rotor.Inlet.Temper..ature..FÂº., 
 #                   y=Thrust..to..Weight.Ratio))+
@@ -71,5 +73,49 @@ ggsave(order,
 summary(cars)
 ```
 
-## Scatter Plot
+## Scatter Sample
+```{r engine}
 
+sample_series_list<-c("F119PW","F101GE","F404GE","F100PW-229","Pegasus 5")
+  # unique(engine$EngineSeries)
+
+sample_engine_list<-c("F119PW-100","F110GE-400","F414GE-400","F100PW","F402RR-401")
+
+		
+
+
+(
+order_sample<-ggplot(engine %>% filter(EngineSeries %in% sample_series_list)
+                ,aes(x=`Rotor Inlet Temperature (F)`, 
+                  y=`Thrust-to-Weight Ratio`,
+                  label=EngineLabel))+
+  geom_line(aes(group=EngineSeries,color=EngineSeries))+
+   geom_point(aes(shape=factor(Series.Order.Cut)),fill="black")+
+    # geom_text(aes(),
+              # hjust="right",
+              # check_overlap =TRUE#colour = "white",  ,fill = factor(EngineSeries) fontface = "bold"
+              # )+#+theme(legend.position = "bottom")+
+  geom_label_repel(aes(fill=EngineSeries), colour="white", segment.colour="black",min.segment.length = unit(0.1, 'lines'))+scale_color_discrete(guide="none")+scale_fill_discrete(guide="none")+
+         scale_shape("Engine Series Order")+
+         theme(legend.position = "bottom")
+)
+
+
+ggsave(order_sample,file="engine_order_sample.png",
+       height=7,width=6.5)
+
+ggsave(order_sample,
+       file="engine_order_Sample.svg",
+       height=7,width=6.5)
+
+write.csv(engine %>% group_by(EngineSeries) %>%  summarise(`Thrust-to-Weight Ratio`=mean(`Thrust-to-Weight Ratio`)) %>% arrange(`Thrust-to-Weight Ratio`),file="EngineSeries.csv" , row.names = FALSE)
+# (new_engine<-
+# ggplot(engine,aes(x=Rotor.Inlet.Temper..ature..FÂº., 
+#                   y=Thrust..to..Weight.Ratio))+
+#   geom_line(aes(group=EngineSeries))+
+#   geom_point(aes(shape=factor(New.Centerline.Design..Yes.1..No.0.)))
+# )
+# engine$
+
+summary(cars)
+```
