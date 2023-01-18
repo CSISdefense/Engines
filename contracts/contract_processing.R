@@ -311,6 +311,20 @@ engine_vendor_overall<-engine_vendor%>%
 
 write.csv(engine_vendor_overall, file="contracts/data/TopEngineVendors.csv")
 
+
+engine_vendor_annual<-engine_vendor%>% 
+  group_by(AllContractor,Fiscal_Year) %>% # group_by(Fiscal_Year,IsDefense,PlatformPortfolioUAV) %>%
+  summarise(NumberOfActions=sum(NumberOfActions,na.rm=TRUE),
+            Action_Obligation_OMB23_GDP21=sum(Action_Obligation_OMB23_GDP21,na.rm=TRUE),
+            MinOfFiscalYear=min(),
+            MaxOfFiscalYear=max(Fiscal_Year),
+  ) %>%
+  group_by(Fiscal_Year) %>%
+  dplyr::mutate(pos=rank(-Action_Obligation_OMB23_GDP21))%>%
+  arrange(Fiscal_Year,pos)
+
+write.csv(engine_vendor_annual, file="contracts/data/TopEngineVendorsAnnual.csv")
+
 save(file="contracts/data/engine_vendor.rda",engine_vendor)
 colnames(engine_vendor)
 

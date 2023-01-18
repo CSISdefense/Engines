@@ -283,14 +283,23 @@ engine_contracts$TopVendors[engine_contracts$TopVendors %in%
 
 ### Top  5 graph
 ```{r TopVendor}
+engine_contracts$TopVendorsPretty<-factor(engine_contracts$TopVendors)
+levels(engine_contracts$TopVendorsPretty)<-
+  list("Pratt & Whitney"="UNITED TECH",
+       "General Electric"="GENERAL ELECTRIC",
+      "Rolls Royce"="ROLLS ROYCE",
+       "Honeywell"="HONEYWELL",
+       "Kelly Aviation Center (JV)"="KELLY AVIATION CENTER [Joint Venture Lockheed Martin/Rolls Royce]",
+      "All Other Vendors"="All Other Vendors")
+
 (
   TopVendors <- engine_contracts %>%
     filter(TopVendors != "Unlabeled") %>%
-    group_by(Fiscal_Year, TopVendors) %>%
+    group_by(Fiscal_Year, TopVendorsPretty) %>%
     dplyr::summarise(Action_Obligation_OMB23_GDP21 = sum(Action_Obligation_OMB23_GDP21, na.rm = TRUE)) %>%
     ggplot() +
     geom_area(aes(y = Action_Obligation_OMB23_GDP21, x = Fiscal_Year), alpha = .9, stat = "identity") +
-    facet_wrap(~ TopVendors, nrow = 2) +
+    facet_wrap(~ TopVendorsPretty, nrow = 2) +
     chart_theme +
     ggtitle("DoD Aircraft Engine Contract Obligations by Vendor Size") +
     xlab("Fiscal Year") +
@@ -305,6 +314,158 @@ engine_contracts$TopVendors[engine_contracts$TopVendors %in%
 )
 
 
+(
+  Top3 <- engine_contracts %>%
+    filter(TopVendorsPretty %in% c("Pratt & Whitney","General Electric","Rolls Royce")) %>%
+    group_by(Fiscal_Year, TopVendorsPretty) %>%
+    dplyr::summarise(Action_Obligation_OMB23_GDP21 = sum(Action_Obligation_OMB23_GDP21, na.rm = TRUE)) %>%
+    ggplot() +
+    geom_area(aes(y = Action_Obligation_OMB23_GDP21, x = Fiscal_Year), alpha = .9, stat = "identity") +
+    facet_wrap(~ TopVendorsPretty, nrow = 1) +
+    chart_theme +
+    ggtitle("DoD Aircraft Engine Contract Obligations by Vendor Size") +
+    xlab("Fiscal Year") +
+    ylab("Constant 2021 $") +
+    scale_y_continuous(labels = money_labels) +
+    scale_x_continuous(
+      breaks = seq(2000, 2020, by = 2),
+      labels = function(x) {
+        substring(as.character(x), 3, 4)
+      }
+    )
+)
+
+ggsave(
+  "charts/amount_Top3.svg",
+  Top3+labs(title=NULL),
+  device = "svg",
+  width = 8,
+  height = 3,
+  units = "in"
+)
+
+
+
+
+(
+  PW <- engine_contracts %>%
+    filter(TopVendorsPretty == "Pratt & Whitney") %>%
+    group_by(Fiscal_Year, TopVendorsPretty) %>%
+    dplyr::summarise(Action_Obligation_OMB23_GDP21 = sum(Action_Obligation_OMB23_GDP21, na.rm = TRUE)) %>%
+    ggplot() +
+    geom_area(aes(y = Action_Obligation_OMB23_GDP21, x = Fiscal_Year), alpha = .9, stat = "identity") +
+    facet_wrap(~ TopVendorsPretty, nrow = 2) +
+    chart_theme +
+    xlab("Fiscal Year") +
+    ylab("Constant 2021 $") +
+    scale_y_continuous(labels = money_labels) +
+    scale_x_continuous(
+      breaks = seq(2000, 2020, by = 2),
+      labels = function(x) {
+        substring(as.character(x), 3, 4)
+      }
+    )
+)
+ggsave(
+  "charts/amount_PW.svg",
+  PW,
+  device = "svg",
+  width = 8,
+  height = 6,
+  units = "in"
+)
+
+
+
+(
+  GE <- engine_contracts %>%
+    filter(TopVendorsPretty == "Pratt & Whitney") %>%
+    group_by(Fiscal_Year, TopVendorsPretty) %>%
+    dplyr::summarise(Action_Obligation_OMB23_GDP21 = sum(Action_Obligation_OMB23_GDP21, na.rm = TRUE)) %>%
+    ggplot() +
+    geom_area(aes(y = Action_Obligation_OMB23_GDP21, x = Fiscal_Year), alpha = .9, stat = "identity") +
+    facet_wrap(~ TopVendorsPretty, nrow = 2) +
+    chart_theme +
+    xlab("Fiscal Year") +
+    ylab("Constant 2021 $") +
+    scale_y_continuous(labels = money_labels) +
+    scale_x_continuous(
+      breaks = seq(2000, 2020, by = 2),
+      labels = function(x) {
+        substring(as.character(x), 3, 4)
+      }
+    )
+)
+
+ggsave(
+  "charts/amount_GE.svg",
+  GE,
+  device = "svg",
+  width = 8,
+  height = 6,
+  units = "in"
+)
+
+
+(
+  GE <- engine_contracts %>%
+    filter(TopVendorsPretty == "General Electric") %>%
+    group_by(Fiscal_Year, TopVendorsPretty) %>%
+    dplyr::summarise(Action_Obligation_OMB23_GDP21 = sum(Action_Obligation_OMB23_GDP21, na.rm = TRUE)) %>%
+    ggplot() +
+    geom_area(aes(y = Action_Obligation_OMB23_GDP21, x = Fiscal_Year), alpha = .9, stat = "identity") +
+    facet_wrap(~ TopVendorsPretty, nrow = 2) +
+    chart_theme +
+    xlab("Fiscal Year") +
+    ylab("Constant 2021 $") +
+    scale_y_continuous(labels = money_labels) +
+    scale_x_continuous(
+      breaks = seq(2000, 2020, by = 2),
+      labels = function(x) {
+        substring(as.character(x), 3, 4)
+      }
+    )
+)
+
+ggsave(
+  "charts/amount_GE.svg",
+  GE,
+  device = "svg",
+  width = 8,
+  height = 6,
+  units = "in"
+)
+
+
+
+(
+  RR <- engine_contracts %>%
+    filter(TopVendorsPretty == "Rolls Royce") %>%
+    group_by(Fiscal_Year, TopVendorsPretty) %>%
+    dplyr::summarise(Action_Obligation_OMB23_GDP21 = sum(Action_Obligation_OMB23_GDP21, na.rm = TRUE)) %>%
+    ggplot() +
+    geom_area(aes(y = Action_Obligation_OMB23_GDP21, x = Fiscal_Year), alpha = .9, stat = "identity") +
+    facet_wrap(~ TopVendorsPretty, nrow = 2) +
+    chart_theme +
+    xlab("Fiscal Year") +
+    ylab("Constant 2021 $") +
+    scale_y_continuous(labels = money_labels) +
+    scale_x_continuous(
+      breaks = seq(2000, 2020, by = 2),
+      labels = function(x) {
+        substring(as.character(x), 3, 4)
+      }
+    )
+)
+
+ggsave(
+  "charts/amount_RR.svg",
+  RR,
+  device = "svg",
+  width = 8,
+  height = 6,
+  units = "in"
+)
 
 
 ggsave(
