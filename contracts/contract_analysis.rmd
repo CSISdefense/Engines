@@ -281,7 +281,7 @@ engine_contracts$TopVendors[engine_contracts$TopVendors %in%
 ```
 
 
-### engine contracts by Vendor Size 
+### Top  5 graph
 ```{r TopVendor}
 (
   TopVendors <- engine_contracts %>%
@@ -316,9 +316,13 @@ ggsave(
   units = "in"
 )
 
-write.csv(TopVendors$data,# %>%
-            # spread(key=Fiscal_Year, value=Action_Obligation_OMB23_GDP21),
-          file="charts/amount_top_vendor.csv",row.names = FALSE)
+write.csv(file="charts//amount_top_vendor.csv",row.names = FALSE, na = "",
+          TopVendors$data%>% mutate(Fiscal_Year)%>%#=lubridate::year(dFYear)
+            pivot_wider(id_cols=c(TopVendors),
+                        names_from=Fiscal_Year,values_from=Action_Obligation_OMB23_GDP21)%>%
+            arrange(TopVendors))
+
+
 
 # --------------------------------------------------------------------------------
 sum((engine_contracts %>% filter(Competition.multisum == "Unlabeled"))$Action_Obligation_OMB23_GDP21 )
